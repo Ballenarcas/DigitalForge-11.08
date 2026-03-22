@@ -1,4 +1,4 @@
-@page "/proyectos"
+@page "/{VotacionId}/proyectos/"
 @using Votify.Client.DTOs
 @using Votify.Client.Services
 @inject ProyectosService ProyectosService
@@ -52,7 +52,7 @@
         else
         {
             <div class="projects-grid">
-                @foreach (var p in listaProyectos)
+                @foreach (ProyectoDto  p in listaProyectos)
                 {
                     <div class="project-card">
                         <div class="card-image-placeholder">
@@ -145,12 +145,14 @@
 </style>
 
 @code {
+    [Parameter]
+    public string? VotacionId { get; set; }
     private List<ProyectoDto>? listaProyectos;
 
     protected override async Task OnInitializedAsync()
     {
         try 
-        {
+        {   
             listaProyectos = await ProyectosService.ObtenerProyectosAsync();
         }
         catch (Exception ex)
