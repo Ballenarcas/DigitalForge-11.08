@@ -52,5 +52,53 @@ namespace Votify.Application.Services
                 PermiteComentarios = e.PermiteComentarios
             }).ToList();
         }
+
+        public async Task<CrearVotacionResponse?> ObtenerPorIdAsync(string id)
+        {
+            var e = await _repo.ObtenerAsync(id);
+            if (e is null) return null;
+
+            return new CrearVotacionResponse
+            {
+                Id = e.Id.ToString(),
+                Nombre = e.Nombre,
+                Tipo = e.Tipo(),
+                FechaInicio = e.FechaInicio,
+                FechaFin = e.FechaFin,
+                LimiteProyectos = e.LimiteProyectos,
+                PermiteComentarios = e.PermiteComentarios
+            };
+        }
+        public async Task ActualizarVotacionAsync(string id, CrearVotacionDto dto)
+        {
+            if (dto.FechaInicio >= dto.FechaFin)
+                throw new ArgumentException("La fecha de inicio debe ser menor a la fecha de fin.");
+
+            VotacionFactory factory = dto.Tipo.ToUpper() switch
+            {
+                "ESTANDAR" => new VotacionEstandarFactory(),
+                "ANONIMA"  => new VotacionAnonimaFactory(),
+                _          => throw new ArgumentException("Tipo de votación no válido.")
+            };
+
+            var votacion = factory.Crear(
+                dto.Nombre,
+                dto.FechaInicio,
+                dto.FechaFin,
+                dto.LimiteProyectos,
+                dto.PermiteComentarios
+            );
+
+            var actualizado = await _repo.ActualizarAsync(id, votacion);
+            if (!actualizado)
+                throw new KeyNotFoundException($"No se encontró la votación con id {id}.");
+        }
+
+        public async Task EliminarVotacionAsync(string id)
+        {
+            var eliminado = await _repo.EliminarAsync(id);
+            if (!eliminado)
+                throw new KeyNotFoundException($"No se encontró la votación con id {id}.");
+        }
     }
 }

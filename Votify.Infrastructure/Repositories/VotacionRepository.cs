@@ -47,6 +47,36 @@ namespace Votify.Infrastructure.Repositories
             return entities.Select(MapToDomain).ToList();
         }
 
+        public async Task<bool> ActualizarAsync(string id, Votacion votacion)
+        {
+            if (!Guid.TryParse(id, out var guid)) return false;
+
+            var entity = await _db.Votaciones.FindAsync(guid);
+            if (entity is null) return false;
+
+            entity.Nombre = votacion.Nombre;
+            entity.Tipo = votacion.Tipo();
+            entity.FechaInicio = votacion.FechaInicio.ToUniversalTime();
+            entity.FechaFin = votacion.FechaFin.ToUniversalTime();
+            entity.LimiteProyectos = votacion.LimiteProyectos;
+            entity.PermiteComentarios = votacion.PermiteComentarios;
+
+            await _db.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> EliminarAsync(string id)
+        {
+            if (!Guid.TryParse(id, out var guid)) return false;
+
+            var entity = await _db.Votaciones.FindAsync(guid);
+            if (entity is null) return false;
+
+            _db.Votaciones.Remove(entity);
+            await _db.SaveChangesAsync();
+            return true;
+        }
+
         private Votacion MapToDomain(VotacionEntity entity)
         {
             VotacionFactory factory = entity.Tipo.ToUpper() switch

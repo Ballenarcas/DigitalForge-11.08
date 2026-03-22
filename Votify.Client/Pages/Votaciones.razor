@@ -67,18 +67,41 @@
             <div class="votaciones-grid">
                 @foreach (var v in listaVotaciones)
                 {
-                    <div class="votacion-card">
-                        <div class="card-badge">@v.Tipo</div>
+                    var ahora = DateTime.UtcNow;
+                    var yaInicio  = ahora >= v.FechaInicio;
+                    var yaFinalizo = ahora >= v.FechaFin;
+
+                    <div class="votacion-card @(yaFinalizo ? "card-ended" : yaInicio ? "card-active" : "card-pending")">
+                        <div class="card-top-row">
+                            <div class="card-badge">@v.Tipo</div>
+                            <div class="status-pill @(yaFinalizo ? "pill-ended" : yaInicio ? "pill-active" : "pill-pending")">
+                                @(yaFinalizo ? "Finalizada" : yaInicio ? "En curso" : "Pendiente")
+                            </div>
+                        </div>
                         <h3>@v.Nombre</h3>
-                        <p class="fecha">Finaliza: @v.FechaFin.ToString("dd/MM/yyyy")</p>
-                        
-                        <button class="btn-votar" @onclick="() => Votar(v.Id)">
-                            Acceder a votar
-                        </button>
+                        <p class="fecha">Finaliza: @v.FechaFin.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</p>
+
+                        @if (!yaFinalizo)
+                        {
+                            <button class="btn-votar" @onclick="() => Votar(v.Id)">
+                                Acceder a votar
+                            </button>
+                        }
 
                         <div class="card-footer">
                             <span class="stats">@v.LimiteProyectos Proyectos votables</span>
-                            <button class="btn-ver" @onclick="() => Gestionar(v.Id)">Gestionar</button>
+                            <div class="footer-actions">
+                                @if (!yaFinalizo)
+                                {
+                                    <button class="btn-ver" @onclick="() => Gestionar(v.Id)">Gestionar</button>
+                                }
+                                @if (yaFinalizo)
+                                {
+                                    <button class="btn-eliminar" @onclick="() => EliminarVotacion(v.Id)">
+                                        🗑 Eliminar
+                                    </button>
+                                }
+                            </div>
                         </div>
                     </div>
                 }
@@ -133,7 +156,7 @@
     .loader-container { text-align: center; padding: 4rem; color: #64748b; }
     .spinner { width: 35px; height: 35px; border: 4px solid #f3e8ff; border-top: 4px solid #9333ea; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem; }
     .empty-state { text-align: center; padding: 3rem; background: white; border-radius: 30px; border: 2px dashed #e2e8f0; }
-    .btn-volver { 
+.btn-volver { 
     background: white; 
     border: 1px solid #e2e8f0; 
     color: #64748b; 
@@ -150,6 +173,29 @@
 }
 .btn-volver:hover { background: #f8f9fc; border-color: #ddd6fe; color: #7c3aed; }
 
+/* ── Card state variants ── */
+.card-top-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; }
+.card-ended { opacity: 0.75; }
+.status-pill { font-size: 0.68rem; font-weight: 800; padding: 0.2rem 0.6rem; border-radius: 8px; text-transform: uppercase; letter-spacing: 0.04em; }
+.pill-pending { background: #fef9c3; color: #854d0e; }
+.pill-active  { background: #dcfce7; color: #166534; }
+.pill-ended   { background: #fee2e2; color: #991b1b; }
+.footer-actions { display: flex; gap: 0.5rem; align-items: center; }
+
+/* ── Delete button ── */
+.btn-eliminar {
+    background: #fee2e2;
+    border: 1px solid #fecaca;
+    color: #b91c1c;
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.btn-eliminar:hover { background: #fecaca; border-color: #f87171; }
+
 </style>
 
 @code {
@@ -157,7 +203,12 @@
 
     protected override async Task OnInitializedAsync()
     {
-        try 
+        await CargarVotaciones();
+    }
+
+    private async Task CargarVotaciones()
+    {
+        try
         {
             listaVotaciones = await VotacionesService.ObtenerVotaciones();
         }
@@ -170,6 +221,19 @@
 
     private void IrACrearVotacion() => Nav.NavigateTo("/nueva-votacion");
     private void Gestionar(string id) => Nav.NavigateTo($"/votacion/{id}");
-
     private void Votar(string id) => Nav.NavigateTo($"/{id}/proyectos/");
+
+    private async Task EliminarVotacion(string id)
+    {
+        try
+        {
+            await VotacionesService.EliminarVotacion(id);
+            // Recarga la lista tras eliminar
+            await CargarVotaciones();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error eliminando votación: {ex.Message}");
+        }
+    }
 }
