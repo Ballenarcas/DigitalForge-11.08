@@ -47,5 +47,44 @@ namespace Votify.API.Controllers
             var votaciones = await _service.ObtenerTodasAsync();
             return Ok(votaciones);
         }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<CrearVotacionResponse>> GetById(string id)
+        {
+            var votacion = await _service.ObtenerPorIdAsync(id);
+            if (votacion is null) return NotFound();
+            return Ok(votacion);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Actualizar(string id, [FromBody] CrearVotacionRequest request)
+        {
+            var dto = new CrearVotacionDto
+            {
+                Nombre = request.Nombre,
+                Tipo = request.Tipo,
+                FechaInicio = request.FechaInicio,
+                FechaFin = request.FechaFin,
+                LimiteProyectos = request.LimiteProyectos,
+                PermiteComentarios = request.PermiteComentarios
+            };
+
+            await _service.ActualizarVotacionAsync(id, dto);
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Eliminar(string id)
+        {
+            try
+            {
+                await _service.EliminarVotacionAsync(id);
+                return NoContent();
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+        }
     }
 }
