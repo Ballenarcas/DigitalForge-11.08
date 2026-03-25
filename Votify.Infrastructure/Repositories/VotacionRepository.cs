@@ -72,6 +72,12 @@ namespace Votify.Infrastructure.Repositories
             var entity = await _db.Votaciones.FindAsync(guid);
             if (entity is null) return false;
 
+            var votos = await _db.Votos.Where(v => v.VotacionId == guid).ToListAsync();
+            if (votos.Any())
+            {
+                _db.Votos.RemoveRange(votos);
+            }
+
             _db.Votaciones.Remove(entity);
             await _db.SaveChangesAsync();
             return true;
