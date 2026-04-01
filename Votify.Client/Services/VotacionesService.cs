@@ -55,5 +55,23 @@ namespace Votify.Client.Services
                 throw new Exception($"Error al eliminar la votación: {error}");
             }
         }
+
+        public async Task EmitirVotoAsync(string votacionId, VotarDto dto)
+        {
+            var response = await _http.PostAsJsonAsync("api/votos", dto);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                // Leer el JSON de error que manda nuestra API
+                var error = await response.Content.ReadAsStringAsync();
+                
+                // Extraer el mensaje específico si lo tiene
+                if (error.Contains("Error"))
+                {
+                    throw new Exception(error);
+                }
+                throw new Exception($"Error HTTP: {response.StatusCode} - {error}");
+            }
+        }
     }
 }

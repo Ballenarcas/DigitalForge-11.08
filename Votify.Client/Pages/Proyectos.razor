@@ -2,6 +2,7 @@
 @using Votify.Client.DTOs
 @using Votify.Client.Services
 @inject ProyectosService ProyectosService
+@inject VotacionesService VotacionesService
 @inject NavigationManager Nav
 
 <div class="main-container">
@@ -36,6 +37,22 @@
     <div class="content-wrapper">
         <h2 class="section-title">Elige tu favorito</h2>
         
+        @if (!string.IsNullOrEmpty(mensajeExito))
+        {
+            <div class="alert-success">
+                <svg viewBox="0 0 24 24" fill="none" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                @mensajeExito
+            </div>
+        }
+        
+        @if (!string.IsNullOrEmpty(mensajeError))
+        {
+            <div class="alert-danger">
+                <svg viewBox="0 0 24 24" fill="none" width="20" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M12 8v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                @mensajeError
+            </div>
+        }
+        
         @if (listaProyectos == null)
         {
             <div class="loader-container">
@@ -62,8 +79,7 @@
                         <h3>@p.Nombre</h3>
                         <p class="descripcion">@p.Descripcion</p>
                         
-                        <button class="btn-votar">
-                            Emitir Voto
+                        <button class="btn-votar" @onclick="() => Votar(p.Id)" disabled="@isVoting">
                         </button>
 
                         <div class="card-footer">
@@ -142,12 +158,21 @@
     .spinner { width: 35px; height: 35px; border: 4px solid #f3e8ff; border-top: 4px solid #9333ea; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem; }
     @@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     .empty-state { text-align: center; padding: 3rem; background: white; border-radius: 30px; border: 2px dashed #e2e8f0; width: 100%; }
+    
+    .alert-success { background-color: #f0fdf4; color: #166534; padding: 1rem; border-radius: 14px; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.8rem; border: 1px solid #bbf7d0; font-weight: 600; font-size: 0.95rem; }
+    .alert-danger { background-color: #fef2f2; color: #991b1b; padding: 1rem; border-radius: 14px; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.8rem; border: 1px solid #fecaca; font-weight: 600; font-size: 0.95rem; line-height: 1.4; }
 </style>
 
 @code {
     [Parameter]
     public string? VotacionId { get; set; }
     private List<ProyectoDto>? listaProyectos;
+    private string? mensajeExito;
+    private string? mensajeError;
+    private bool isVoting = false;
+
+    // TODO: En el futuro esto vendrá del Login/Autenticación
+    private readonly string usuarioTesterId = "ce932822-2615-46fd-ab8c-7f5164ca2414";
 
     protected override async Task OnInitializedAsync()
     {
@@ -159,6 +184,43 @@
         {
             Console.WriteLine($"Error cargando proyectos: {ex.Message}");
             listaProyectos = new List<ProyectoDto>();
+        }
+    }
+
+    private async Task Votar(string proyectoId)
+    {
+        if (string.IsNullOrEmpty(VotacionId)) return;
+        
+        isVoting = true;
+        mensajeExito = null;
+        mensajeError = null;
+        
+        try
+        {
+            var dto = new VotarDto
+            {
+                VotacionId = VotacionId,
+                ProyectoId = proyectoId,
+                VotanteId = usuarioTesterId
+            };
+            
+            await VotacionesService.EmitirVotoAsync(VotacionId, dto);
+            mensajeExito = "¡Voto registrado con éxito! Tu apoyo ha sido añadido al proyecto.";
+        }
+        catch (Exception ex)
+        {
+            // Ocultamos la traza del error para dejar solo el mensaje del backend ("Error: No puedes votar...")
+            var msg = ex.Message;
+            if (msg.Contains("\"Error\""))
+            {
+                // Limpiamos el JSON bruto que pudiera llegar y mostramos solo el contenido útil para el usuario
+                msg = System.Text.RegularExpressions.Regex.Match(msg, "\"Error\":\"(.*?)\"").Groups[1].Value;
+            }
+            mensajeError = string.IsNullOrEmpty(msg) ? ex.Message : msg;
+        }
+        finally
+        {
+            isVoting = false;
         }
     }
 

@@ -14,7 +14,7 @@ namespace Votify.Infrastructure.Persistence.Entities
       [Column("proyecto_id")]
       public Guid ProyectoId { get; set; }
       [Column("votante_id")]
-      public Guid VotanteId { get; set; }
+      public Guid? VotanteId { get; set; }
       [Column("votacion_id")]
       public Guid VotacionId { get; set; }
       [Column("fecha")]

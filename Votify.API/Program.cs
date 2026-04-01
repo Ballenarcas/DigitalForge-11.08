@@ -49,6 +49,8 @@ builder.Services.AddScoped<IVotacionRepository, VotacionRepository>();
 builder.Services.AddScoped<IVotacionService, VotacionService>();
 builder.Services.AddScoped<IProyectoRepository, ProyectoRepository>();
 builder.Services.AddScoped<IProyectoService, ProyectoService>();
+builder.Services.AddScoped<IVotoRepository, VotoRepository>();
+builder.Services.AddScoped<IVotoService, VotoService>();
 
 Console.WriteLine($"DB => {host}:{port}/{db} USER => {user}");
 

@@ -4,9 +4,9 @@ namespace Votify.Domain.Factory
 {
     public class VotoEstandarFactory : VotoFactory
     {
-        public override Voto Crear(string proyectoId, string? votanteId = null)
+        public override Voto Crear(string proyectoId, string votacionId, string? votanteId = null)
         {
-            return new VotoEstandar(proyectoId, votanteId!);
+            return new VotoEstandar(proyectoId, votanteId!, votacionId);
         }
     }
 }
