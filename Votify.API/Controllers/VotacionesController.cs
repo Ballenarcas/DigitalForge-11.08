@@ -86,5 +86,12 @@ namespace Votify.API.Controllers
                 return NotFound();
             }
         }
+
+        [HttpGet("{id}/resultados")]
+        public async Task<ActionResult<List<ResultadoProyectoDto>>> ObtenerResultados(string id)
+        {
+            var resultados = await _service.ObtenerResultadosAsync(id);
+            return Ok(resultados);
+        }
     }
 }

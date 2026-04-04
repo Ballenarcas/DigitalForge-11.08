@@ -62,16 +62,21 @@ namespace Votify.Client.Services
 
             if (!response.IsSuccessStatusCode)
             {
-                // Leer el JSON de error que manda nuestra API
+
                 var error = await response.Content.ReadAsStringAsync();
                 
-                // Extraer el mensaje específico si lo tiene
+
                 if (error.Contains("Error"))
                 {
                     throw new Exception(error);
                 }
                 throw new Exception($"Error HTTP: {response.StatusCode} - {error}");
             }
+        }
+
+        public async Task<List<ResultadoProyectoDto>?> ObtenerResultados(string votacionId)
+        {
+            return await _http.GetFromJsonAsync<List<ResultadoProyectoDto>>($"api/votaciones/{votacionId}/resultados");
         }
     }
 }

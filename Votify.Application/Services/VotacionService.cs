@@ -8,10 +8,14 @@ namespace Votify.Application.Services
     public class VotacionService : IVotacionService
     {
         private readonly IVotacionRepository _repo;
+        private readonly IVotoRepository _votoRepo;
+        private readonly IProyectoRepository _proyectoRepo;
 
-        public VotacionService(IVotacionRepository repo)
+        public VotacionService(IVotacionRepository repo, IVotoRepository votoRepo, IProyectoRepository proyectoRepo)
         {
             _repo = repo;
+            _votoRepo = votoRepo;
+            _proyectoRepo = proyectoRepo;
         }
 
         public async Task CrearVotacionAsync(CrearVotacionDto dto)
@@ -99,6 +103,33 @@ namespace Votify.Application.Services
             var eliminado = await _repo.EliminarAsync(id);
             if (!eliminado)
                 throw new KeyNotFoundException($"No se encontró la votación con id {id}.");
+        }
+
+        public async Task<List<ResultadoProyectoDto>> ObtenerResultadosAsync(string votacionId)
+        {
+            // Obtener votos agrupados por proyecto
+            var votosporProyecto = await _votoRepo.ObtenerVotosPorVotacionAsync(votacionId);
+
+            if (votosporProyecto.Count == 0)
+                return new List<ResultadoProyectoDto>();
+
+            // Obtener proyectos
+            var proyectos = await _proyectoRepo.ObtenerPorVotacionAsync(votacionId);
+            var proyectoDict = proyectos.ToDictionary(p => p.Id);
+
+            // Construir resultados con posiciones
+            var resultados = votosporProyecto
+                .Select((vp, index) => new ResultadoProyectoDto
+                {
+                    Id = vp.ProyectoId,
+                    Nombre = proyectoDict.ContainsKey(vp.ProyectoId) ? proyectoDict[vp.ProyectoId].Nombre : "Proyecto desconocido",
+                    Equipo = proyectoDict.ContainsKey(vp.ProyectoId) ? (proyectoDict[vp.ProyectoId].Equipo_Id ?? "Sin equipo") : "Sin equipo",
+                    TotalVotos = vp.Votos,
+                    Posicion = index + 1
+                })
+                .ToList();
+
+            return resultados;
         }
     }
 }

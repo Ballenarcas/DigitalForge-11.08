@@ -80,6 +80,8 @@
                         <p class="descripcion">@p.Descripcion</p>
                         
                         <button class="btn-votar" @onclick="() => Votar(p.Id)" disabled="@isVoting">
+                            Emitir voto
+                        
                         </button>
 
                         <div class="card-footer">
@@ -203,7 +205,6 @@
                 ProyectoId = proyectoId,
                 VotanteId = usuarioTesterId
             };
-            
             await VotacionesService.EmitirVotoAsync(VotacionId, dto);
             mensajeExito = "¡Voto registrado con éxito! Tu apoyo ha sido añadido al proyecto.";
         }

@@ -6,5 +6,6 @@ namespace Votify.Domain.Interfaces
 
         Task<List<Proyecto>> ObtenerTodasAsync();
         Task<Proyecto?> ObtenerAsync(String proyectoId);
+        Task<List<Proyecto>> ObtenerPorVotacionAsync(string votacionId);
     }
 }

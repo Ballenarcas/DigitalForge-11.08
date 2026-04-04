@@ -9,5 +9,6 @@ namespace Votify.Application.Interfaces
         Task<CrearVotacionResponse?> ObtenerPorIdAsync(string id);
         Task ActualizarVotacionAsync(string id, CrearVotacionDto dto);
         Task EliminarVotacionAsync(string id);
+        Task<List<ResultadoProyectoDto>> ObtenerResultadosAsync(string votacionId);
     }
 }
