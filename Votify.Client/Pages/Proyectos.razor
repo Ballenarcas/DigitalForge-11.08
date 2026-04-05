@@ -86,7 +86,7 @@
 
                         <div class="card-footer">
                             <span class="stats">Equipo: @p.Equipo_Id</span>
-                            <button class="btn-ver">Detalles</button>
+                            <button class="btn-ver" @onclick="() => VerDetalles(p.Id)">Ver Detalles</button>
                         </div>
                     </div>
                 }
@@ -226,6 +226,11 @@
     }
 
     private void Volver() => Nav.NavigateTo("/");
+    
+    private void VerDetalles(string proyectoId)
+    {
+        Nav.NavigateTo($"/{VotacionId}/proyectos/{proyectoId}");
+    }
 
     private string GetRandomColor(string id)
     {
