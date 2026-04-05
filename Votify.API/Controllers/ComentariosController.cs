@@ -20,7 +20,7 @@ namespace Votify.API.Controllers
         {
             try
             {
-                await _comentarioService.AgregarComentarioAsync(proyectoId, request.Texto);
+                await _comentarioService.AgregarComentarioAsync(proyectoId, request.Texto, request.AutorId);
                 return Ok();
             }
             catch (ArgumentException ex)

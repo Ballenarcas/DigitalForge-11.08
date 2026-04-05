@@ -57,5 +57,28 @@ namespace Votify.Infrastructure.Repositories
                 p.Equipo_Id?.ToString(), 
                 p.Id.ToString())).ToList();
         }
+
+        public async Task<List<Proyecto>> ObtenerPorVotacionAsync(string votacionId)
+        {
+            if (!Guid.TryParse(votacionId, out var votacionGuid))
+                return new List<Proyecto>();
+
+            var proyectoIds = await _context.Votos
+                .Where(v => v.VotacionId == votacionGuid)
+                .Select(v => v.ProyectoId)
+                .Distinct()
+                .ToListAsync();
+
+            var entities = await _context.Proyectos
+                .Where(p => proyectoIds.Contains(p.Id))
+                .ToListAsync();
+
+            return entities.Select(p => new Proyecto(
+                p.Categoria_Id?.ToString(), 
+                p.Nombre, 
+                p.Descripcion, 
+                p.Equipo_Id?.ToString(), 
+                p.Id.ToString())).ToList();
+        }
     }
 }

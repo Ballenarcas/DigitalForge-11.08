@@ -12,14 +12,14 @@ namespace Votify.Application.Services
             _comentarioRepository = comentarioRepository;
         }
 
-        public async Task AgregarComentarioAsync(string proyectoId, string texto)
+        public async Task AgregarComentarioAsync(string proyectoId, string texto, Guid? autorId = null)
         {
             if (string.IsNullOrWhiteSpace(texto))
             {
                 throw new ArgumentException("El comentario no puede estar vacío.");
             }
 
-            await _comentarioRepository.GuardarAsync(proyectoId, texto);
+            await _comentarioRepository.GuardarAsync(proyectoId, texto, autorId);
         }
 
         public async Task<List<string>> ObtenerComentariosAsync(string proyectoId)

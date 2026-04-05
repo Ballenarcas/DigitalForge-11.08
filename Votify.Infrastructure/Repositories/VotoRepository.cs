@@ -49,6 +49,21 @@ namespace Votify.Infrastructure.Repositories
                 .CountAsync(v => v.VotacionId == votacionGuid && v.VotanteId == votanteGuid);
         }
 
+        public async Task<List<(string ProyectoId, int Votos)>> ObtenerVotosPorVotacionAsync(string votacionId)
+        {
+            if (!Guid.TryParse(votacionId, out var votacionGuid))
+                return new List<(string, int)>();
+
+            var resultado = await _db.Votos
+                .Where(v => v.VotacionId == votacionGuid)
+                .GroupBy(v => v.ProyectoId)
+                .Select(g => new { ProyectoId = g.Key, Votos = g.Count() })
+                .OrderByDescending(x => x.Votos)
+                .ToListAsync();
+
+            return resultado.Select(x => (x.ProyectoId.ToString(), x.Votos)).ToList();
+        }
+
         private Voto MapToDomain(VotoEntity entity)
         {
             VotoFactory factory;

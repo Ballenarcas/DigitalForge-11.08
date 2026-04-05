@@ -2,8 +2,40 @@
 @using Votify.Client.DTOs
 @inject VotacionesService VotacionesService
 @inject NavigationManager Nav
+@inject IJSRuntime JSRuntime
 
 <div class="main-container">
+    @if (mostrarModalConfirmacion)
+    {
+        <div class="modal-overlay" @onclick="CerrarModal">
+            <div class="modal-content" @onclick:stopPropagation="true">
+                <div class="modal-header">
+                    <h3>⚠️ Confirmar eliminación</h3>
+                </div>
+                <div class="modal-body">
+                    <p>¿Estás seguro de que deseas <strong>eliminar permanentemente</strong> la votación?</p>
+                    <p class="votacion-nombre"><strong>@Nombre</strong></p>
+                    <p class="warning-text">Esta acción <strong>no se puede deshacer</strong>.</p>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-modal-cancel" @onclick="CerrarModal" disabled="@eliminando">
+                        Cancelar
+                    </button>
+                    <button class="btn-modal-delete" @onclick="ConfirmarEliminar" disabled="@eliminando">
+                        @if (eliminando)
+                        {
+                            <span class="btn-spinner"></span>
+                            <span>Eliminando...</span>
+                        }
+                        else
+                        {
+                            <span>Sí, eliminar</span>
+                        }
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
     <div class="top-nav">
         <button class="btn-back" @onclick="HandleVolver">
             <span class="icon-arrow">←</span> Volver
@@ -118,6 +150,17 @@
                 </div>
 
                 <div class="action-row">
+                    <button class="btn-delete" @onclick="HandleEliminar" id="btn-eliminar" disabled="@eliminando">
+                        @if (eliminando)
+                        {
+                            <span class="btn-spinner"></span>
+                            <span>Eliminando...</span>
+                        }
+                        else
+                        {
+                            <span>🗑️ Eliminar votación</span>
+                        }
+                    </button>
                     <button class="btn-cancel" @onclick="HandleVolver" id="btn-cancelar">
                         Cancelar
                     </button>
@@ -501,6 +544,40 @@ input:checked + .slider:before {
     background: #faf5ff;
 }
 
+.btn-delete {
+    flex: 0.8;
+    background: #fee2e2;
+    border: 1.5px solid #fecaca;
+    color: #dc2626;
+    padding: 1.1rem;
+    border-radius: 20px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-family: inherit;
+}
+
+.btn-delete:hover:not(:disabled) {
+    background: #fca5a5;
+    border-color: #f87171;
+    color: #b91c1c;
+    box-shadow: 0 4px 14px rgba(220, 38, 38, 0.2);
+}
+
+.btn-delete:active:not(:disabled) {
+    transform: scale(0.99);
+}
+
+.btn-delete:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
 .btn-submit {
     flex: 2;
     background: linear-gradient(to right, #a855f7, #9333ea);
@@ -601,6 +678,138 @@ input:checked + .slider:before {
     to { transform: rotate(360deg); }
 }
 
+/* ── Modal Confirmation ── */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.2s ease;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    max-width: 400px;
+    width: 90%;
+    animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.3rem;
+    color: #1e293b;
+    font-weight: 800;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.modal-body p {
+    margin: 0.8rem 0;
+    color: #475569;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.votacion-nombre {
+    background: #fef2f2;
+    color: #991b1b;
+    padding: 0.8rem;
+    border-radius: 10px;
+    border-left: 4px solid #dc2626;
+    font-weight: 700;
+    margin: 1rem 0;
+}
+
+.warning-text {
+    color: #dc2626;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 1rem;
+    padding: 1.5rem;
+    border-top: 1px solid #f1f5f9;
+}
+
+.btn-modal-cancel {
+    flex: 1;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    color: #64748b;
+    padding: 0.9rem;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.95rem;
+    font-family: inherit;
+}
+
+.btn-modal-cancel:hover:not(:disabled) {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+}
+
+.btn-modal-cancel:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-modal-delete {
+    flex: 1;
+    background: #dc2626;
+    border: none;
+    color: white;
+    padding: 0.9rem;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+    font-family: inherit;
+}
+
+.btn-modal-delete:hover:not(:disabled) {
+    background: #b91c1c;
+    box-shadow: 0 4px 14px rgba(220, 38, 38, 0.3);
+    transform: translateY(-1px);
+}
+
+.btn-modal-delete:active:not(:disabled) {
+    transform: scale(0.99);
+}
+
+.btn-modal-delete:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
 /* ── Error state ── */
 .error-state {
     text-align: center;
@@ -661,6 +870,8 @@ input:checked + .slider:before {
     bool cargando = true;
     bool errorCarga = false;
     bool guardando = false;
+    bool eliminando = false;
+    bool mostrarModalConfirmacion = false;
     bool YaInicio    => DateTime.Now >= FechaInicio;
     bool YaFinalizo  => DateTime.Now >= FechaFin;
 
@@ -739,6 +950,39 @@ input:checked + .slider:before {
         {
             guardando = false;
         }
+    }
+
+    async Task HandleEliminar()
+    {
+        mostrarModalConfirmacion = true;
+    }
+
+    async Task ConfirmarEliminar()
+    {
+        eliminando = true;
+        Mensaje = null;
+        try
+        {
+            await VotacionesService.EliminarVotacion(Id);
+            Mensaje = "Votación eliminada correctamente.";
+            StateHasChanged();
+            await Task.Delay(800);
+            Nav.NavigateTo("/");
+        }
+        catch
+        {
+            Mensaje = "Error al eliminar la votación. Inténtalo de nuevo.";
+            mostrarModalConfirmacion = false;
+        }
+        finally
+        {
+            eliminando = false;
+        }
+    }
+
+    void CerrarModal()
+    {
+        mostrarModalConfirmacion = false;
     }
 
     void HandleVolver() => Nav.NavigateTo("/");

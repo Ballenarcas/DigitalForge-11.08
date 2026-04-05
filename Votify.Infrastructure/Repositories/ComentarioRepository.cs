@@ -14,7 +14,7 @@ namespace Votify.Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task GuardarAsync(string proyectoId, string texto)
+        public async Task GuardarAsync(string proyectoId, string texto, Guid? autorId = null)
         {
             if (!Guid.TryParse(proyectoId, out var guidProyectoId))
             {
@@ -24,6 +24,7 @@ namespace Votify.Infrastructure.Repositories
             var entity = new ComentarioEntity
             {
                 Proyecto_Id = guidProyectoId,
+                Autor_Id = autorId,
                 Texto = texto,
                 FechaCreacion = DateTime.UtcNow
             };

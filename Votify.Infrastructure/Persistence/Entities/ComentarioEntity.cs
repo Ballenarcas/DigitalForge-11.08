@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Votify.Infrastructure.Persistence.Entities
 {
-    [Table("comentarios")]
+    [Table("Comentario")]
     public class ComentarioEntity
     {
         [Key]
@@ -13,6 +13,9 @@ namespace Votify.Infrastructure.Persistence.Entities
         [Required]
         [Column("proyecto_id")]
         public Guid Proyecto_Id { get; set; }
+
+        [Column("autor_id")]
+        public Guid? Autor_Id { get; set; }
 
         [Required]
         [Column("texto")]
