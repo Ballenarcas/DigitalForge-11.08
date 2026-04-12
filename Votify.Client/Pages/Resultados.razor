@@ -4,19 +4,22 @@
 @inject Votify.Client.Services.VotacionesService VotacionesService
 
 <div class="main-container">
-    <div class="top-nav">
-        <button class="btn-back"@onclick="HandleVolver">
+    <div class="header-principal">
+        <button class="btn-back" @onclick="HandleVolver">
             <span class="icon-arrow">←</span> Volver
         </button>
-        <div class="breadcrumbs">
-            <a href="/" class="breadcrumb-link">Evento A</a> <span class="separator">></span> <span class="current-page">Ranking</span>
+        <div class="logo-container">
+            <div class="logo-icon small">
+                <img src="images/ranking-logo.png" alt="Ranking logo" class="ranking-logo-img" style="width:30px;height:30px;margin-left:0.75rem;" />
+            </div>
+            <span class="brand-name">Ranking</span>
         </div>
     </div>
 
     <div class="content-wrapper">
         <div class="results-header">
             <h1 class="results-title">Clasificación de proyectos</h1>
-            <p class="results-subtitle">Conteo de votos final para los proyectos del Evento A</p>
+            <p class="results-subtitle">Conteo de votos final para los proyectos del evento: <strong>@(nombreVotacion ?? "...")</strong></p>
         </div>
 
         @if (listaResultados == null)
@@ -49,7 +52,7 @@
                         <div class="podium-position">@resultado.Posicion@GetOrdinalSuffix(resultado.Posicion)</div>
                         <div class="podium-medal">@medal</div>
                         <h3 class="podium-title">@resultado.Nombre</h3>
-                        <p class="podium-team">Equipo @resultado.Equipo</p>
+                        <p class="podium-team">Equipo:  @resultado.Equipo</p>
                         <div class="podium-votes">
                             <span class="votes-label">VOTOS TOTALES</span>
                             <span class="votes-count">@resultado.TotalVotos.ToString("N0")</span>
@@ -94,11 +97,7 @@
             }
         }
 
-        <div class="actions-container">
-            <button class="btn-volver-votaciones" @onclick='() => Nav.NavigateTo("/")'>
-                ← Volver a Votaciones
-            </button>
-        </div>
+
     </div>
 </div>
 
@@ -114,15 +113,15 @@
         font-family: 'Inter', sans-serif; 
     }
     
-    .top-nav { 
+    .header-principal { 
         display: flex; 
         justify-content: flex-start; 
         align-items: center; 
         max-width: 1200px; 
-        margin: 0 auto 2rem; 
+        margin: 0 auto 2rem;
         gap: 1.5rem;
     }
-    
+
     .btn-back { 
         background: white; 
         border: 1px solid #e2e8f0; 
@@ -138,41 +137,15 @@
         gap: 0.5rem;
         flex-shrink: 0;
     }
+    .btn-back:hover { background: #f8f9fc; border-color: #ddd6fe; color: #7c3aed; }
+    .icon-arrow { font-size: 1rem; }
+
+    .logo-container { display: flex; align-items: center; }
+    .logo-icon.small { display: flex; align-items: center; }
+    .ranking-logo-img { object-fit: contain; }
+    .brand-name { font-weight: 800; font-size: 1.2rem; color: #4c1d95; letter-spacing: -0.02em; margin-left: 0.75rem; }
     
-    .btn-back:hover { 
-        background: #f8f9fc; 
-        border-color: #ddd6fe; 
-        color: #7c3aed; 
-    }
-    
-    .icon-arrow {
-        font-size: 1rem;
-    }
-    .breadcrumbs {
-        color: #94a3b8;
-        font-size: 0.9rem;
-    }
-    
-    .breadcrumb-link {
-        color: #aa7ad7;
-        font-weight: 700;
-        text-decoration: none;
-    }
-    
-    .breadcrumb-link:hover {
-        color: #9333ea;
-    }
-    
-    .separator {
-        color: #cbd5e1;
-        font-size: 0.9rem;
-    }
-    
-    .current-page {
-        font-size: 0.9rem;
-        color: #9333ea;
-        font-weight: 600;
-    }
+
     
     .content-wrapper { 
         max-width: 1200px; 
@@ -387,29 +360,7 @@
         color: #9333ea;
     }
     
-    /* Acciones */
-    .actions-container {
-        display: flex;
-        justify-content: center;
-        gap: 1rem;
-    }
-    
-    .btn-volver-votaciones {
-        background: white;
-        border: 2px solid #9333ea;
-        color: #9333ea;
-        padding: 0.75rem 1.5rem;
-        border-radius: 12px;
-        font-weight: 700;
-        font-size: 0.95rem;
-        cursor: pointer;
-        transition: 0.3s;
-    }
-    
-    .btn-volver-votaciones:hover {
-        background: #f3e8ff;
-        transform: translateY(-2px);
-    }
+
     
     .loader-container { 
         text-align: center; 
@@ -465,11 +416,14 @@
     public string? VotacionId { get; set; }
     
     private List<ResultadoProyectoDto>? listaResultados;
+    private string? nombreVotacion;
 
     protected override async Task OnInitializedAsync()
     {
         if (!string.IsNullOrEmpty(VotacionId))
         {
+            var votacion = await VotacionesService.ObtenerVotacion(VotacionId);
+            nombreVotacion = votacion?.Nombre;
             await CargarResultados();
         }
     }

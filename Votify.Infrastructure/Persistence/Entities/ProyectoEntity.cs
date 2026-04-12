@@ -21,7 +21,7 @@ public class ProyectoEntity
     [Column("descripcion")]
     public string Descripcion { get; set; } = default!;
 
-    [Column("equipo_id")]
-    public Guid? Equipo_Id { get; set; }
+    [Column("equipo")]
+    public string? Equipo_Id { get; set; }
 }
 }

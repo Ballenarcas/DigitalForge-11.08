@@ -23,7 +23,7 @@ namespace Votify.Infrastructure.Repositories
                 Categoria_Id = string.IsNullOrEmpty(proyecto.Categoria_Id) ? null : Guid.Parse(proyecto.Categoria_Id),
                 Nombre = proyecto.Nombre,
                 Descripcion = proyecto.Descripcion,
-                Equipo_Id = string.IsNullOrEmpty(proyecto.Equipo_Id) ? null : Guid.Parse(proyecto.Equipo_Id)
+                Equipo_Id = string.IsNullOrEmpty(proyecto.Equipo_Id) ? null : proyecto.Equipo_Id
             };
             _context.Proyectos.Add(entity);
             await _context.SaveChangesAsync();
@@ -43,7 +43,7 @@ namespace Votify.Infrastructure.Repositories
                 entity.Categoria_Id?.ToString(), 
                 entity.Nombre, 
                 entity.Descripcion, 
-                entity.Equipo_Id?.ToString(), 
+                entity.Equipo_Id, 
                 entity.Id.ToString());
         }
 
@@ -54,7 +54,7 @@ namespace Votify.Infrastructure.Repositories
                 p.Categoria_Id?.ToString(), 
                 p.Nombre, 
                 p.Descripcion, 
-                p.Equipo_Id?.ToString(), 
+                p.Equipo_Id, 
                 p.Id.ToString())).ToList();
         }
 
@@ -77,7 +77,7 @@ namespace Votify.Infrastructure.Repositories
                 p.Categoria_Id?.ToString(), 
                 p.Nombre, 
                 p.Descripcion, 
-                p.Equipo_Id?.ToString(), 
+                p.Equipo_Id, 
                 p.Id.ToString())).ToList();
         }
     }
