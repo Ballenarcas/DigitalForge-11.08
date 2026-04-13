@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Votify.Infrastructure", "Vo
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Votify", "Votify", "{22C51D25-BA21-32A3-8E36-A84928BAC71F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Votify.AcceptanceTests", "Votify.AcceptanceTests\Votify.AcceptanceTests.csproj", "{8C4E5F9A-B3D2-4E1F-9C7A-2B8D1A5E7F3C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,6 +43,10 @@ Global
 		{769B2096-B7FC-83AD-7BAB-C61F79ED3D9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{769B2096-B7FC-83AD-7BAB-C61F79ED3D9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{769B2096-B7FC-83AD-7BAB-C61F79ED3D9B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8C4E5F9A-B3D2-4E1F-9C7A-2B8D1A5E7F3C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C4E5F9A-B3D2-4E1F-9C7A-2B8D1A5E7F3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C4E5F9A-B3D2-4E1F-9C7A-2B8D1A5E7F3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C4E5F9A-B3D2-4E1F-9C7A-2B8D1A5E7F3C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
