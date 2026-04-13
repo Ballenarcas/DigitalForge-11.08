@@ -53,5 +53,13 @@ namespace Votify.Application.Services
             // 5. Guardar el voto de forma segura
             await _votoRepository.GuardarAsync(nuevoVoto);
         }
+        public async Task<bool> PuedeVotarAsync(string votacionId, string votanteId)
+        {
+            var votacion = await _votacionRepository.ObtenerAsync(votacionId);
+            if (votacion == null) return false;
+
+            int votosActuales = await _votoRepository.ContarVotosPorUsuarioYVotacionAsync(votacionId, votanteId);
+            return votosActuales < votacion.LimiteProyectos;
+        }
     }
 }

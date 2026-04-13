@@ -78,5 +78,21 @@ namespace Votify.Client.Services
         {
             return await _http.GetFromJsonAsync<List<ResultadoProyectoDto>>($"api/votaciones/{votacionId}/resultados");
         }
+        public async Task<bool> VerificarLimiteVotos(string votacionId, string votanteId)
+        {
+            try
+            {
+                var response = await _http.GetAsync($"api/votos/puede-votar/{votacionId}/{votanteId}");
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadFromJsonAsync<bool>();
+                }
+                return true; // En caso de error, preferimos permitir el intento (el backend validará igual)
+            }
+            catch
+            {
+                return true;
+            }
+        }
     }
 }
