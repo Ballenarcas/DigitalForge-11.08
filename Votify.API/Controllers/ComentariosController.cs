@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Votify.API.DTOs;
+using Votify.Application.DTOs;
 using Votify.Application.Interfaces;
 
 namespace Votify.API.Controllers
@@ -35,9 +36,9 @@ namespace Votify.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<string>>> ObtenerComentarios(string proyectoId)
+        public async Task<ActionResult<List<ComentarioDto>>> ObtenerComentarios(string proyectoId, [FromQuery] string? votacionId = null)
         {
-            var comentarios = await _comentarioService.ObtenerComentariosAsync(proyectoId);
+            var comentarios = await _comentarioService.ObtenerComentariosAsync(proyectoId, votacionId);
             return Ok(comentarios);
         }
     }

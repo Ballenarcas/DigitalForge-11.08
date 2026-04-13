@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Votify.Domain.Entities;
 using Votify.Domain.Interfaces;
 using Votify.Infrastructure.Persistence;
 using Votify.Infrastructure.Persistence.Entities;
@@ -33,17 +34,22 @@ namespace Votify.Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task<List<string>> ObtenerAsync(string proyectoId)
+        public async Task<List<Comentario>> ObtenerAsync(string proyectoId)
         {
             if (!Guid.TryParse(proyectoId, out var guidProyectoId))
             {
-                return new List<string>();
+                return new List<Comentario>();
             }
 
             var comentarios = await _context.Comentarios
                 .Where(c => c.Proyecto_Id == guidProyectoId)
                 .OrderByDescending(c => c.FechaCreacion)
-                .Select(c => c.Texto)
+                .Select(c => new Comentario
+                {
+                    Texto = c.Texto,
+                    AutorId = c.Autor_Id,
+                    FechaCreacion = c.FechaCreacion
+                })
                 .ToListAsync();
 
             return comentarios;

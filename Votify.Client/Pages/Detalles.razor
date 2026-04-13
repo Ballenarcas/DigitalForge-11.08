@@ -47,9 +47,9 @@
                     VOTACIÓN ABIERTA
                 </div>
 
-                <h1 class="proyecto-titulo">@proyecto.Nombre</h1>
+                <h1 class="proyecto-titulo">@(proyecto?.Nombre ?? "Proyecto")</h1>
 
-                @if (!string.IsNullOrEmpty(proyecto.Equipo_Id))
+                @if (!string.IsNullOrEmpty(proyecto?.Equipo_Id))
                 {
                     <div class="equipo-row">
                         <div class="equipo-avatar">@GetInitials(proyecto.Equipo_Id)</div>
@@ -58,7 +58,7 @@
                 }
 
                 <!-- Imagen / Banner del proyecto -->
-                <div class="proyecto-imagen" style="background: @GetGradient(proyecto.Id)">
+                <div class="proyecto-imagen" style="background: @GetGradient(proyecto?.Id ?? string.Empty)">
                     <div class="imagen-overlay">
                         <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" width="48" height="48" opacity="0.35">
                             <rect x="8" y="16" width="48" height="34" rx="6" stroke="white" stroke-width="3"/>
@@ -78,7 +78,10 @@
                         </svg>
                         <h2>Descripción del Proyecto</h2>
                     </div>
-                    <p class="descripcion-texto">@proyecto.Descripcion</p>
+                    <p class="descripcion-texto">@(proyecto?.Descripcion ?? "")</p>
+                    <div class="descripcion-acciones">
+                        <button class="btn-ver-comentarios" @onclick="VerComentarios">Ver comentarios</button>
+                    </div>
                 </div>
 
             </main>
@@ -87,7 +90,7 @@
             <aside class="col-sidebar">
 
                 <!-- Panel de feedback -->
-                <div class="sidebar-card feedback-card">
+                <div class="sidebar-card feedback-card" id="comentarios">
                     <h3 class="sidebar-title">Envía tu Feedback</h3>
                     <p class="sidebar-subtitle">Comparte tus impresiones antes de votar</p>
 
@@ -138,13 +141,15 @@
                     {
                         <div class="comentarios-lista">
                             <div class="comentarios-lista-titulo">@comentarios.Count comentario(s) enviado(s)</div>
-                            @foreach (var c in comentarios)
+                            @for (var index = 0; index < comentarios.Count; index++)
                             {
-                                <div class="comentario-item">
-                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="14" height="14">
-                                        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="#9333ea" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    </svg>
-                                    <span>@c</span>
+                                var comentario = comentarios[index];
+                                <div class="comentario-item comentario-card">
+                                    <div class="comentario-info">
+                                        <span class="comentario-meta">@GetAutorEtiqueta(comentario, index)</span>
+                                        <span class="comentario-fecha">@comentario.FechaCreacion.ToLocalTime().ToString("dd MMM yyyy HH:mm")</span>
+                                    </div>
+                                    <p>@comentario.Texto</p>
                                 </div>
                             }
                         </div>
@@ -334,6 +339,29 @@
         margin: 0;
     }
 
+    .descripcion-acciones {
+        margin-top: 1.25rem;
+    }
+    .btn-ver-comentarios {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #f5f3ff;
+        color: #5b21b6;
+        border: 1px solid #ddd6fe;
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+        font-weight: 700;
+        text-decoration: none;
+        transition: background 0.2s, transform 0.2s, border-color 0.2s;
+    }
+    .btn-ver-comentarios:hover {
+        background: #ede9fe;
+        border-color: #c4b5fd;
+        transform: translateY(-1px);
+    }
+
     /* ── Columna derecha (sidebar) ── */
     .col-sidebar {
         display: flex;
@@ -437,15 +465,45 @@
     }
     .comentario-item {
         display: flex;
-        align-items: flex-start;
+        flex-direction: column;
         gap: 0.5rem;
         background: #f8f9fc;
-        border-radius: 10px;
-        padding: 0.5rem 0.75rem;
-        margin-bottom: 0.4rem;
-        font-size: 0.82rem;
+        border-radius: 16px;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        font-size: 0.92rem;
         color: #475569;
-        line-height: 1.5;
+        line-height: 1.6;
+        border: 1px solid #e5e7eb;
+    }
+    .comentario-card {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        padding: 1rem;
+        background: white;
+        border-radius: 18px;
+        border: 1px solid #ede9fe;
+    }
+    .comentario-info {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        flex-wrap: wrap;
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #7c3aed;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+    }
+    .comentario-fecha {
+        color: #64748b;
+        font-weight: 600;
+        text-transform: none;
+    }
+    .comentario-item p {
+        margin: 0;
+        color: #334155;
     }
     .comentario-item svg { flex-shrink: 0; margin-top: 2px; }
 
@@ -563,23 +621,48 @@
     private bool enviandoComentario = false;
     private string? mensajeComentario;
     private bool comentarioOk = false;
-    private List<string> comentarios = new();
+    private List<ComentarioDto> comentarios = new();
 
     private bool votando = false;
     private bool votoOk = false;
     private string? mensajeVoto;
 
+    private CrearVotacionResponse? votacion;
+
     // TODO: vendrá del sistema de autenticación
     private readonly string usuarioTesterId = "ce932822-2615-46fd-ab8c-7f5164ca2414";
+
+    private bool EsVotacionAnonima => votacion?.Tipo?.Equals("ANONIMA", StringComparison.OrdinalIgnoreCase) ?? false;
+
+    private string GetAutorEtiqueta(ComentarioDto comentario, int indice)
+    {
+        if (comentario.EsAnonimo)
+        {
+            return $"Votante anónimo #{indice + 1}";
+        }
+
+        if (comentario.AutorId.HasValue)
+        {
+            var shortId = comentario.AutorId.Value.ToString().Split('-')[0];
+            return $"Votante {shortId}";
+        }
+
+        return "Votante identificado";
+    }
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
+            if (!string.IsNullOrEmpty(VotacionId))
+            {
+                votacion = await VotacionesService.ObtenerVotacion(VotacionId);
+            }
+
             if (!string.IsNullOrEmpty(ProyectoId))
             {
                 proyecto = await ProyectosService.ObtenerProyectoAsync(ProyectoId);
-                comentarios = await ProyectosService.ObtenerComentariosAsync(ProyectoId);
+                comentarios = await ProyectosService.ObtenerComentariosAsync(ProyectoId, VotacionId);
             }
         }
         catch (Exception ex)
@@ -601,8 +684,15 @@
 
         try
         {
-            await ProyectosService.AgregarComentarioAsync(ProyectoId, comentarioTexto);
-            comentarios.Insert(0, comentarioTexto);
+            var autorId = EsVotacionAnonima ? null : usuarioTesterId;
+            await ProyectosService.AgregarComentarioAsync(ProyectoId, comentarioTexto, autorId);
+            comentarios.Insert(0, new ComentarioDto
+            {
+                Texto = comentarioTexto,
+                AutorId = EsVotacionAnonima ? null : Guid.Parse(usuarioTesterId),
+                EsAnonimo = EsVotacionAnonima,
+                FechaCreacion = DateTime.UtcNow
+            });
             comentarioTexto = string.Empty;
             mensajeComentario = "¡Comentario enviado correctamente!";
             comentarioOk = true;
@@ -652,6 +742,8 @@
     }
 
     private void Volver() => Nav.NavigateTo($"/{VotacionId}/proyectos/");
+
+    private void VerComentarios() => Nav.NavigateTo($"/{VotacionId}/proyectos/{ProyectoId}/comentarios");
 
     private string GetGradient(string id)
     {

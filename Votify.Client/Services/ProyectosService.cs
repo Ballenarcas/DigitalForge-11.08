@@ -23,9 +23,9 @@ namespace Votify.Client.Services
             return await _httpClient.GetFromJsonAsync<ProyectoDto>($"api/proyectos/{id}");
         }
 
-        public async Task AgregarComentarioAsync(string proyectoId, string texto)
+        public async Task AgregarComentarioAsync(string proyectoId, string texto, string? autorId = null)
         {
-            var request = new CrearComentarioRequest { Texto = texto };
+            var request = new CrearComentarioRequest { Texto = texto, AutorId = string.IsNullOrEmpty(autorId) ? null : Guid.Parse(autorId) };
             var response = await _httpClient.PostAsJsonAsync($"api/proyectos/{proyectoId}/comentarios", request);
             
             if (!response.IsSuccessStatusCode)
@@ -35,10 +35,16 @@ namespace Votify.Client.Services
             }
         }
 
-        public async Task<List<string>> ObtenerComentariosAsync(string proyectoId)
+        public async Task<List<ComentarioDto>> ObtenerComentariosAsync(string proyectoId, string? votacionId = null)
         {
-            var response = await _httpClient.GetFromJsonAsync<List<string>>($"api/proyectos/{proyectoId}/comentarios");
-            return response ?? new List<string>();
+            var url = $"api/proyectos/{proyectoId}/comentarios";
+            if (!string.IsNullOrEmpty(votacionId))
+            {
+                url += $"?votacionId={Uri.EscapeDataString(votacionId)}";
+            }
+
+            var response = await _httpClient.GetFromJsonAsync<List<ComentarioDto>>(url);
+            return response ?? new List<ComentarioDto>();
         }
     }
 }

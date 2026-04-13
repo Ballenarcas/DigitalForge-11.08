@@ -1,3 +1,5 @@
+using System;
+using Votify.Application.DTOs;
 using Votify.Application.Interfaces;
 using Votify.Domain.Interfaces;
 
@@ -6,10 +8,12 @@ namespace Votify.Application.Services
     public class ComentarioService : IComentarioService
     {
         private readonly IComentarioRepository _comentarioRepository;
+        private readonly IVotacionRepository _votacionRepository;
 
-        public ComentarioService(IComentarioRepository comentarioRepository)
+        public ComentarioService(IComentarioRepository comentarioRepository, IVotacionRepository votacionRepository)
         {
             _comentarioRepository = comentarioRepository;
+            _votacionRepository = votacionRepository;
         }
 
         public async Task AgregarComentarioAsync(string proyectoId, string texto, Guid? autorId = null)
@@ -22,9 +26,24 @@ namespace Votify.Application.Services
             await _comentarioRepository.GuardarAsync(proyectoId, texto, autorId);
         }
 
-        public async Task<List<string>> ObtenerComentariosAsync(string proyectoId)
+        public async Task<List<ComentarioDto>> ObtenerComentariosAsync(string proyectoId, string? votacionId = null)
         {
-            return await _comentarioRepository.ObtenerAsync(proyectoId);
+            var comentarios = await _comentarioRepository.ObtenerAsync(proyectoId);
+            var esVotacionAnonima = false;
+
+            if (!string.IsNullOrEmpty(votacionId))
+            {
+                var votacion = await _votacionRepository.ObtenerAsync(votacionId);
+                esVotacionAnonima = votacion?.Tipo().Equals("ANONIMA", StringComparison.OrdinalIgnoreCase) ?? false;
+            }
+
+            return comentarios.Select(c => new ComentarioDto
+            {
+                Texto = c.Texto,
+                AutorId = esVotacionAnonima ? null : c.AutorId,
+                EsAnonimo = esVotacionAnonima || !c.AutorId.HasValue,
+                FechaCreacion = c.FechaCreacion
+            }).ToList();
         }
     }
 }
