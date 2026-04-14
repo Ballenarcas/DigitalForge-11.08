@@ -26,18 +26,22 @@
         <div class="detalles-layout">
 
             <!-- breadcrumb dentro del layout -->
-            <nav class="breadcrumb-nav breadcrumb-full">
+            <div class="header-principal">
                 <button class="btn-volver" @onclick="Volver">
                     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="16" height="16">
-                        <path d="M15 19L8 12L15 5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M15 19L8 12L15 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
-                    Volver
+                    Eventos
                 </button>
-                <span class="breadcrumb-sep">›</span>
-                <span class="breadcrumb-item">Evento</span>
-                <span class="breadcrumb-sep">›</span>
-                <span class="breadcrumb-item active">@(proyecto?.Nombre ?? "Cargando...")</span>
-            </nav>
+            </div>
+
+            <div class="page-header-row">
+                <div class="logo-icon small">
+                    <img src="images/proyectos-logo.png" alt="Logo" class="evento-logo-img" style="width:20px;height:20px;" />
+                </div>
+                <span class="brand-name">Detalles de "@(proyecto?.Nombre ?? "...")"</span>
+            </div>
+
 
             @if (limiteAlcanzado && !votoOk)
             {
@@ -50,10 +54,7 @@
             <!-- COLUMNA IZQUIERDA: Información del proyecto -->
             <main class="col-info">
 
-                <div class="status-badge">
-                    <span class="dot-pulse"></span>
-                    VOTACIÓN ABIERTA
-                </div>
+
 
                 <h1 class="proyecto-titulo">@(proyecto?.Nombre ?? "Proyecto")</h1>
 
@@ -206,15 +207,14 @@
     }
 
     /* ── Breadcrumb dentro del contenido ── */
-    .breadcrumb-full {
+    .header-principal {
         grid-column: 1 / -1;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
         margin-bottom: 0.25rem;
     }
-    .breadcrumb-nav {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
+
     .btn-volver {
         display: flex;
         align-items: center;
@@ -229,10 +229,39 @@
         cursor: pointer;
         transition: all 0.2s;
     }
-    .btn-volver:hover { background: #f8f9fc; border-color: #ddd6fe; color: #7c3aed; }
-    .breadcrumb-sep { color: #cbd5e1; font-size: 0.9rem; }
-    .breadcrumb-item { color: #94a3b8; font-size: 0.85rem; font-weight: 500; }
-    .breadcrumb-item.active { color: #7c3aed; font-weight: 700; }
+
+    .btn-volver:hover { 
+        background: #f8f9fc; 
+        border-color: #ddd6fe; 
+        color: #7c3aed; 
+    }
+
+    .page-header-row {
+        grid-column: 1 / -1;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .brand-name {
+        font-weight: 800;
+        font-size: 1.2rem;
+        color: #4c1d95;
+        letter-spacing: -0.02em;
+    }
+
+    .logo-icon.small {
+        display: flex;
+        align-items: center;
+    }
+
+    .evento-logo-img {
+        width: 20px !important;
+        height: 20px !important;
+        object-fit: contain;
+    }
+
 
     /* ── Layout ── */
     .detalles-layout {

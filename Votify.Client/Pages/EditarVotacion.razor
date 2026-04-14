@@ -36,16 +36,22 @@
             </div>
         </div>
     }
-    <div class="top-nav">
-        <button class="btn-back" @onclick="HandleVolver">
-            <span class="icon-arrow">←</span> Volver
+    <div class="header-principal">
+        <button class="btn-volver" @onclick="HandleVolver">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="16" height="16">
+                <path d="M15 19L8 12L15 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Eventos
         </button>
-        <div class="breadcrumbs">
-            <a href="/" class="breadcrumb-link">Evento A</a>
-            <span class="separator"> > </span>
-            <span class="current-page">Editar Votación</span>
-        </div>
     </div>
+
+    <div class="page-header-row">
+        <div class="logo-icon small">
+            <img src="images/logo-cambio-votacion.png" alt="Logo" class="evento-logo-img" style="width:20px;height:20px;" />
+        </div>
+        <span class="brand-name">Editar votación de "@Nombre"</span>
+    </div>
+
 
     @if (cargando)
     {
@@ -198,61 +204,63 @@
 }
 
 
-.top-nav {
+.header-principal {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    max-width: 900px;
+    margin: 0 auto 1.5rem;
+}
+
+.btn-volver {
+    background: white;
+    border: 1px solid #e2e8f0;
+    color: #64748b;
+    padding: 0.4rem 0.8rem;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: 0.2s;
     display: flex;
     align-items: center;
-    gap: 1.5rem;
+    gap: 0.3rem;
+}
+
+.btn-volver:hover {
+    background: #f8f9fc;
+    border-color: #ddd6fe;
+    color: #7c3aed;
+}
+
+.page-header-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     margin-bottom: 2rem;
     max-width: 900px;
     margin-left: auto;
     margin-right: auto;
 }
 
-.btn-back {
-    background: white;
-    border: 1px solid #e2e8f0;
-    padding: 0.6rem 1.2rem;
-    border-radius: 12px;
-    color: #6b21a8;
-    font-weight: 700;
-    cursor: pointer;
+.brand-name {
+    font-weight: 800;
+    font-size: 1.2rem;
+    color: #4c1d95;
+    letter-spacing: -0.02em;
+}
+
+.logo-icon.small {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    transition: all 0.2s;
-    font-size: 0.9rem;
 }
 
-.btn-back:hover {
-    background: #f5f3ff;
-    border-color: #ddd6fe;
+.evento-logo-img {
+    width: 20px !important;
+    height: 20px !important;
+    object-fit: contain;
 }
 
-.breadcrumbs {
-    color: #94a3b8;
-    font-size: 0.9rem;
-}
-
-.breadcrumbs .breadcrumb-link {
-    color: #aa7ad7;
-    font-weight: 700;
-    text-decoration: none;
-}
-
-.breadcrumb-link:hover {
-    color: #6b21a8;
-    text-decoration: underline;
-}
-
-.separator {
-    margin: 0 0.4rem;
-    color: #cbd5e1;
-}
-
-.current-page {
-    color: #6b21a8;
-    font-weight: 700;
-}
 
 
 .card {

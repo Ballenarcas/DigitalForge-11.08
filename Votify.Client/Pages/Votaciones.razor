@@ -76,15 +76,15 @@
                             <div class="footer-actions">
                                 @if (yaInicio)
                                 {
-                                    <button class="btn-resultados" @onclick="() => VerResultados(v.Id)">📊 Resultados</button>
+                                    <button class="btn-resultados" @onclick="() => VerResultados(v.Id)">Resultados</button>
                                 }
                                 @if (!yaInicio && !yaFinalizo)
                                 {
-                                    <button class="btn-resultados" @onclick="() => VerResultados(v.Id)" disabled>📊 Resultados</button>
+                                    <button class="btn-resultados" @onclick="() => VerResultados(v.Id)" disabled>Resultados</button>
                                 }
                                 @if (!yaFinalizo)
                                 {
-                                    <button class="btn-ver" @onclick="() => Gestionar(v.Id)">Gestionar</button>
+                                    <button class="btn-ver" @onclick="() => Gestionar(v.Id)">Editar</button>
                                 }
                                 @if (yaFinalizo)
                                 {
