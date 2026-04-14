@@ -47,5 +47,18 @@ namespace Votify.API.Controllers
                 });
             }
         }
+        [HttpGet("puede-votar/{votacionId}/{votanteId}")]
+        public async Task<IActionResult> PuedeVotar(string votacionId, string votanteId)
+        {
+            try
+            {
+                bool puedeVotar = await _votoService.PuedeVotarAsync(votacionId, votanteId);
+                return Ok(puedeVotar);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Error = ex.Message });
+            }
+        }
     }
 }
