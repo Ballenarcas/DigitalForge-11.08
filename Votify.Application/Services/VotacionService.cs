@@ -100,6 +100,10 @@ namespace Votify.Application.Services
 
         public async Task EliminarVotacionAsync(string id)
         {
+
+            var votosEliminados = await _votoRepo.EliminarPorVotacionAsync(id);
+            
+
             var eliminado = await _repo.EliminarAsync(id);
             if (!eliminado)
                 throw new KeyNotFoundException($"No se encontró la votación con id {id}.");

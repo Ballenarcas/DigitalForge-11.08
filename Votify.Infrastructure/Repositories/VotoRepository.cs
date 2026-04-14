@@ -82,5 +82,20 @@ namespace Votify.Infrastructure.Repositories
             
             return factory.Crear(entity.ProyectoId.ToString(), entity.VotacionId.ToString(), votanteStr);
         }
+
+        public async Task<bool> EliminarPorVotacionAsync(string votacionId)
+        {
+            if (!Guid.TryParse(votacionId, out var votacionGuid)) return false;
+
+            var votos = await _db.Votos.Where(v => v.VotacionId == votacionGuid).ToListAsync();
+            
+            if (votos.Any())
+            {
+                _db.Votos.RemoveRange(votos);
+                await _db.SaveChangesAsync();
+            }
+
+            return true;
+        }
     }
 }
