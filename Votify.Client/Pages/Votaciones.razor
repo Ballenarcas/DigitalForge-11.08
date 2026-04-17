@@ -439,9 +439,9 @@
 </style>
 
 @code {
-    private List<CrearVotacionResponse>? listaVotaciones;
+    private List<VotacionDto>? listaVotaciones;
     private bool mostrarModalConfirmacion = false;
-    private CrearVotacionResponse? votacionAEliminar;
+    private VotacionDto? votacionAEliminar;
     private bool eliminando = false;
 
     protected override async Task OnInitializedAsync()
@@ -458,7 +458,7 @@
         catch (Exception ex)
         {
             Console.WriteLine($"Error cargando votaciones: {ex.Message}");
-            listaVotaciones = new List<CrearVotacionResponse>();
+            listaVotaciones = new List<VotacionDto>();
         }
     }
 

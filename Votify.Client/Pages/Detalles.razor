@@ -6,8 +6,6 @@
 @inject NavigationManager Nav
 
 <div class="detalles-wrapper">
-
-    <!-- ===== CONTENIDO PRINCIPAL ===== -->
     @if (cargando)
     {
         <div class="loader-center">
@@ -687,7 +685,7 @@
     private bool votoOk = false;
     private bool limiteAlcanzado = false;
     private string? mensajeVoto;
-    private CrearVotacionResponse? votacion;
+    private VotacionDto? votacion;
     private readonly string usuarioTesterId = "ce932822-2615-46fd-ab8c-7f5164ca2414";
 
     private bool EsVotacionAnonima => votacion?.Tipo?.Equals("ANONIMA", StringComparison.OrdinalIgnoreCase) ?? false;

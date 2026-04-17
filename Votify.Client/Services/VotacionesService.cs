@@ -1,5 +1,6 @@
 using System.Net.Http.Json;
 using Votify.Client.DTOs;
+using Votify.Domain.Entities;
 
 namespace Votify.Client.Services
 {
@@ -12,7 +13,7 @@ namespace Votify.Client.Services
             _http = http;
         }
 
-        public async Task CrearVotacion(CrearVotacionRequest request)
+        public async Task CrearVotacion(VotacionDto request)
         {
             var response = await _http.PostAsJsonAsync("api/votaciones", request);
 
@@ -23,18 +24,18 @@ namespace Votify.Client.Services
             }
         }
 
-        public async Task<List<CrearVotacionResponse>> ObtenerVotaciones()
+        public async Task<List<VotacionDto>> ObtenerVotaciones()
         {
-            var resultado = await _http.GetFromJsonAsync<List<CrearVotacionResponse>>("api/votaciones");
-            return resultado ?? new List<CrearVotacionResponse>();
+            var resultado = await _http.GetFromJsonAsync<List<VotacionDto>>("api/votaciones");
+            return resultado ?? new List<VotacionDto>();
         }
 
-        public async Task<CrearVotacionResponse?> ObtenerVotacion(string id)
+        public async Task<VotacionDto?> ObtenerVotacion(string id)
         {
-            return await _http.GetFromJsonAsync<CrearVotacionResponse>($"api/votaciones/{id}");
+            return await _http.GetFromJsonAsync<VotacionDto>($"api/votaciones/{id}");
         }
 
-        public async Task ActualizarVotacion(string id, CrearVotacionRequest request)
+        public async Task ActualizarVotacion(string id, VotacionDto request)
         {
             var response = await _http.PutAsJsonAsync($"api/votaciones/{id}", request);
 

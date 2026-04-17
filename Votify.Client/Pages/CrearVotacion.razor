@@ -28,7 +28,6 @@
                 <div class="select-wrapper">
                     <select class="form-control select-custom" @bind="Tipo">
                         <option value="ESTANDAR">Recuento de votos</option>
-                        <option value="ANONIMA">Votación anónima</option>
                     </select>
                 </div>
             </div>
@@ -47,6 +46,16 @@
 
             <h4 class="section-divider">Opciones adicionales</h4>
 
+            <div class="option-row">
+                <div class="option-info">
+                    <p class="option-title">Votación anónima</p>
+                    <p class="option-desc">Ocultar la identidad de los votantes en los resultados finales</p>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" @bind="EsAnonima">
+                    <span class="slider round"></span>
+                </label>
+            </div>
 
             <div class="option-row">
                 <div class="option-info">
@@ -366,6 +375,7 @@ input:checked + .slider:before {
 @code {
     string Nombre = "";
     string Tipo = "ESTANDAR";
+    bool EsAnonima = false;
     DateTime FechaInicio = DateTime.Now;
     DateTime FechaFin = DateTime.Now.AddDays(1);
     int LimiteProyectos = 1;
@@ -390,7 +400,7 @@ input:checked + .slider:before {
             return;
         }
         try {
-            CrearVotacionRequest? request = new CrearVotacionRequest {
+            VotacionDto? request = new VotacionDto {
                 Nombre = Nombre, Tipo = Tipo, 
                 FechaInicio = FechaInicio.ToUniversalTime(), 
                 FechaFin = FechaFin.ToUniversalTime(),

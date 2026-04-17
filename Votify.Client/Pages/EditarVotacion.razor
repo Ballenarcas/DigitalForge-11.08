@@ -458,7 +458,8 @@
     margin: 3px 0 0 0;
 }
 
-/* ── Toggle switch ── */
+
+.switch {
     position: relative;
     display: inline-block;
     width: 54px;
@@ -934,7 +935,7 @@ input:checked + .slider:before {
         Mensaje   = null;
         try
         {
-            var request = new CrearVotacionRequest
+            var request = new VotacionDto
             {
                 Id                = Id,
                 Nombre            = Nombre,
