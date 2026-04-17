@@ -20,10 +20,9 @@ namespace Votify.Infrastructure.Repositories
         {
             var entity = new VotoEntity
             {
-                Id = Guid.NewGuid(), // Evitar depender de la auto-generación del Guid en PostgreSQL
+                Id = Guid.NewGuid(),
                 ProyectoId = Guid.Parse(voto.ProyectoId),
                 VotacionId = Guid.Parse(voto.VotacionId),
-                // Si es un voto anónimo (votante nulo), pasamos null a la BD para no violar la Foreign Key
                 VotanteId = string.IsNullOrEmpty(voto.VotanteId) ? (Guid?)null : Guid.Parse(voto.VotanteId),
                 Fecha = DateTime.UtcNow
             };
@@ -67,8 +66,6 @@ namespace Votify.Infrastructure.Repositories
         private Voto MapToDomain(VotoEntity entity)
         {
             VotoFactory factory;
-            
-            // Si el votante es null asumimos que fue un voto anónimo
             if (entity.VotanteId == null || entity.VotanteId == Guid.Empty)
             {
                 factory = new VotoAnonimoFactory();

@@ -2,9 +2,6 @@ using Votify.Infrastructure.Persistence.Entities;
 
 namespace Votify.AcceptanceTests.Helpers
 {
-    /// <summary>
-    /// Factory para crear datos de prueba
-    /// </summary>
     public static class TestDataFactory
     {
         public static VotacionEntity CrearVotacionEstandar(

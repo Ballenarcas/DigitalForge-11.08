@@ -103,14 +103,22 @@
                     <h3 class="sidebar-title">Envía tu Feedback</h3>
                     <p class="sidebar-subtitle">Comparte tus impresiones antes de votar</p>
 
+                    @if (YaTieneComentario)
+                    {
+                        <div class="alert-ok" style="margin-bottom: 1rem;">
+                            Ya has dejado un comentario en este proyecto.
+                        </div>
+                    }
+
                     <div class="feedback-section-label">COMENTARIOS DE FEEDBACK</div>
 
                     <textarea
                         class="feedback-textarea"
                         placeholder="Escribe aquí tus comentarios sobre el proyecto para que el equipo pueda mejorar..."
                         @bind="comentarioTexto"
+                        @bind:event="oninput"
                         rows="6"
-                        disabled="@enviandoComentario">
+                        disabled="@(enviandoComentario || YaTieneComentario)">
                     </textarea>
 
                     @if (!string.IsNullOrEmpty(mensajeComentario))
@@ -120,7 +128,7 @@
                         </div>
                     }
 
-                    <button class="btn-enviar-feedback" @onclick="EnviarComentario" disabled="@(enviandoComentario || string.IsNullOrWhiteSpace(comentarioTexto))">
+                    <button class="btn-enviar-feedback" @onclick="EnviarComentario" disabled="@(enviandoComentario || string.IsNullOrWhiteSpace(comentarioTexto) || YaTieneComentario)">
                         @if (enviandoComentario)
                         {
                             <span class="spinner-sm"></span>
@@ -199,14 +207,12 @@
 </div>
 
 <style>
-    /* ── Reset y base ── */
     .detalles-wrapper {
         min-height: 100vh;
         background-color: #f8f9fc;
         font-family: 'Inter', sans-serif;
     }
 
-    /* ── Breadcrumb dentro del contenido ── */
     .header-principal {
         grid-column: 1 / -1;
         display: flex;
@@ -263,7 +269,6 @@
     }
 
 
-    /* ── Layout ── */
     .detalles-layout {
         max-width: 1200px;
         margin: 0 auto;
@@ -274,7 +279,6 @@
         align-items: start;
     }
 
-    /* ── Columna izquierda ── */
     .col-info { display: flex; flex-direction: column; gap: 1.5rem; }
 
     .status-badge {
@@ -397,7 +401,6 @@
         transform: translateY(-1px);
     }
 
-    /* ── Columna derecha (sidebar) ── */
     .col-sidebar {
         display: flex;
         flex-direction: column;
@@ -460,9 +463,9 @@
         align-items: center;
         justify-content: center;
         gap: 0.5rem;
-        background: #f5f3ff;
-        color: #7c3aed;
-        border: 1px solid #ddd6fe;
+        background: #7c3aed;
+        color: white;
+        border: 1px solid #6d28d9;
         border-radius: 12px;
         padding: 0.65rem 1rem;
         font-weight: 700;
@@ -470,9 +473,22 @@
         cursor: pointer;
         transition: all 0.2s;
         margin-top: 0.75rem;
+        box-shadow: 0 2px 8px rgba(124, 58, 237, 0.2);
     }
-    .btn-enviar-feedback:hover:not(:disabled) { background: #ede9fe; border-color: #c4b5fd; }
-    .btn-enviar-feedback:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-enviar-feedback:hover:not(:disabled) { 
+        background: #6d28d9; 
+        border-color: #5b21b6;
+        box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+        transform: translateY(-1px);
+    }
+    .btn-enviar-feedback:disabled { 
+        background: #e8e7f0; 
+        color: #b0acb8; 
+        border-color: #d1cce0;
+        cursor: not-allowed; 
+        opacity: 1;
+        box-shadow: none;
+    }
 
     .feedback-info-box {
         display: flex;
@@ -489,7 +505,6 @@
     }
     .feedback-info-box svg { flex-shrink: 0; margin-top: 1px; }
 
-    /* Comentarios enviados */
     .comentarios-lista { margin-top: 1rem; }
     .comentarios-lista-titulo {
         font-size: 0.72rem;
@@ -542,7 +557,6 @@
     }
     .comentario-item svg { flex-shrink: 0; margin-top: 2px; }
 
-    /* Panel de votar */
     .votar-card { padding: 1.25rem; }
     .btn-votar-proyecto {
         width: 100%;
@@ -577,7 +591,6 @@
         margin: 0.75rem 0 0 0;
     }
 
-    /* Alerts */
     .alert-ok {
         background: #f0fdf4;
         color: #166534;
@@ -615,7 +628,6 @@
     }
     .alert-top { grid-column: 1 / -1; }
 
-    /* Spinners */
     .loader-center {
         display: flex;
         flex-direction: column;
@@ -648,7 +660,6 @@
         color: #94a3b8;
     }
 
-    /* Responsive */
     @@media (max-width: 900px) {
         .detalles-layout {
             grid-template-columns: 1fr;
@@ -676,13 +687,11 @@
     private bool votoOk = false;
     private bool limiteAlcanzado = false;
     private string? mensajeVoto;
-
     private CrearVotacionResponse? votacion;
-
-    // TODO: vendrá del sistema de autenticación
     private readonly string usuarioTesterId = "ce932822-2615-46fd-ab8c-7f5164ca2414";
 
     private bool EsVotacionAnonima => votacion?.Tipo?.Equals("ANONIMA", StringComparison.OrdinalIgnoreCase) ?? false;
+    private bool YaTieneComentario => !EsVotacionAnonima && comentarios.Any(c => c.AutorId == Guid.Parse(usuarioTesterId));
 
     private string GetAutorEtiqueta(ComentarioDto comentario, int indice)
     {
@@ -717,7 +726,6 @@
 
             if (!string.IsNullOrEmpty(VotacionId))
             {
-                // Comprobación proactiva del límite
                 bool puedeVotar = await VotacionesService.VerificarLimiteVotos(VotacionId, usuarioTesterId);
                 limiteAlcanzado = !puedeVotar;
             }
@@ -821,7 +829,6 @@
     private string GetInitials(string equipoId)
     {
         if (string.IsNullOrEmpty(equipoId)) return "??";
-        // Si es un GUID, tomamos las dos primeras letras
         return equipoId.Length >= 2 ? equipoId[..2].ToUpper() : equipoId.ToUpper();
     }
 }

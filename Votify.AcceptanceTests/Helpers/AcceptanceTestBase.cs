@@ -4,9 +4,6 @@ using Xunit;
 
 namespace Votify.AcceptanceTests.Helpers
 {
-    /// <summary>
-    /// Clase base para las pruebas de aceptación que proporciona una BD en memoria
-    /// </summary>
     public abstract class AcceptanceTestBase : IAsyncLifetime
     {
         protected VotifyDbContext DbContext { get; private set; } = null!;

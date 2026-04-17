@@ -20,7 +20,6 @@ namespace Votify.Application.Services
 
         public async Task VotarAsync(VotarDto dto)
         {
-            // 1. Obtener la votación para conocer su límite de proyectos
             var votacion = await _votacionRepository.ObtenerAsync(dto.VotacionId);
             
             if (votacion == null)
@@ -28,16 +27,13 @@ namespace Votify.Application.Services
                 throw new ArgumentException("La votación especificada no existe.");
             }
 
-            // 2. Contar los votos que ya tiene este usuario en esta votación específica
             int votosActuales = await _votoRepository.ContarVotosPorUsuarioYVotacionAsync(dto.VotacionId, dto.VotanteId ?? string.Empty);
 
-            // 3. Validar si ya alcanzó o superó el límite
             if (votosActuales >= votacion.LimiteProyectos)
             {
                 throw new InvalidOperationException($"No puedes votar. Has alcanzado el límite de {votacion.LimiteProyectos} votos para esta votación.");
             }
 
-            // 4. Crear el voto usando la Factory según sea anónimo o estándar
             VotoFactory factory;
             if (string.IsNullOrEmpty(dto.VotanteId))
             {
@@ -50,7 +46,6 @@ namespace Votify.Application.Services
 
             var nuevoVoto = factory.Crear(dto.ProyectoId, dto.VotacionId, dto.VotanteId);
 
-            // 5. Guardar el voto de forma segura
             await _votoRepository.GuardarAsync(nuevoVoto);
         }
         public async Task<bool> PuedeVotarAsync(string votacionId, string votanteId)

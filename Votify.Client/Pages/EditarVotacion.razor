@@ -392,7 +392,6 @@
     box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.12);
 }
 
-/* ── Select wrapper ── */
 .select-wrapper {
     position: relative;
 }
@@ -414,14 +413,14 @@
     pointer-events: none;
 }
 
-/* ── Dates grid ── */
 .grid-dates {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1.5rem;
 }
 
-/* ── Section divider ── */
+
+
 .section-divider {
     color: #7e22ce;
     text-transform: uppercase;
@@ -431,7 +430,6 @@
     margin: 2.5rem 0 1.2rem 0;
 }
 
-/* ── Option rows ── */
 .option-row {
     display: flex;
     justify-content: space-between;
@@ -461,7 +459,6 @@
 }
 
 /* ── Toggle switch ── */
-.switch {
     position: relative;
     display: inline-block;
     width: 54px;
@@ -505,7 +502,6 @@ input:checked + .slider:before {
     transform: translateX(26px);
 }
 
-/* ── Number input ── */
 .limit-input {
     width: 70px;
     padding: 0.6rem;
@@ -865,7 +861,6 @@ input:checked + .slider:before {
     [Parameter]
     public string Id { get; set; } = default!;
 
-    // Form state
     string Nombre = "";
     string Tipo = "ESTANDAR";
     DateTime FechaInicio = DateTime.Now;
@@ -874,7 +869,6 @@ input:checked + .slider:before {
     bool PermiteComentarios = true;
     string? Mensaje;
 
-    // UI state
     bool cargando = true;
     bool errorCarga = false;
     bool guardando = false;

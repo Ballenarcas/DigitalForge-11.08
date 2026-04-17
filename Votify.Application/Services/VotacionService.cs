@@ -111,17 +111,14 @@ namespace Votify.Application.Services
 
         public async Task<List<ResultadoProyectoDto>> ObtenerResultadosAsync(string votacionId)
         {
-            // Obtener votos agrupados por proyecto
             var votosporProyecto = await _votoRepo.ObtenerVotosPorVotacionAsync(votacionId);
 
             if (votosporProyecto.Count == 0)
                 return new List<ResultadoProyectoDto>();
 
-            // Obtener proyectos
             var proyectos = await _proyectoRepo.ObtenerPorVotacionAsync(votacionId);
             var proyectoDict = proyectos.ToDictionary(p => p.Id);
 
-            // Construir resultados con posiciones
             var resultados = votosporProyecto
                 .Select((vp, index) => new ResultadoProyectoDto
                 {

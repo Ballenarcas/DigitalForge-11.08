@@ -30,7 +30,6 @@ namespace Votify.API.Controllers
             }
             catch (Exception ex)
             {
-                // Manejo genérico de errores (loguear idealmente)
                 return StatusCode(500, new { Error = "Hubo un error al guardar el comentario.", Detalle = ex.Message });
             }
         }

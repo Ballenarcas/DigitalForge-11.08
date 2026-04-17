@@ -19,12 +19,12 @@
 
         <div class="form-body">
             <div class="form-group">
-                <label>Título de la votación</label>
+                <label>Título de la votación <span class="required-asterisk">*</span></label>
                 <input type="text" class="form-control" @bind="Nombre" placeholder="Votación Final" />
             </div>
 
             <div class="form-group">
-                <label>Tipo de votación</label>
+                <label>Tipo de votación <span class="required-asterisk">*</span></label>
                 <div class="select-wrapper">
                     <select class="form-control select-custom" @bind="Tipo">
                         <option value="ESTANDAR">Recuento de votos</option>
@@ -36,11 +36,11 @@
 
             <div class="grid-dates">
                 <div class="form-group">
-                    <label>Inicio del periodo</label>
+                    <label>Inicio del periodo <span class="required-asterisk">*</span></label>
                     <input type="datetime-local" class="form-control" @bind="FechaInicio" />
                 </div>
                 <div class="form-group">
-                    <label>Fin del periodo</label>
+                    <label>Fin del periodo <span class="required-asterisk">*</span></label>
                     <input type="datetime-local" class="form-control" @bind="FechaFin" />
                 </div>
             </div>
@@ -74,10 +74,14 @@
             @if (!string.IsNullOrEmpty(Mensaje))
             {
                 <div class="alert @(Mensaje.Contains("Error") ? "alert-error" : "alert-success")">
-                    @Mensaje
+                    <span>@(Mensaje.Contains("Error") ? "❌" : "✅")</span>
+                    <span>@Mensaje</span>
                 </div>
             }
         </div>
+        <em>
+            <span>*</span> Campos obligatorios
+        </em>
     </div>
 </div>
 <style>
@@ -151,6 +155,26 @@
     font-size: 1.1rem;
 }
 
+.required-notice {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: #166534;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.required-asterisk {
+    color: #dc2626;
+    font-weight: 800;
+    font-size: 1.2rem;
+}
+
 
 .form-group {
     margin-bottom: 1.5rem;
@@ -162,6 +186,9 @@
     color: #334155;
     margin-bottom: 0.6rem;
     font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
 }
 
 .form-control {
@@ -313,6 +340,27 @@ input:checked + .slider:before {
     color: #6b21a8;
     text-decoration: underline;
 }
+
+.alert {
+    padding: 1rem;
+    border-radius: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.alert-success {
+    background-color: #f0fdf4;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+}
+
+.alert-error {
+    background-color: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
 </style>
 
 @code {
@@ -328,7 +376,17 @@ input:checked + .slider:before {
     {
        if (string.IsNullOrWhiteSpace(Nombre))
         {
-            Mensaje = "El título de la votación es obligatorio.";
+            Mensaje = "Error: El título de la votación es obligatorio.";
+            return;
+        }
+        if (FechaInicio >= FechaFin)
+        {
+            Mensaje = "Error: La fecha de fin debe ser posterior a la de inicio.";
+            return;
+        }
+        if (LimiteProyectos < 1)
+        {
+            Mensaje = "Error: El límite de proyectos debe ser al menos 1.";
             return;
         }
         try {

@@ -13,6 +13,7 @@
             </svg>
             Eventos
         </button>
+        <span class="votables-text">@proyectosVotables proyecto(s) votable(s)</span>
     </div>
 
     <div class="content-wrapper">
@@ -91,7 +92,8 @@
 <style>
     .main-container { background-color: #f8f9fc; min-height: 100vh; padding: 1.5rem; font-family: 'Inter', sans-serif; }
     .content-wrapper { max-width: 1000px; margin: 0 auto; }
-    .header-principal { display: flex; align-items: center; max-width: 1000px; margin: 0 auto 1.5rem; }
+    .header-principal { display: flex; align-items: center; max-width: 1000px; margin: 0 auto 1.5rem; gap: 1rem; }
+    .votables-text { font-size: 0.72rem; font-weight: 700; color: #94a3b8; letter-spacing: 0.05em; text-transform: uppercase; }
     .page-title-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
     .brand-name { font-weight: 800; font-size: 1.2rem; color: #4c1d95; letter-spacing: -0.02em; }
     .logo-icon.small { display: flex; align-items: center; }
@@ -130,7 +132,7 @@
     .stats { font-size: 0.75rem; color: #94a3b8; font-weight: 600; }
     
     .btn-votar { 
-        width: 100%; 
+        width: 100%;
         background: linear-gradient(135deg, #9333ea 0%, #7c3aed 100%); 
         color: white; 
         border: none; 
@@ -166,10 +168,9 @@
     private string? mensajeExito;
     private string? mensajeError;
     private string? nombreVotacion;
+    private string? proyectosVotables;
     private bool isVoting = false;
     private bool limiteAlcanzado = false;
-
-    // TODO: En el futuro esto vendrá del Login/Autenticación
     private readonly string usuarioTesterId = "ce932822-2615-46fd-ab8c-7f5164ca2414";
 
     protected override async Task OnInitializedAsync()
@@ -180,8 +181,7 @@
             {
                 var vot = await VotacionesService.ObtenerVotacion(VotacionId);
                 nombreVotacion = vot?.Nombre;
-
-                // Comprobación proactiva del límite de votos al cargar la página
+                proyectosVotables = vot?.LimiteProyectos.ToString() ?? "0";
                 bool puedeSeguirVotando = await VotacionesService.VerificarLimiteVotos(VotacionId, usuarioTesterId);
                 limiteAlcanzado = !puedeSeguirVotando;
             }
@@ -220,7 +220,6 @@
             {
                 msg = System.Text.RegularExpressions.Regex.Match(msg, "\"Error\":\"(.*?)\"").Groups[1].Value;
             }
-            // Si el error es por límite de votos, mostramos el banner y bloqueamos votar
             if (msg.Contains("límite") || msg.Contains("limite") || msg.Contains("máximo") || msg.Contains("maximo") || msg.Contains("votar más") || msg.Contains("votar mas") || msg.Contains("excedido") || msg.Contains("no puedes votar"))
             {
                 limiteAlcanzado = true;
