@@ -880,8 +880,12 @@ input:checked + .slider:before {
     bool guardando = false;
     bool eliminando = false;
     bool mostrarModalConfirmacion = false;
-    bool YaInicio    => DateTime.Now >= FechaInicio;
-    bool YaFinalizo  => DateTime.Now >= FechaFin;
+    
+    DateTime FechaInicioOriginal = DateTime.Now;
+    DateTime FechaFinOriginal = DateTime.Now.AddDays(1);
+    
+    bool YaInicio    => DateTime.Now >= FechaInicioOriginal;
+    bool YaFinalizo  => DateTime.Now >= FechaFinOriginal;
 
     protected override async Task OnInitializedAsync()
     {
@@ -904,6 +908,8 @@ input:checked + .slider:before {
             Tipo               = votacion.Tipo;
             FechaInicio        = votacion.FechaInicio.ToLocalTime();
             FechaFin           = votacion.FechaFin.ToLocalTime();
+            FechaInicioOriginal = votacion.FechaInicio.ToLocalTime();
+            FechaFinOriginal    = votacion.FechaFin.ToLocalTime();
             LimiteProyectos    = votacion.LimiteProyectos;
             PermiteComentarios = votacion.PermiteComentarios;
         }
