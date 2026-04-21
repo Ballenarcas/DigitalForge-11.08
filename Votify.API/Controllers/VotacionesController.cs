@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Votify.API.DTOs;
 using Votify.Application.DTOs;
 using Votify.Application.Interfaces;
 
@@ -17,18 +16,8 @@ namespace Votify.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CrearVotacionn([FromBody] CrearVotacionRequest request)
+        public async Task<IActionResult> CrearVotacionn([FromBody] CrearVotacionDto dto)
         {
-            var dto = new CrearVotacionDto
-            {
-                Nombre = request.Nombre,
-                Tipo = request.Tipo,
-                FechaInicio = request.FechaInicio,
-                FechaFin = request.FechaFin,
-                LimiteProyectos = request.LimiteProyectos,
-                PermiteComentarios = request.PermiteComentarios
-            };
-
             await _service.CrearVotacionAsync(dto);
 
             return Ok(new
@@ -57,18 +46,8 @@ namespace Votify.API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Actualizar(string id, [FromBody] CrearVotacionRequest request)
+        public async Task<IActionResult> Actualizar(string id, [FromBody] CrearVotacionDto dto)
         {
-            var dto = new CrearVotacionDto
-            {
-                Nombre = request.Nombre,
-                Tipo = request.Tipo,
-                FechaInicio = request.FechaInicio,
-                FechaFin = request.FechaFin,
-                LimiteProyectos = request.LimiteProyectos,
-                PermiteComentarios = request.PermiteComentarios
-            };
-
             await _service.ActualizarVotacionAsync(id, dto);
             return NoContent();
         }
