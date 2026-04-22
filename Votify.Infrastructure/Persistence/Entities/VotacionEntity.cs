@@ -25,9 +25,12 @@ public class VotacionEntity
     public DateTime FechaFin { get; set; }
 
     [Column("limite_proy")]
-    public int LimiteProyectos { get; set; }
+    public int LimiteProy { get; set; }
 
     [Column("comentarios")]
-    public bool PermiteComentarios { get; set; }
+    public bool Comentarios { get; set; }
+
+    [Column("EsAnonima")]
+    public bool EsAnonima { get; set; }
 }
 }
