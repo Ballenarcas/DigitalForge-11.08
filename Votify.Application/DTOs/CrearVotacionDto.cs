@@ -6,6 +6,7 @@ public class CrearVotacionDto
     public string Tipo { get; set; } = default!;
     public DateTime FechaInicio { get; set; }
     public DateTime FechaFin { get; set; }
-    public int LimiteProyectos { get; set; }
-    public bool PermiteComentarios { get; set; }
+    public int LimiteProy { get; set; }
+    public bool Comentarios { get; set; }
+    public bool EsAnonima { get; set; }
 }

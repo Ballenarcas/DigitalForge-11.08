@@ -63,7 +63,7 @@
                     <p class="option-desc">Los votantes podrán dejar una breve reseña al votar</p>
                 </div>
                 <label class="switch">
-                    <input type="checkbox" @bind="PermiteComentarios">
+                    <input type="checkbox" @bind="Comentarios">
                     <span class="slider round"></span>
                 </label>
             </div>
@@ -74,7 +74,7 @@
                     <p class="option-title">Límite de proyectos por votar</p>
                     <p class="option-desc">Máximo número de proyectos que un usuario puede seleccionar</p>
                 </div>
-                <input type="number" class="limit-input" @bind="LimiteProyectos" min="1" />
+                <input type="number" class="limit-input" @bind="LimiteProy" min="1" />
             </div>
 
 
@@ -378,8 +378,8 @@ input:checked + .slider:before {
     bool EsAnonima = false;
     DateTime FechaInicio = DateTime.Now;
     DateTime FechaFin = DateTime.Now.AddDays(1);
-    int LimiteProyectos = 1;
-    bool PermiteComentarios = true;
+    int LimiteProy = 1;
+    bool Comentarios = true;
     string? Mensaje;
 
     async Task HandleCrearVotacion()
@@ -394,7 +394,7 @@ input:checked + .slider:before {
             Mensaje = "Error: La fecha de fin debe ser posterior a la de inicio.";
             return;
         }
-        if (LimiteProyectos < 1)
+        if (LimiteProy < 1)
         {
             Mensaje = "Error: El límite de proyectos debe ser al menos 1.";
             return;
@@ -404,7 +404,8 @@ input:checked + .slider:before {
                 Nombre = Nombre, Tipo = Tipo, 
                 FechaInicio = FechaInicio.ToUniversalTime(), 
                 FechaFin = FechaFin.ToUniversalTime(),
-                LimiteProyectos = LimiteProyectos, PermiteComentarios = PermiteComentarios
+                LimiteProy = LimiteProy, Comentarios = Comentarios,
+                EsAnonima = EsAnonima
             };
             await VotacionesService.CrearVotacion(request);
             Mensaje = "Votación creada correctamente.";

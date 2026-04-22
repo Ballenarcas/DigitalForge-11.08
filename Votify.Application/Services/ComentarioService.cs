@@ -34,7 +34,7 @@ namespace Votify.Application.Services
             if (!string.IsNullOrEmpty(votacionId))
             {
                 var votacion = await _votacionRepository.ObtenerAsync(votacionId);
-                esVotacionAnonima = votacion?.Tipo().Equals("ANONIMA", StringComparison.OrdinalIgnoreCase) ?? false;
+                esVotacionAnonima = votacion?.EsAnonima ?? false;
             }
 
             return comentarios.Select(c => new ComentarioDto

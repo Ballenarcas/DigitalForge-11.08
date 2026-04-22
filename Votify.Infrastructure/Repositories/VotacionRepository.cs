@@ -22,11 +22,12 @@ namespace Votify.Infrastructure.Repositories
             {
                 Id = votacion.Id,
                 Nombre = votacion.Nombre,
-                Tipo = votacion.Tipo(),
+                Tipo = votacion.Tipo,
                 FechaInicio = votacion.FechaInicio.ToUniversalTime(),
                 FechaFin = votacion.FechaFin.ToUniversalTime(),
-                LimiteProyectos = votacion.LimiteProyectos,
-                PermiteComentarios = votacion.PermiteComentarios
+                LimiteProy = votacion.LimiteProy,
+                Comentarios = votacion.Comentarios,
+                EsAnonima = votacion.EsAnonima
             };
 
             await _db.Votaciones.AddAsync(entity);
@@ -55,11 +56,12 @@ namespace Votify.Infrastructure.Repositories
             if (entity is null) return false;
 
             entity.Nombre = votacion.Nombre;
-            entity.Tipo = votacion.Tipo();
+            entity.Tipo = votacion.Tipo;
             entity.FechaInicio = votacion.FechaInicio.ToUniversalTime();
             entity.FechaFin = votacion.FechaFin.ToUniversalTime();
-            entity.LimiteProyectos = votacion.LimiteProyectos;
-            entity.PermiteComentarios = votacion.PermiteComentarios;
+            entity.LimiteProy = votacion.LimiteProy;
+            entity.Comentarios = votacion.Comentarios;
+            entity.EsAnonima = votacion.EsAnonima;
 
             await _db.SaveChangesAsync();
             return true;
@@ -88,7 +90,6 @@ namespace Votify.Infrastructure.Repositories
             VotacionFactory factory = entity.Tipo.ToUpper() switch
             {
                 "ESTANDAR" => new VotacionEstandarFactory(),
-                "ANONIMA" => new VotacionAnonimaFactory(),
                 _ => throw new Exception("Tipo desconocido")
             };
 
@@ -96,8 +97,9 @@ namespace Votify.Infrastructure.Repositories
                 entity.Nombre,
                 entity.FechaInicio,
                 entity.FechaFin,
-                entity.LimiteProyectos,
-                entity.PermiteComentarios
+                entity.LimiteProy,
+                entity.Comentarios,
+                entity.EsAnonima
             );
             domain.Id = entity.Id;
             return domain;

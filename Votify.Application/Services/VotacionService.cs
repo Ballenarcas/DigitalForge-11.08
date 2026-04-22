@@ -27,7 +27,6 @@ namespace Votify.Application.Services
             VotacionFactory factory = dto.Tipo.ToUpper() switch
             {
                 "ESTANDAR" => new VotacionEstandarFactory(),
-                "ANONIMA" => new VotacionAnonimaFactory(),
                 _ => throw new ArgumentException("Tipo de votación no válido.")
             };
 
@@ -35,8 +34,9 @@ namespace Votify.Application.Services
                 dto.Nombre,
                 dto.FechaInicio,
                 dto.FechaFin,
-                dto.LimiteProyectos,
-                dto.PermiteComentarios
+                dto.LimiteProy,
+                dto.Comentarios,
+                dto.EsAnonima
             );
             
             await _repo.GuardarAsync(votacion);
@@ -49,11 +49,12 @@ namespace Votify.Application.Services
             {
                 Id = e.Id.ToString(), 
                 Nombre = e.Nombre,
-                Tipo = e.Tipo(),
+                Tipo = e.Tipo,
                 FechaInicio = e.FechaInicio,
                 FechaFin = e.FechaFin,
-                LimiteProyectos = e.LimiteProyectos,
-                PermiteComentarios = e.PermiteComentarios
+                LimiteProy = e.LimiteProy,
+                Comentarios = e.Comentarios,
+                EsAnonima = e.EsAnonima
             }).ToList();
         }
 
@@ -66,11 +67,12 @@ namespace Votify.Application.Services
             {
                 Id = e.Id.ToString(),
                 Nombre = e.Nombre,
-                Tipo = e.Tipo(),
+                Tipo = e.Tipo,
                 FechaInicio = e.FechaInicio,
                 FechaFin = e.FechaFin,
-                LimiteProyectos = e.LimiteProyectos,
-                PermiteComentarios = e.PermiteComentarios
+                LimiteProy = e.LimiteProy,
+                Comentarios = e.Comentarios,
+                EsAnonima = e.EsAnonima
             };
         }
         public async Task ActualizarVotacionAsync(string id, CrearVotacionDto dto)
@@ -81,16 +83,16 @@ namespace Votify.Application.Services
             VotacionFactory factory = dto.Tipo.ToUpper() switch
             {
                 "ESTANDAR" => new VotacionEstandarFactory(),
-                "ANONIMA"  => new VotacionAnonimaFactory(),
-                _          => throw new ArgumentException("Tipo de votación no válido.")
+                _ => throw new ArgumentException("Tipo de votación no válido.")
             };
 
             var votacion = factory.Crear(
                 dto.Nombre,
                 dto.FechaInicio,
                 dto.FechaFin,
-                dto.LimiteProyectos,
-                dto.PermiteComentarios
+                dto.LimiteProy,
+                dto.Comentarios,
+                dto.EsAnonima
             );
 
             var actualizado = await _repo.ActualizarAsync(id, votacion);

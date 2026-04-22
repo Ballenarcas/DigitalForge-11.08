@@ -6,19 +6,21 @@ namespace Votify.Domain.Entities
         public string Nombre { get; }
         public DateTime FechaInicio { get; }
         public DateTime FechaFin { get; }
-        public int LimiteProyectos { get; }
-        public bool PermiteComentarios { get; }
+        public int LimiteProy { get; }
+        public bool Comentarios { get; }
+        public string Tipo { get; }
+        public bool EsAnonima { get; }
 
-        protected Votacion(string nombre, DateTime inicio, DateTime fin, int limite, bool permiteComentarios)
+        protected Votacion(string nombre, DateTime inicio, DateTime fin, int limite, bool comentarios, string tipo, bool esAnonima)
         {
             Id = Guid.NewGuid();
             Nombre = nombre;
             FechaInicio = inicio;
             FechaFin = fin;
-            LimiteProyectos = limite;
-            PermiteComentarios = permiteComentarios;
+            LimiteProy = limite;
+            Comentarios = comentarios;
+            Tipo = tipo;
+            EsAnonima = esAnonima;
         }
-
-        public abstract string Tipo();
     }
 }

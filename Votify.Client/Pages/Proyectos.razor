@@ -181,7 +181,7 @@
             {
                 var vot = await VotacionesService.ObtenerVotacion(VotacionId);
                 nombreVotacion = vot?.Nombre;
-                proyectosVotables = vot?.LimiteProyectos.ToString() ?? "0";
+                proyectosVotables = vot?.LimiteProy.ToString() ?? "0";
                 bool puedeSeguirVotando = await VotacionesService.VerificarLimiteVotos(VotacionId, usuarioTesterId);
                 limiteAlcanzado = !puedeSeguirVotando;
             }

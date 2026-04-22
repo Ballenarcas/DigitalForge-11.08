@@ -138,11 +138,22 @@
 
                 <div class="option-row">
                     <div class="option-info">
+                        <p class="option-title">Votación anónima</p>
+                        <p class="option-desc">Ocultar la identidad de los votantes en los resultados finales</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" @bind="EsAnonima" disabled="@YaInicio">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+
+                <div class="option-row">
+                    <div class="option-info">
                         <p class="option-title">Permitir comentarios de feedback</p>
                         <p class="option-desc">Los votantes podrán dejar una breve reseña al votar</p>
                     </div>
                     <label class="switch">
-                        <input type="checkbox" @bind="PermiteComentarios" disabled="@YaInicio">
+                        <input type="checkbox" @bind="Comentarios" disabled="@YaInicio">
                         <span class="slider round"></span>
                     </label>
                 </div>
@@ -152,7 +163,7 @@
                         <p class="option-title">Límite de proyectos por votar</p>
                         <p class="option-desc">Máximo número de proyectos que un usuario puede seleccionar</p>
                     </div>
-                    <input type="number" class="limit-input" @bind="LimiteProyectos" min="1" disabled="@YaInicio"   />
+                    <input type="number" class="limit-input" @bind="LimiteProy" min="1" disabled="@YaInicio"   />
                 </div>
 
                 <div class="action-row">
@@ -866,8 +877,9 @@ input:checked + .slider:before {
     string Tipo = "ESTANDAR";
     DateTime FechaInicio = DateTime.Now;
     DateTime FechaFin = DateTime.Now.AddDays(1);
-    int LimiteProyectos = 1;
-    bool PermiteComentarios = true;
+    int LimiteProy = 1;
+    bool Comentarios = true;
+    bool EsAnonima = false;
     string? Mensaje;
 
     bool cargando = true;
@@ -905,8 +917,9 @@ input:checked + .slider:before {
             FechaFin           = votacion.FechaFin.ToLocalTime();
             FechaInicioOriginal = votacion.FechaInicio.ToLocalTime();
             FechaFinOriginal    = votacion.FechaFin.ToLocalTime();
-            LimiteProyectos    = votacion.LimiteProyectos;
-            PermiteComentarios = votacion.PermiteComentarios;
+            LimiteProy    = votacion.LimiteProy;
+            Comentarios = votacion.Comentarios;
+            EsAnonima = votacion.EsAnonima;
         }
         catch
         {
@@ -942,8 +955,9 @@ input:checked + .slider:before {
                 Tipo              = Tipo,
                 FechaInicio       = FechaInicio.ToUniversalTime(),
                 FechaFin          = FechaFin.ToUniversalTime(),
-                LimiteProyectos   = LimiteProyectos,
-                PermiteComentarios = PermiteComentarios
+                LimiteProy   = LimiteProy,
+                Comentarios = Comentarios,
+                EsAnonima = EsAnonima
             };
             await VotacionesService.ActualizarVotacion(Id, request);
             Mensaje = "Votación actualizada correctamente.";

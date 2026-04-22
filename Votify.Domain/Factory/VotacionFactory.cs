@@ -8,8 +8,9 @@ namespace Votify.Domain.Factory
             string nombre,
             DateTime inicio,
             DateTime fin,
-            int limiteProyectos,
-            bool permiteComentarios
+            int limite,
+            bool comentarios,
+            bool esAnonima = false
         );
     }
 }

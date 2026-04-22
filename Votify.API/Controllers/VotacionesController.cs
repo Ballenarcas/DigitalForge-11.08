@@ -26,8 +26,8 @@ namespace Votify.API.Controllers
                 dto.Tipo,
                 dto.FechaInicio,
                 dto.FechaFin,
-                dto.LimiteProyectos,
-                dto.PermiteComentarios
+                dto.LimiteProy,
+                dto.Comentarios
             });
         }
         [HttpGet]

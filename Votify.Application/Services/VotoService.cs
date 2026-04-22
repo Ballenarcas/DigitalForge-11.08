@@ -29,9 +29,9 @@ namespace Votify.Application.Services
 
             int votosActuales = await _votoRepository.ContarVotosPorUsuarioYVotacionAsync(dto.VotacionId, dto.VotanteId ?? string.Empty);
 
-            if (votosActuales >= votacion.LimiteProyectos)
+            if (votosActuales >= votacion.LimiteProy)
             {
-                throw new InvalidOperationException($"No puedes votar. Has alcanzado el límite de {votacion.LimiteProyectos} votos para esta votación.");
+                throw new InvalidOperationException($"No puedes votar. Has alcanzado el límite de {votacion.LimiteProy} votos para esta votación.");
             }
 
             VotoFactory factory;
@@ -54,7 +54,7 @@ namespace Votify.Application.Services
             if (votacion == null) return false;
 
             int votosActuales = await _votoRepository.ContarVotosPorUsuarioYVotacionAsync(votacionId, votanteId);
-            return votosActuales < votacion.LimiteProyectos;
+            return votosActuales < votacion.LimiteProy;
         }
     }
 }

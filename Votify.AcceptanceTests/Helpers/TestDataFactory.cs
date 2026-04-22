@@ -17,8 +17,8 @@ namespace Votify.AcceptanceTests.Helpers
                 Tipo = "ESTANDAR",
                 FechaInicio = inicio ?? DateTime.UtcNow.AddHours(-1),
                 FechaFin = fin ?? DateTime.UtcNow.AddHours(1),
-                LimiteProyectos = limiteProyectos,
-                PermiteComentarios = true
+                LimiteProy = limiteProyectos,
+                Comentarios = true
             };
         }
 
@@ -35,8 +35,8 @@ namespace Votify.AcceptanceTests.Helpers
                 Tipo = "ANONIMA",
                 FechaInicio = inicio ?? DateTime.UtcNow.AddHours(-1),
                 FechaFin = fin ?? DateTime.UtcNow.AddHours(1),
-                LimiteProyectos = limiteProyectos,
-                PermiteComentarios = false
+                LimiteProy = limiteProyectos,
+                Comentarios = false
             };
         }
 
