@@ -77,24 +77,13 @@
 
                     <div class="votacion-card @(yaFinalizo ? "card-ended" : yaInicio ? "card-active" : "card-pending")">
                         <div class="card-top-row">
-                            <div style="display: flex; gap: 0.5rem; align-items: center;">
-                                <div class="card-badge">@v.Tipo</div>
-                            </div>
+                            <div class="card-badge">@v.Tipo</div>
                             <div class="status-pill @(yaFinalizo ? "pill-ended" : yaInicio ? "pill-active" : "pill-pending")">
                                 @(yaFinalizo ? "Finalizada" : yaInicio ? "En curso" : "Pendiente")
                             </div>
                         </div>
                         <h3>@v.Nombre</h3>
-
                         <p class="fecha">Finaliza: @v.FechaFin.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</p>
-                                @if (v.EsAnonima)
-                                {
-                                    <div class="card-badge" style="background: #f1f5f9; color: #475569; font-size: 0.75rem;" title="Esta votación es anónima">🕵️ Anónima</div>
-                                }
-                                @if(!v.EsAnonima)
-                                {
-                                    <div class="card-badge" style="background: #f1f5f9; color: #475569; font-size: 0.75rem;" title="Esta votación no es anónima">👤 Nominal</div>
-                                }
                         @if (!yaInicio && !yaFinalizo)
                         {
                             <button class="btn-votar" @onclick="() => Votar(v.Id)" disabled>
