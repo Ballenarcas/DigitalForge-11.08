@@ -8,7 +8,6 @@ namespace Votify.Client.DTOs
         public DateTime FechaInicio { get; set; }
         public DateTime FechaFin { get; set; }
         public int LimiteProy { get; set; }
-        public int LimiteProyectos => LimiteProy;
         public bool Comentarios { get; set; }
         public bool EsAnonima { get; set; }
     }
