@@ -1,0 +1,109 @@
+@page "/"
+@using Votify.Client.DTOs
+@using Votify.Client.Services
+@inject NavigationManager Nav
+@inject EventosService EventosService
+
+<div class="main-container">
+    <div class="header-principal">
+        <div class="logo-container">
+            <div class="logo-icon small">
+                <img src="images/evento-logo.png" alt="Evento logo" class="evento-logo-img" style="width:20px;height:20px;" />
+            </div>
+            <span class="brand-name">Eventos</span>
+        </div>
+        <div class="header-actions">
+            <button class="btn-crear">
+                <span>+</span> Nuevo Evento
+            </button>
+        </div>
+    </div>
+
+    <div class="content-wrapper">
+
+        @if (listaEventos == null)
+        {
+            <div class="loader-container">
+                <div class="spinner"></div>
+                <p>Cargando...</p>
+            </div>
+        }
+        else if (!listaEventos.Any())
+        {
+            <div class="empty-state">
+                <p>No hay eventos disponibles.</p>
+                <button class="btn-ver">Crear nuevo</button>
+            </div>
+        }
+        else
+        {
+            <div class="votaciones-grid">
+                @foreach (var e in listaEventos)
+                {
+                    var ahora = DateTime.UtcNow;
+                    var yaInicio  = ahora >= e.FechaInicio;
+                    var yaFinalizo = ahora >= e.FechaFin;
+
+                    <div class="votacion-card @(yaFinalizo ? "card-ended" : yaInicio ? "card-active" : "card-pending")">
+                        <div class="card-top-row">
+                            <div class="card-badge">Evento</div>
+                            <div class="status-pill @(yaFinalizo ? "pill-ended" : yaInicio ? "pill-active" : "pill-pending")">
+                                @(yaFinalizo ? "Finalizado" : yaInicio ? "En curso" : "Pendiente")
+                            </div>
+                        </div>
+                        <h3>@e.Nombre</h3>
+                        <p class="descripcion-breve">@e.Descripcion</p>
+                        <p class="fecha">Finaliza: @e.FechaFin.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</p>
+
+                        @if (yaInicio && !yaFinalizo)
+                        {
+                            <button class="btn-votar" @onclick='() => Nav.NavigateTo("/votaciones")'>
+                                Ver Votaciones
+                            </button>
+                        }
+                        else
+                        {
+                            <button class="btn-votar" disabled>
+                                Ver Votaciones
+                            </button>
+                        }
+
+                        <div class="card-footer">
+                            <span class="stats">Inicia: @e.FechaInicio.ToLocalTime().ToString("dd/MM/yyyy")</span>
+                            <div class="footer-actions">
+                                @if (yaFinalizo)
+                                {
+                                    <button class="btn-eliminar">
+                                        🗑 Eliminar
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button class="btn-ver">Detalles</button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private List<EventoDto>? listaEventos;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try 
+        {
+            listaEventos = await EventosService.ObtenerEventos();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error cargando eventos: {ex.Message}");
+            listaEventos = new List<EventoDto>();
+        }
+    }
+}
+

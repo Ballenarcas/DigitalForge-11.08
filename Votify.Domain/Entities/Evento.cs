@@ -1,0 +1,20 @@
+namespace Votify.Domain.Entities
+{
+    public class Evento
+    {
+        public Guid Id { get; set; }
+        public string Nombre { get; }
+        public string Descripcion { get; }
+        public DateTime FechaInicio { get; }
+        public DateTime FechaFin { get; }
+
+        public Evento(string nombre, string descripcion, DateTime fechaInicio, DateTime fechaFin, Guid? id = null)
+        {
+            Id = id ?? Guid.NewGuid();
+            Nombre = nombre;
+            Descripcion = descripcion;
+            FechaInicio = fechaInicio;
+            FechaFin = fechaFin;
+        }
+    }
+}
