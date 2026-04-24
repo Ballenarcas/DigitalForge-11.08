@@ -12,6 +12,7 @@ public class VotifyDbContext : DbContext
     public DbSet<ProyectoEntity> Proyectos { get; set; }
     public DbSet<VotoEntity> Votos { get; set; }
     public DbSet<ComentarioEntity> Comentarios { get; set; }
+    public DbSet<ParticipanteEntity> Participantes { get; set; }
 
 }
 }

@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using DotNetEnv;
 using Votify.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -5,6 +7,7 @@ using Votify.Application.Interfaces;
 using Votify.Application.Services;
 using Votify.Infrastructure.Repositories;
 using Votify.Domain.Interfaces;
+using System.Text;
 
 static string? FindEnvFile()
 {
@@ -48,6 +51,28 @@ builder.Services.AddDbContext<VotifyDbContext>(options =>
 builder.Services.AddScoped<IVotacionRepository, VotacionRepository>();
 builder.Services.AddScoped<IVotacionService, VotacionService>();
 builder.Services.AddScoped<IProyectoRepository, ProyectoRepository>();
+builder.Services.AddScoped<IParticipanteRepository, ParticipanteRepository>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+
+// Configure JWT
+var jwtSettings = builder.Configuration.GetSection("Jwt");
+var key = Encoding.UTF8.GetBytes(jwtSettings["Key"] ?? "ClaveSecretaSuperLargaParaQueFuncioneElJWT32Caracteres");
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(key),
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            RequireExpirationTime = true,
+            ValidateLifetime = true
+        };
+    });
+builder.Services.AddAuthorization();
+
 builder.Services.AddScoped<IProyectoService, ProyectoService>();
 builder.Services.AddScoped<IVotoRepository, VotoRepository>();
 builder.Services.AddScoped<IVotoService, VotoService>();
@@ -73,6 +98,10 @@ var app = builder.Build();
 
 app.UseCors("AllowBlazor");
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.MapControllers();
 
 app.Run();
