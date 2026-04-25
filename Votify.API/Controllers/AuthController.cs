@@ -6,7 +6,7 @@ using Votify.Application.Interfaces;
 namespace Votify.API.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/auth")]
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
@@ -16,8 +16,8 @@ namespace Votify.API.Controllers
             _authService = authService;
         }
 
-        [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterRequestDto request)
+        [HttpPost("registro")]
+        public async Task<ActionResult<AuthResponseDto>> Registrar([FromBody] RegisterRequestDto request)
         {
             var result = await _authService.RegisterAsync(request);
             if (!result.IsSuccess)
@@ -27,7 +27,7 @@ namespace Votify.API.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequestDto request)
+        public async Task<ActionResult<AuthResponseDto>> IniciarSesion([FromBody] LoginRequestDto request)
         {
             var result = await _authService.LoginAsync(request);
             if (!result.IsSuccess)

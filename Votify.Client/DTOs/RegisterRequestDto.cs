@@ -1,4 +1,4 @@
-namespace Votify.Application.DTOs
+namespace Votify.Client.DTOs
 {
     public class RegisterRequestDto
     {
