@@ -7,14 +7,16 @@ namespace Votify.Domain.Entities
         public string Descripcion { get; }
         public DateTime FechaInicio { get; }
         public DateTime FechaFin { get; }
+        public string? ImagenUrl { get; }
 
-        public Evento(string nombre, string descripcion, DateTime fechaInicio, DateTime fechaFin, Guid? id = null)
+        public Evento(string nombre, string descripcion, DateTime fechaInicio, DateTime fechaFin, string? imagenUrl = null, Guid? id = null)
         {
             Id = id ?? Guid.NewGuid();
             Nombre = nombre;
             Descripcion = descripcion;
             FechaInicio = fechaInicio;
             FechaFin = fechaFin;
+            ImagenUrl = imagenUrl;
         }
     }
 }

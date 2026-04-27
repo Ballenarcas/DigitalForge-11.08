@@ -23,7 +23,8 @@ namespace Votify.Application.Services
                 Nombre      = e.Nombre,
                 Descripcion = e.Descripcion,
                 FechaInicio = e.FechaInicio,
-                FechaFin    = e.FechaFin
+                FechaFin    = e.FechaFin,
+                ImagenUrl   = e.ImagenUrl
             }).ToList();
         }
 
@@ -38,8 +39,25 @@ namespace Votify.Application.Services
                 Nombre      = e.Nombre,
                 Descripcion = e.Descripcion,
                 FechaInicio = e.FechaInicio,
-                FechaFin    = e.FechaFin
+                FechaFin    = e.FechaFin,
+                ImagenUrl   = e.ImagenUrl
             };
+        }
+
+        public async Task<EventoDto> CrearAsync(EventoDto dto)
+        {
+            var e = new Votify.Domain.Entities.Evento(
+                dto.Nombre,
+                dto.Descripcion,
+                dto.FechaInicio,
+                dto.FechaFin,
+                dto.ImagenUrl
+            );
+
+            await _repo.GuardarAsync(e);
+
+            dto.Id = e.Id.ToString();
+            return dto;
         }
     }
 }

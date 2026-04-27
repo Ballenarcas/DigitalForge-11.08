@@ -6,5 +6,6 @@ namespace Votify.Application.Interfaces
     {
         Task<List<EventoDto>> ObtenerTodosAsync();
         Task<EventoDto?> ObtenerPorIdAsync(string id);
+        Task<EventoDto> CrearAsync(EventoDto dto);
     }
 }

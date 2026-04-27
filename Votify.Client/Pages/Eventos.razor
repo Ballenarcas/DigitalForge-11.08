@@ -13,7 +13,7 @@
             <span class="brand-name">Eventos</span>
         </div>
         <div class="header-actions">
-            <button class="btn-crear">
+            <button class="btn-crear" @onclick='() => Nav.NavigateTo("/nuevo-evento")'>
                 <span>+</span> Nuevo Evento
             </button>
         </div>
@@ -45,42 +45,47 @@
                     var yaFinalizo = ahora >= e.FechaFin;
 
                     <div class="votacion-card @(yaFinalizo ? "card-ended" : yaInicio ? "card-active" : "card-pending")">
-                        <div class="card-top-row">
-                            <div class="card-badge">Evento</div>
-                            <div class="status-pill @(yaFinalizo ? "pill-ended" : yaInicio ? "pill-active" : "pill-pending")">
-                                @(yaFinalizo ? "Finalizado" : yaInicio ? "En curso" : "Pendiente")
-                            </div>
+                        <div class="card-cover">
+                            <img src="@(string.IsNullOrEmpty(e.ImagenUrl) ? "images/evento-default.png" : e.ImagenUrl)" alt="@e.Nombre" />
                         </div>
-                        <h3>@e.Nombre</h3>
-                        <p class="descripcion-breve">@e.Descripcion</p>
-                        <p class="fecha">Finaliza: @e.FechaFin.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</p>
+                        <div class="card-content">
+                            <div class="card-top-row">
+                                <div class="card-badge">Evento</div>
+                                <div class="status-pill @(yaFinalizo ? "pill-ended" : yaInicio ? "pill-active" : "pill-pending")">
+                                    @(yaFinalizo ? "Finalizado" : yaInicio ? "En curso" : "Pendiente")
+                                </div>
+                            </div>
+                            <h3>@e.Nombre</h3>
+                            <p class="descripcion-breve">@e.Descripcion</p>
+                            <p class="fecha">Finaliza: @e.FechaFin.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</p>
 
-                        @if (yaInicio && !yaFinalizo)
-                        {
-                            <button class="btn-votar" @onclick='() => Nav.NavigateTo("/votaciones")'>
-                                Ver Votaciones
-                            </button>
-                        }
-                        else
-                        {
-                            <button class="btn-votar" disabled>
-                                Ver Votaciones
-                            </button>
-                        }
+                            @if (yaInicio && !yaFinalizo)
+                            {
+                                <button class="btn-votar" @onclick='() => Nav.NavigateTo("/votaciones")'>
+                                    Ver Votaciones
+                                </button>
+                            }
+                            else
+                            {
+                                <button class="btn-votar" disabled>
+                                    Ver Votaciones
+                                </button>
+                            }
 
-                        <div class="card-footer">
-                            <span class="stats">Inicia: @e.FechaInicio.ToLocalTime().ToString("dd/MM/yyyy")</span>
-                            <div class="footer-actions">
-                                @if (yaFinalizo)
-                                {
-                                    <button class="btn-eliminar">
-                                        🗑 Eliminar
-                                    </button>
-                                }
-                                else
-                                {
-                                    <button class="btn-ver">Detalles</button>
-                                }
+                            <div class="card-footer">
+                                <span class="stats">Inicia: @e.FechaInicio.ToLocalTime().ToString("dd/MM/yyyy")</span>
+                                <div class="footer-actions">
+                                    @if (yaFinalizo)
+                                    {
+                                        <button class="btn-eliminar">
+                                            🗑 Eliminar
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button class="btn-ver">Detalles</button>
+                                    }
+                                </div>
                             </div>
                         </div>
                     </div>

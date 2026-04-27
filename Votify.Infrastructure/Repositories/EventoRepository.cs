@@ -36,7 +36,8 @@ namespace Votify.Infrastructure.Repositories
                 Nombre      = evento.Nombre,
                 Descripcion = evento.Descripcion,
                 FechaInicio = evento.FechaInicio.ToUniversalTime(),
-                FechaFin    = evento.FechaFin.ToUniversalTime()
+                FechaFin    = evento.FechaFin.ToUniversalTime(),
+                ImagenUrl   = evento.ImagenUrl
             };
 
             await _db.Eventos.AddAsync(entity);
@@ -55,6 +56,6 @@ namespace Votify.Infrastructure.Repositories
         }
 
         private static Evento MapToDomain(EventoEntity entity) =>
-            new Evento(entity.Nombre, entity.Descripcion, entity.FechaInicio, entity.FechaFin, entity.Id);
+            new Evento(entity.Nombre, entity.Descripcion, entity.FechaInicio, entity.FechaFin, entity.ImagenUrl, entity.Id);
     }
 }

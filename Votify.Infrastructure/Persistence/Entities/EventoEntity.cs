@@ -22,5 +22,8 @@ namespace Votify.Infrastructure.Persistence.Entities
 
         [Column("fecha_fin")]
         public DateTime FechaFin { get; set; }
+
+        [Column("imagen_url")]
+        public string? ImagenUrl { get; set; }
     }
 }

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Votify.Infrastructure.Persistence;
@@ -11,9 +12,11 @@ using Votify.Infrastructure.Persistence;
 namespace Votify.Infrastructure.Migrations
 {
     [DbContext(typeof(VotifyDbContext))]
-    partial class VotifyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260427151050_AddImagenUrlToEvento")]
+    partial class AddImagenUrlToEvento
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -89,8 +92,8 @@ namespace Votify.Infrastructure.Migrations
                         {
                             Id = new Guid("a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d"),
                             Descripcion = "Evento de programación de 48 horas para crear soluciones innovadoras.",
-                            FechaFin = new DateTime(2026, 4, 29, 18, 0, 0, 0, DateTimeKind.Utc),
-                            FechaInicio = new DateTime(2026, 4, 26, 10, 0, 0, 0, DateTimeKind.Utc),
+                            FechaFin = new DateTime(2026, 4, 29, 15, 10, 49, 601, DateTimeKind.Utc).AddTicks(1373),
+                            FechaInicio = new DateTime(2026, 4, 26, 15, 10, 49, 601, DateTimeKind.Utc).AddTicks(1123),
                             ImagenUrl = "images/hackathon-cover.png",
                             Nombre = "Hackathon Anual 2026"
                         },
@@ -98,8 +101,8 @@ namespace Votify.Infrastructure.Migrations
                         {
                             Id = new Guid("f6e5d4c3-b2a1-4f5e-9d8c-7b6a5e4d3c2b"),
                             Descripcion = "Presentación de proyectos finales de la asignatura Proyectos de Software.",
-                            FechaFin = new DateTime(2026, 5, 10, 20, 0, 0, 0, DateTimeKind.Utc),
-                            FechaInicio = new DateTime(2026, 5, 5, 9, 0, 0, 0, DateTimeKind.Utc),
+                            FechaFin = new DateTime(2026, 5, 7, 15, 10, 49, 601, DateTimeKind.Utc).AddTicks(1696),
+                            FechaInicio = new DateTime(2026, 5, 2, 15, 10, 49, 601, DateTimeKind.Utc).AddTicks(1695),
                             ImagenUrl = "images/feria-cover.png",
                             Nombre = "Feria de Proyectos PSW"
                         });
