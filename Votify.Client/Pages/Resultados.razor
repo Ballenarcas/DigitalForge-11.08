@@ -6,7 +6,7 @@
 <div class="main-container">
     <div class="header-principal">
         <button class="btn-back" @onclick="HandleVolver">
-            <span class="icon-arrow">←</span> Volver
+            <span class="icon-arrow">←</span> Votaciones
         </button>
         <div class="logo-container">
             <div class="logo-icon small">
@@ -438,7 +438,7 @@
         }
     }
 
-    private void HandleVolver() => Nav.NavigateTo("/");
+    private void HandleVolver() => Nav.NavigateTo("/votaciones");
 
     private string GetOrdinalSuffix(int number)
     {

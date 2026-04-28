@@ -22,6 +22,20 @@
     color: #4c1d95;
     letter-spacing: -0.02em;
 }
+.page-header-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    max-width: 1000px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
 .logo-icon.small {
     display: flex;
     align-items: center;
@@ -283,7 +297,6 @@
     display: flex;
     align-items: center;
     gap: 0.3rem;
-    margin-left: -10rem;
 }
 .btn-volver:hover {
     background: #f8f9fc;

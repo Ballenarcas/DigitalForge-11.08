@@ -9,6 +9,7 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 builder.Services.AddScoped<VotacionesService>();
 builder.Services.AddScoped<ProyectosService>();
 builder.Services.AddScoped<EventosService>();
+builder.Services.AddScoped<AppState>();
 
 builder.Services.AddScoped(sp => new HttpClient 
 { 

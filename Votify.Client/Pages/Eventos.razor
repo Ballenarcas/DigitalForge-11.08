@@ -3,6 +3,7 @@
 @using Votify.Client.Services
 @inject NavigationManager Nav
 @inject EventosService EventosService
+@inject AppState AppState
 
 <div class="main-container">
     <div class="header-principal">
@@ -61,7 +62,7 @@
 
                             @if (yaInicio && !yaFinalizo)
                             {
-                                <button class="btn-votar" @onclick='() => Nav.NavigateTo("/votaciones")'>
+                                <button class="btn-votar" @onclick='() => { AppState.EventoNombre = e.Nombre; Nav.NavigateTo("/votaciones"); }'>
                                     Ver Votaciones
                                 </button>
                             }
