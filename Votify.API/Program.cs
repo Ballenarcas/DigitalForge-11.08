@@ -53,6 +53,8 @@ builder.Services.AddScoped<IVotoRepository, VotoRepository>();
 builder.Services.AddScoped<IVotoService, VotoService>();
 builder.Services.AddScoped<IComentarioRepository, ComentarioRepository>();
 builder.Services.AddScoped<IComentarioService, ComentarioService>();
+builder.Services.AddScoped<Votify.Domain.Interfaces.IEventoRepository, Votify.Infrastructure.Repositories.EventoRepository>();
+builder.Services.AddScoped<Votify.Application.Interfaces.IEventoService, Votify.Application.Services.EventoService>();
 
 Console.WriteLine($"DB => {host}:{port}/{db} USER => {user}");
 
@@ -72,6 +74,7 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 app.UseCors("AllowBlazor");
+app.UseStaticFiles();
 app.UseHttpsRedirection();
 app.MapControllers();
 

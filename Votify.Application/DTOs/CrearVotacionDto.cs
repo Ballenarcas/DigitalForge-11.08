@@ -9,4 +9,5 @@ public class CrearVotacionDto
     public int LimiteProy { get; set; }
     public bool Comentarios { get; set; }
     public bool EsAnonima { get; set; }
+    public string EventoId { get; set; } = default!;
 }

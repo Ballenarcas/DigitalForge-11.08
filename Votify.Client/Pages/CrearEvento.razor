@@ -1,0 +1,358 @@
+@page "/nuevo-evento"
+@using Votify.Client.DTOs
+@using Votify.Client.Services
+@inject EventosService EventosService
+@inject NavigationManager Nav
+
+<div class="main-container">
+    <div class="top-nav">
+        <button class="btn-back" @onclick="HandleVolver">
+            <span class="icon-arrow">←</span> Volver
+        </button>
+        <div class="breadcrumbs">
+            <a href="/" class="breadcrumb-link">Eventos</a> <span class="separator">></span> <span class="current-page">Nuevo Evento</span>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2 class="title">Crear Nuevo Evento</h2>
+        <p class="subtitle">Configura los detalles del evento y su imagen de portada.</p>
+
+        <div class="form-body">
+            <div class="form-group">
+                <label>Nombre del evento <span class="required-asterisk">*</span></label>
+                <input type="text" class="form-control" @bind="Nombre" placeholder="Ej: Hackathon Primavera 2026" />
+            </div>
+
+            <div class="form-group">
+                <label>Descripción <span class="required-asterisk">*</span></label>
+                <textarea class="form-control textarea-custom" @bind="Descripcion" placeholder="Describe brevemente el evento..." rows="3"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Imagen de portada</label>
+                <div class="upload-container">
+                    @if (!string.IsNullOrEmpty(ImagenUrl))
+                    {
+                        <div class="preview-container">
+                            <img src="@ImagenUrl" class="image-preview" />
+                            <button class="btn-remove-image" @onclick="() => ImagenUrl = null">Eliminar</button>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="upload-box">
+                            <InputFile OnChange="HandleFileSelected" id="fileInput" class="hidden-input" accept="image/*" />
+                            <label for="fileInput" class="upload-label">
+                                <span class="upload-icon">📷</span>
+                                <span class="upload-text">Seleccionar imagen</span>
+                                <span class="upload-subtext">PNG, JPG o WEBP</span>
+                            </label>
+                        </div>
+                    }
+                </div>
+                @if (subiendoImagen)
+                {
+                    <p class="uploading-text">Subiendo imagen...</p>
+                }
+            </div>
+
+            <div class="grid-dates">
+                <div class="form-group">
+                    <label>Fecha de inicio <span class="required-asterisk">*</span></label>
+                    <input type="datetime-local" class="form-control" @bind="FechaInicio" />
+                </div>
+                <div class="form-group">
+                    <label>Fecha de fin <span class="required-asterisk">*</span></label>
+                    <input type="datetime-local" class="form-control" @bind="FechaFin" />
+                </div>
+            </div>
+
+            <button class="btn-submit" @onclick="HandleCrearEvento" disabled="@subiendoImagen">
+                @if (creando)
+                {
+                    <span class="spinner-small"></span>
+                }
+                Crear Evento
+            </button>
+
+            @if (!string.IsNullOrEmpty(Mensaje))
+            {
+                <div class="alert @(Mensaje.Contains("Error") ? "alert-error" : "alert-success")">
+                    <span>@(Mensaje.Contains("Error") ? "❌" : "✅")</span>
+                    <span>@Mensaje</span>
+                </div>
+            }
+        </div>
+        <em>
+            <span>*</span> Campos obligatorios
+        </em>
+    </div>
+</div>
+
+<style>
+.main-container {
+    background-color: #f8f9fc;
+    min-height: 100vh;
+    padding: 2rem;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+
+.top-nav {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.btn-back {
+    background: white;
+    border: 1px solid #e2e8f0;
+    padding: 0.6rem 1.2rem;
+    border-radius: 12px;
+    color: #6b21a8;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+}
+
+.btn-back:hover { background: #f1f5f9; }
+
+.breadcrumbs { color: #94a3b8; font-size: 0.9rem; }
+.current-page { color: #6b21a8; font-weight: 700; }
+
+.card {
+    background: white;
+    max-width: 750px;
+    margin: 0 auto;
+    border-radius: 45px; 
+    padding: 3.5rem;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.025em;
+}
+
+.subtitle { color: #64748b; margin-bottom: 2.5rem; font-size: 1.1rem; }
+.required-asterisk { color: #dc2626; font-weight: 800; font-size: 1.2rem; }
+
+.form-group { margin-bottom: 1.5rem; }
+.form-group label {
+    display: flex;
+    font-weight: 700;
+    color: #334155;
+    margin-bottom: 0.6rem;
+    font-size: 0.95rem;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.9rem 1.2rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    font-size: 1rem;
+    color: #1e293b;
+    background-color: #ffffff;
+    transition: all 0.2s;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #a855f7;
+    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
+}
+
+.textarea-custom { resize: none; font-family: inherit; }
+
+.grid-dates { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+
+/* Image Upload */
+.upload-container {
+    margin-top: 0.5rem;
+}
+.upload-box {
+    border: 2px dashed #e2e8f0;
+    border-radius: 20px;
+    padding: 2rem;
+    text-align: center;
+    transition: 0.2s;
+    cursor: pointer;
+}
+.upload-box:hover { border-color: #a855f7; background: #fdfaff; }
+.hidden-input { display: none; }
+.upload-label { cursor: pointer; display: flex; flex-direction: column; align-items: center; }
+.upload-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+.upload-text { font-weight: 700; color: #1e293b; }
+.upload-subtext { font-size: 0.8rem; color: #94a3b8; }
+
+.preview-container {
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    height: 200px;
+    border: 1px solid #e2e8f0;
+}
+.image-preview { width: 100%; height: 100%; object-fit: cover; }
+.btn-remove-image {
+    position: absolute;
+    top: 10px; right: 10px;
+    background: rgba(239, 68, 68, 0.9);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.uploading-text { color: #a855f7; font-size: 0.85rem; font-weight: 600; margin-top: 0.5rem; }
+
+.btn-submit {
+    width: 100%;
+    background: linear-gradient(to right, #a855f7, #9333ea);
+    color: white;
+    border: none;
+    padding: 1.2rem;
+    border-radius: 20px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 1.5rem;
+    transition: transform 0.1s, opacity 0.2s;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+}
+.btn-submit:hover:not(:disabled) { opacity: 0.9; }
+.btn-submit:active:not(:disabled) { transform: scale(0.99); }
+.btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.breadcrumb-link { color: #aa7ad7; font-weight: 700; text-decoration: none; }
+.breadcrumb-link:hover { color: #6b21a8; text-decoration: underline; }
+
+.alert {
+    padding: 1rem;
+    border-radius: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: 1rem;
+}
+.alert-success { background-color: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+.alert-error { background-color: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+
+.spinner-small {
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+@@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+</style>
+
+@code {
+    string Nombre = "";
+    string Descripcion = "";
+    string? ImagenUrl;
+    DateTime FechaInicio = DateTime.Now;
+    DateTime FechaFin = DateTime.Now.AddDays(7);
+    string? Mensaje;
+    bool subiendoImagen = false;
+    bool creando = false;
+
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        try
+        {
+            subiendoImagen = true;
+            StateHasChanged();
+
+            var file = e.File;
+            if (file != null)
+            {
+                var content = new MultipartFormDataContent();
+                var fileContent = new StreamContent(file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024)); // 10MB max
+                fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(file.ContentType);
+                content.Add(fileContent, "file", file.Name);
+
+                ImagenUrl = await EventosService.SubirImagen(content);
+            }
+        }
+        catch (Exception ex)
+        {
+            Mensaje = "Error al subir la imagen: " + ex.Message;
+        }
+        finally
+        {
+            subiendoImagen = false;
+            StateHasChanged();
+        }
+    }
+
+    async Task HandleCrearEvento()
+    {
+        if (string.IsNullOrWhiteSpace(Nombre) || string.IsNullOrWhiteSpace(Descripcion))
+        {
+            Mensaje = "Error: El nombre y la descripción son obligatorios.";
+            return;
+        }
+        if (FechaInicio >= FechaFin)
+        {
+            Mensaje = "Error: La fecha de fin debe ser posterior a la de inicio.";
+            return;
+        }
+
+        try
+        {
+            creando = true;
+            Mensaje = null;
+            StateHasChanged();
+
+            var dto = new EventoDto
+            {
+                Nombre = Nombre,
+                Descripcion = Descripcion,
+                ImagenUrl = ImagenUrl,
+                FechaInicio = FechaInicio.ToUniversalTime(),
+                FechaFin = FechaFin.ToUniversalTime()
+            };
+
+            await EventosService.CrearEvento(dto);
+            Mensaje = "Evento creado correctamente.";
+            
+            StateHasChanged();
+            await Task.Delay(1000);
+            Nav.NavigateTo("/");
+        }
+        catch (Exception ex)
+        {
+            Mensaje = "Error al crear el evento: " + ex.Message;
+        }
+        finally
+        {
+            creando = false;
+            StateHasChanged();
+        }
+    }
+
+    private void HandleVolver() => Nav.NavigateTo("/");
+}

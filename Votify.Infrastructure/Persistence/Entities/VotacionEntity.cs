@@ -32,5 +32,8 @@ public class VotacionEntity
 
     [Column("EsAnonima")]
     public bool EsAnonima { get; set; }
+
+    [Column("evento")]
+    public Guid EventoId { get; set; }
 }
 }

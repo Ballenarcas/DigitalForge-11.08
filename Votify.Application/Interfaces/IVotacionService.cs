@@ -6,6 +6,7 @@ namespace Votify.Application.Interfaces
     {
         Task CrearVotacionAsync(CrearVotacionDto dto);
         Task<List<CrearVotacionResponse>> ObtenerTodasAsync();
+        Task<List<CrearVotacionResponse>> ObtenerPorEventoAsync(string eventoId);
         Task<CrearVotacionResponse?> ObtenerPorIdAsync(string id);
         Task ActualizarVotacionAsync(string id, CrearVotacionDto dto);
         Task EliminarVotacionAsync(string id);

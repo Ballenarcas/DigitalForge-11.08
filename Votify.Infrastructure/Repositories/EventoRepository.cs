@@ -1,0 +1,61 @@
+using Microsoft.EntityFrameworkCore;
+using Votify.Domain.Entities;
+using Votify.Domain.Interfaces;
+using Votify.Infrastructure.Persistence;
+using Votify.Infrastructure.Persistence.Entities;
+
+namespace Votify.Infrastructure.Repositories
+{
+    public class EventoRepository : IEventoRepository
+    {
+        private readonly VotifyDbContext _db;
+
+        public EventoRepository(VotifyDbContext db)
+        {
+            _db = db;
+        }
+
+        public async Task<List<Evento>> ObtenerTodosAsync()
+        {
+            var entities = await _db.Eventos.ToListAsync();
+            return entities.Select(MapToDomain).ToList();
+        }
+
+        public async Task<Evento?> ObtenerPorIdAsync(string id)
+        {
+            if (!Guid.TryParse(id, out var guid)) return null;
+            var entity = await _db.Eventos.FindAsync(guid);
+            return entity == null ? null : MapToDomain(entity);
+        }
+
+        public async Task GuardarAsync(Evento evento)
+        {
+            var entity = new EventoEntity
+            {
+                Id          = evento.Id,
+                Nombre      = evento.Nombre,
+                Descripcion = evento.Descripcion,
+                FechaInicio = evento.FechaInicio.ToUniversalTime(),
+                FechaFin    = evento.FechaFin.ToUniversalTime(),
+                ImagenUrl   = evento.ImagenUrl
+            };
+
+            await _db.Eventos.AddAsync(entity);
+            await _db.SaveChangesAsync();
+        }
+
+        public async Task<bool> EliminarAsync(string id)
+        {
+            if (!Guid.TryParse(id, out var guid)) return false;
+            var entity = await _db.Eventos.FindAsync(guid);
+            if (entity is null) return false;
+
+            _db.Eventos.Remove(entity);
+            await _db.SaveChangesAsync();
+            return true;
+        }
+
+        private static Evento MapToDomain(EventoEntity entity) =>
+            new Evento(entity.Nombre, entity.Descripcion, entity.FechaInicio, entity.FechaFin, entity.ImagenUrl, entity.Id);
+    }
+}
