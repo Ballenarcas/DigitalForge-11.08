@@ -2,6 +2,7 @@
 @using Votify.Client.DTOs
 @inject VotacionesService VotacionesService
 @inject NavigationManager Nav
+@inject AppState AppState
 
 <div class="main-container">
     <div class="top-nav">
@@ -9,7 +10,7 @@
             <span class="icon-arrow">←</span> Volver
         </button>
         <div class="breadcrumbs">
-            <a href="/" class="breadcrumb-link">Evento A</a> <span class="separator">></span> <span class="current-page">Nueva Votación</span>
+            <a href="/" class="breadcrumb-link">@(AppState.EventoNombre ?? "Evento")</a> <span class="separator">></span> <a href="/votaciones" class="breadcrumb-link">Votaciones</a> <span class="separator">></span> <span class="current-page">Nueva Votación</span>
         </div>
     </div>
 
@@ -376,11 +377,22 @@ input:checked + .slider:before {
     string Nombre = "";
     string Tipo = "ESTANDAR";
     bool EsAnonima = false;
+
+    [SupplyParameterFromQuery]
+    public string? EventoId { get; set; }
     DateTime FechaInicio = DateTime.Now;
     DateTime FechaFin = DateTime.Now.AddDays(1);
     int LimiteProy = 1;
     bool Comentarios = true;
     string? Mensaje;
+
+    protected override void OnInitialized()
+    {
+        if (!string.IsNullOrEmpty(EventoId))
+        {
+            AppState.EventoId = EventoId;
+        }
+    }
 
     async Task HandleCrearVotacion()
     {
@@ -399,13 +411,20 @@ input:checked + .slider:before {
             Mensaje = "Error: El límite de proyectos debe ser al menos 1.";
             return;
         }
+        if (string.IsNullOrWhiteSpace(AppState.EventoId) && string.IsNullOrWhiteSpace(EventoId))
+        {
+            Mensaje = "Error: No se puede crear una votación sin un evento asociado.";
+            return;
+        }
+
         try {
             VotacionDto? request = new VotacionDto {
                 Nombre = Nombre, Tipo = Tipo, 
                 FechaInicio = FechaInicio.ToUniversalTime(), 
                 FechaFin = FechaFin.ToUniversalTime(),
                 LimiteProy = LimiteProy, Comentarios = Comentarios,
-                EsAnonima = EsAnonima
+                EsAnonima = EsAnonima,
+                EventoId = AppState.EventoId ?? ""
             };
             await VotacionesService.CrearVotacion(request);
             Mensaje = "Votación creada correctamente.";
@@ -413,8 +432,12 @@ input:checked + .slider:before {
             StateHasChanged();
             await Task.Delay(400); 
             
-            Nav.NavigateTo("/");
-        } catch { Mensaje = "Error al crear la votación."; }
+            Nav.NavigateTo("/votaciones");
+        } 
+        catch (Exception ex) 
+        { 
+            Mensaje = $"Error al crear la votación: {ex.Message}"; 
+        }
     }
-    private void HandleVolver() => Nav.NavigateTo("/");
+    private void HandleVolver() => Nav.NavigateTo("/votaciones");
 }

@@ -10,8 +10,9 @@ namespace Votify.Domain.Entities
         public bool Comentarios { get; }
         public string Tipo { get; }
         public bool EsAnonima { get; }
+        public Guid EventoId { get; set; }
 
-        protected Votacion(string nombre, DateTime inicio, DateTime fin, int limite, bool comentarios, string tipo, bool esAnonima)
+        protected Votacion(string nombre, DateTime inicio, DateTime fin, int limite, bool comentarios, string tipo, bool esAnonima, Guid eventoId)
         {
             Id = Guid.NewGuid();
             Nombre = nombre;
@@ -21,6 +22,7 @@ namespace Votify.Domain.Entities
             Comentarios = comentarios;
             Tipo = tipo;
             EsAnonima = esAnonima;
+            EventoId = eventoId;
         }
     }
 }

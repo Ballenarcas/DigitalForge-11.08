@@ -62,7 +62,7 @@
 
                             @if (yaInicio && !yaFinalizo)
                             {
-                                <button class="btn-votar" @onclick='() => { AppState.EventoNombre = e.Nombre; Nav.NavigateTo("/votaciones"); }'>
+                                <button class="btn-votar" @onclick='() => { if(AppState != null && e != null) { AppState.EventoNombre = e.Nombre; AppState.EventoId = e.Id.ToString(); } Nav.NavigateTo($"/votaciones?eventoId={e.Id}&eventoNombre={Uri.EscapeDataString(e.Nombre)}"); }'>
                                     Ver Votaciones
                                 </button>
                             }
