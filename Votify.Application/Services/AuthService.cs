@@ -35,10 +35,7 @@ namespace Votify.Application.Services
             // 2. Encriptar contraseña
             string hash = BCrypt.Net.BCrypt.HashPassword(request.Password);
 
-            var nuevoUsuario = new Participante(request.Nombre, request.Email, hash)
-            {
-                Rol = "Participante" // Por defecto
-            };
+            var nuevoUsuario = new Participante(request.Nombre, request.Email, hash);
 
             // 3. Guardar en Base de Datos
             await _participanteRepository.AddAsync(nuevoUsuario);
@@ -74,7 +71,7 @@ namespace Votify.Application.Services
                     new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
                     new Claim(ClaimTypes.Email, usuario.Email),
                     new Claim(ClaimTypes.Name, usuario.Nombre),
-                    new Claim(ClaimTypes.Role, usuario.Rol)
+                    new Claim(ClaimTypes.Role, "Participante") // Dejamos "Participante" como predeterminado en el claim
                 }),
                 Expires = DateTime.UtcNow.AddDays(7),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)

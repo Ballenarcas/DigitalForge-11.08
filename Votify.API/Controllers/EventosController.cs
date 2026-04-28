@@ -31,9 +31,16 @@ namespace Votify.API.Controllers
         }
 
         [HttpPost]
+        [Microsoft.AspNetCore.Authorization.Authorize]
         public async Task<IActionResult> Create([FromBody] EventoDto dto)
         {
-            var result = await _service.CrearAsync(dto);
+            var usuarioId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(usuarioId))
+            {
+                return Unauthorized(new { Message = "Usuario no autenticado." });
+            }
+
+            var result = await _service.CrearAsync(dto, usuarioId);
             return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
         }
     }

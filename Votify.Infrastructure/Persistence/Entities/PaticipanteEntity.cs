@@ -16,10 +16,6 @@ namespace Votify.Infrastructure.Persistence.Entities
 
         [Column("email")]
         public string Email { get; set; } = string.Empty;
-
-        [Required]
-        [Column("rol")]
-        public string Rol { get; set; } = string.Empty;
         
         [Column("PasswordHash")]
         public string PasswordHash { get; set; } = string.Empty;

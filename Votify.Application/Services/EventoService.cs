@@ -1,5 +1,7 @@
+using System;
 using Votify.Application.DTOs;
 using Votify.Application.Interfaces;
+using Votify.Domain.Entities;
 using Votify.Domain.Interfaces;
 
 namespace Votify.Application.Services
@@ -7,10 +9,12 @@ namespace Votify.Application.Services
     public class EventoService : IEventoService
     {
         private readonly IEventoRepository _repo;
+        private readonly IParticipanteEventoRepository _participanteEventoRepo;
 
-        public EventoService(IEventoRepository repo)
+        public EventoService(IEventoRepository repo, IParticipanteEventoRepository participanteEventoRepo)
         {
             _repo = repo;
+            _participanteEventoRepo = participanteEventoRepo;
         }
 
         public async Task<List<EventoDto>> ObtenerTodosAsync()
@@ -44,7 +48,7 @@ namespace Votify.Application.Services
             };
         }
 
-        public async Task<EventoDto> CrearAsync(EventoDto dto)
+        public async Task<EventoDto> CrearAsync(EventoDto dto, string creadorId)
         {
             var e = new Votify.Domain.Entities.Evento(
                 dto.Nombre,
@@ -55,6 +59,12 @@ namespace Votify.Application.Services
             );
 
             await _repo.GuardarAsync(e);
+
+            if (Guid.TryParse(creadorId, out var participanteId))
+            {
+                var pe = new ParticipanteEvento(participanteId, e.Id, "ADMINISTRADOR");
+                await _participanteEventoRepo.GuardarAsync(pe);
+            }
 
             dto.Id = e.Id.ToString();
             return dto;

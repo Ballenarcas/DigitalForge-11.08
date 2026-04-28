@@ -27,8 +27,7 @@ namespace Votify.Infrastructure.Repositories
 
             return new Participante(entity.Nombre, entity.Email, entity.PasswordHash)
             {
-                Id = entity.Id,
-                Rol = entity.Rol
+                Id = entity.Id
             };
         }
 
@@ -39,7 +38,6 @@ namespace Votify.Infrastructure.Repositories
                 Id = participante.Id,
                 Nombre = participante.Nombre,
                 Email = participante.Email,
-                Rol = participante.Rol,
                 PasswordHash = participante.PasswordHash
             };
             
