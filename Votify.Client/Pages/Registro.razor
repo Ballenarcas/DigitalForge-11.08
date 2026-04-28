@@ -1,0 +1,250 @@
+@page "/registro"
+@inject IAuthService AuthService
+@inject NavigationManager NavigationManager
+
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <div class="icon-container">
+            ✨
+        </div>
+        <h1 class="title">Crea una cuenta</h1>
+        <p class="subtitle">Únete a Votify y participa en los eventos</p>
+
+        <EditForm Model="registroModel" OnValidSubmit="HandleRegister">
+            <DataAnnotationsValidator />
+
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="error-message">@errorMessage</div>
+            }
+
+            <div class="form-group">
+                <label>Nombre Completo</label>
+                <InputText @bind-Value="registroModel.Nombre" class="form-control" placeholder="Juan Pérez" />
+            </div>
+
+            <div class="form-group">
+                <label>Correo Electrónico</label>
+                <InputText @bind-Value="registroModel.Email" class="form-control" placeholder="ejemplo@correo.com" />
+            </div>
+
+            <div class="grid-2-cols">
+                <div class="form-group">
+                    <label>Contraseña</label>
+                    <InputText @bind-Value="registroModel.Password" type="password" class="form-control" placeholder="••••••••" />
+                </div>
+
+                <div class="form-group">
+                    <label>Confirmar Contraseña</label>
+                    <InputText @bind-Value="registroModel.ConfirmPassword" type="password" class="form-control" placeholder="••••••••" />
+                </div>
+            </div>
+
+            <button type="submit" class="btn-primary-custom" disabled="@isLoading">
+                @if(isLoading) { <span>Registrando...</span> } else { <span>Registrarse</span> }
+            </button>
+        </EditForm>
+
+        <div class="divider">
+            <span>¿Ya tienes una cuenta?</span>
+        </div>
+
+        <div class="footer-link">
+            <a href="/login">Inicia sesión aquí</a>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Reutilizamos los estilos del login, pero añadimos el panel a 2 columnas para el password */
+    .auth-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 80vh;
+        background-color: #f8f9fa; 
+        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    .auth-card {
+        background: white;
+        padding: 40px;
+        border-radius: 20px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        width: 100%;
+        max-width: 480px; /* Un poco más ancho por las columnas */
+        text-align: center;
+    }
+
+    .icon-container {
+        font-size: 40px;
+        margin-bottom: 10px;
+    }
+
+    .title {
+        font-size: 24px;
+        font-weight: 800;
+        color: #1a202c;
+        margin-bottom: 5px;
+    }
+
+    .subtitle {
+        color: #718096;
+        font-size: 14px;
+        margin-bottom: 30px;
+    }
+
+    .form-group {
+        text-align: left;
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #2d3748;
+        font-size: 14px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        box-sizing: border-box;
+        font-size: 14px;
+        transition: border-color 0.2s;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #8b5cf6;
+    }
+
+    .grid-2-cols {
+        display: flex;
+        gap: 15px; /* Espacio entre columnas */
+    }
+
+    .grid-2-cols .form-group {
+        flex: 1; /* Hacen que midan lo mismo */
+    }
+
+    .footer-link a {
+        color: #8b5cf6;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .btn-primary-custom {
+        width: 100%;
+        padding: 14px;
+        background-color: #8b5cf6;
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        margin-top: 10px;
+    }
+
+    .btn-primary-custom:hover {
+        background-color: #7c3aed;
+    }
+    
+    .btn-primary-custom:disabled {
+        background-color: #c4b5fd;
+        cursor: not-allowed;
+    }
+
+    .divider {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        margin: 30px 0;
+        color: #a0aec0;
+        font-size: 14px;
+    }
+
+    .divider::before, .divider::after {
+        content: '';
+        flex: 1;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .divider span {
+        padding: 0 10px;
+    }
+
+    .error-message {
+        background-color: #fed7d7;
+        color: #c53030;
+        padding: 10px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-size: 14px;
+    }
+</style>
+
+@code {
+    // Definimos un modelo local en la vista porque necesitamos el campo "ConfirmPassword" que no está en el DTO de la DB.
+    public class RegisterViewModel
+    {
+        public string Nombre { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+        public string ConfirmPassword { get; set; } = string.Empty;
+    }
+
+    private RegisterViewModel registroModel = new RegisterViewModel();
+    private bool isLoading = false;
+    private string errorMessage = string.Empty;
+
+    private async Task HandleRegister()
+    {
+        errorMessage = string.Empty;
+
+        if (string.IsNullOrWhiteSpace(registroModel.Nombre) || string.IsNullOrWhiteSpace(registroModel.Email) || string.IsNullOrWhiteSpace(registroModel.Password))
+        {
+             errorMessage = "Por favor, completa todos los campos obligatorios.";
+             return;
+        }
+
+        if (registroModel.Password != registroModel.ConfirmPassword)
+        {
+            errorMessage = "Las contraseñas no coinciden.";
+            return;
+        }
+
+        isLoading = true;
+
+        var dto = new Votify.Application.DTOs.RegisterRequestDto 
+        { 
+            Nombre = registroModel.Nombre, 
+            Email = registroModel.Email, 
+            Password = registroModel.Password 
+        };
+
+        var response = await AuthService.RegisterAsync(dto);
+
+        if (response.IsSuccess)
+        {
+            // Una vez registrado, hacemos autologin instantáneo o lo mandamos a la pantalla de login.
+            // Para mejor UX lo mandaremos a Login con un mensaje por URL, o directamente logueamos:
+            var loginDto = new Votify.Application.DTOs.LoginRequestDto { Email = dto.Email, Password = dto.Password };
+            await AuthService.LoginAsync(loginDto);
+            
+            NavigationManager.NavigateTo("/"); // Redirige al inicio
+        }
+        else
+        {
+             errorMessage = response.Message;
+        }
+
+        isLoading = false;
+    }
+}

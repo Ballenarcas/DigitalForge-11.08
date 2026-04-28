@@ -12,7 +12,9 @@ public class VotifyDbContext : DbContext
     public DbSet<ProyectoEntity> Proyectos { get; set; }
     public DbSet<VotoEntity> Votos { get; set; }
     public DbSet<ComentarioEntity> Comentarios { get; set; }
+    public DbSet<ParticipanteEntity> Participantes { get; set; }
     public DbSet<EventoEntity> Eventos { get; set; }
+    public DbSet<ParticipanteEventoEntity> ParticipantesEventos { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -43,4 +45,4 @@ public class VotifyDbContext : DbContext
 
 }
 }
-
+
