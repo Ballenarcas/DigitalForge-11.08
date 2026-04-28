@@ -1,7 +1,8 @@
-@page "/"
+@page "/votaciones"
 @using Votify.Client.DTOs
 @inject Votify.Client.Services.VotacionesService VotacionesService
 @inject NavigationManager Nav
+@inject Votify.Client.Services.AppState AppState
 
 <div class="main-container">
     @if (mostrarModalConfirmacion)
@@ -36,17 +37,25 @@
         </div>
     }
     <div class="header-principal">
-        <div class="logo-container">
+        <button class="btn-volver" @onclick='() => Nav.NavigateTo("/")'>
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="16" height="16">
+                <path d="M15 19L8 12L15 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Eventos
+        </button>
 
-            <div class="logo-icon small">
-                <img src="images/evento-logo.png" alt="Evento logo" class="evento-logo-img" style="width:20px;height:20px;" />
-            </div>
-            <span class="brand-name">Eventos</span>
-        </div>
         <button class="btn-crear" @onclick="IrACrearVotacion">
             <span>+</span> Nueva Votación
         </button>
-  
+    </div>
+
+    <div class="page-header-row">
+        <div class="logo-container">
+            <div class="logo-icon small">
+                <img src="images/votaciones-logo.png" alt="Votaciones logo" class="evento-logo-img" style="width:30px;height:30px;" />
+            </div>
+            <span class="brand-name">Votaciones de @(AppState.EventoNombre ?? "Evento")</span>
+        </div>
     </div>
 
     <div class="content-wrapper">
@@ -134,6 +143,9 @@
 </div>
 
 @code {
+    [SupplyParameterFromQuery]
+    public string? EventoNombre { get; set; }
+
     private List<VotacionDto>? listaVotaciones;
     private bool mostrarModalConfirmacion = false;
     private VotacionDto? votacionAEliminar;
@@ -141,6 +153,10 @@
 
     protected override async Task OnInitializedAsync()
     {
+        if (!string.IsNullOrEmpty(EventoNombre))
+        {
+            AppState.EventoNombre = EventoNombre;
+        }
         await CargarVotaciones();
     }
 
