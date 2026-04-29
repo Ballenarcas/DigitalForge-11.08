@@ -48,6 +48,15 @@ namespace Votify.Infrastructure.Repositories
                 .CountAsync(v => v.VotacionId == votacionGuid && v.VotanteId == votanteGuid);
         }
 
+        public async Task<bool> HaVotadoPorProyectoAsync(string votacionId, string proyectoId, string votanteId)
+        {
+            if (!Guid.TryParse(votacionId, out var votacionGuid) || !Guid.TryParse(proyectoId, out var proyectoGuid) || !Guid.TryParse(votanteId, out var votanteGuid))
+                return false;
+
+            return await _db.Votos
+                .AnyAsync(v => v.VotacionId == votacionGuid && v.ProyectoId == proyectoGuid && v.VotanteId == votanteGuid);
+        }
+
         public async Task<List<(string ProyectoId, int Votos)>> ObtenerVotosPorVotacionAsync(string votacionId)
         {
             if (!Guid.TryParse(votacionId, out var votacionGuid))

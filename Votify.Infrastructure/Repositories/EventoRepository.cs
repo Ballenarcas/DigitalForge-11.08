@@ -21,6 +21,20 @@ namespace Votify.Infrastructure.Repositories
             return entities.Select(MapToDomain).ToList();
         }
 
+        public async Task<List<Evento>> ObtenerPorParticipanteAsync(Guid participanteId)
+        {
+            var eventoIds = await _db.ParticipantesEventos
+                .Where(pe => pe.ParticipanteId == participanteId)
+                .Select(pe => pe.EventoId)
+                .ToListAsync();
+
+            var entities = await _db.Eventos
+                .Where(e => eventoIds.Contains(e.Id))
+                .ToListAsync();
+
+            return entities.Select(MapToDomain).ToList();
+        }
+
         public async Task<Evento?> ObtenerPorIdAsync(string id)
         {
             if (!Guid.TryParse(id, out var guid)) return null;

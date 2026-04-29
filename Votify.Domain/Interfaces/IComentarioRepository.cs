@@ -6,5 +6,6 @@ namespace Votify.Domain.Interfaces
     {
         Task GuardarAsync(string proyectoId, string texto, Guid? autorId = null);
         Task<List<Comentario>> ObtenerAsync(string proyectoId);
+        Task<bool> HaComentadoProyectoAsync(string proyectoId, Guid autorId);
     }
 }

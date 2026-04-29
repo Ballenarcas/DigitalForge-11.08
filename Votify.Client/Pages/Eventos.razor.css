@@ -21,20 +21,22 @@
     gap: 0.75rem;
     align-items: center;
 }
+.logo-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+}
+.evento-icon {
+    width: 24px;
+    height: 24px;
+    color: #4c1d95;
+}
 .brand-name {
     font-weight: 800;
     font-size: 1.2rem;
     color: #4c1d95;
     letter-spacing: -0.02em;
-}
-.logo-icon.small {
-    display: flex;
-    align-items: center;
-}
-.evento-logo-img {
-    width: 20px !important;
-    height: 20px !important;
-    object-fit: contain;
 }
 .section-title {
     color: #1e293b;

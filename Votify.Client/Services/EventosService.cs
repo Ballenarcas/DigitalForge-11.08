@@ -14,7 +14,7 @@ namespace Votify.Client.Services
 
         public async Task<List<EventoDto>> ObtenerEventos()
         {
-            var resultado = await _http.GetFromJsonAsync<List<EventoDto>>("api/eventos");
+            var resultado = await _http.GetFromJsonAsync<List<EventoDto>>("api/eventos/mis-eventos");
             return resultado ?? new List<EventoDto>();
         }
 

@@ -23,6 +23,15 @@ namespace Votify.Application.Services
                 throw new ArgumentException("El comentario no puede estar vacío.");
             }
 
+            if (autorId.HasValue)
+            {
+                bool haComentado = await _comentarioRepository.HaComentadoProyectoAsync(proyectoId, autorId.Value);
+                if (haComentado)
+                {
+                    throw new InvalidOperationException("Solo puedes dejar un comentario por proyecto.");
+                }
+            }
+
             await _comentarioRepository.GuardarAsync(proyectoId, texto, autorId);
         }
 

@@ -32,6 +32,26 @@ namespace Votify.Application.Services
             }).ToList();
         }
 
+        public async Task<List<EventoDto>> ObtenerMisEventosAsync(string participanteId)
+        {
+            if (!Guid.TryParse(participanteId, out var pId))
+            {
+                return new List<EventoDto>();
+            }
+
+            var entidades = await _repo.ObtenerPorParticipanteAsync(pId);
+
+            return entidades.Select(e => new EventoDto
+            {
+                Id          = e.Id.ToString(),
+                Nombre      = e.Nombre,
+                Descripcion = e.Descripcion,
+                FechaInicio = e.FechaInicio,
+                FechaFin    = e.FechaFin,
+                ImagenUrl   = e.ImagenUrl
+            }).ToList();
+        }
+
         public async Task<EventoDto?> ObtenerPorIdAsync(string id)
         {
             var e = await _repo.ObtenerPorIdAsync(id);

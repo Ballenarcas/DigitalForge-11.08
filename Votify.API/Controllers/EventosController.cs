@@ -22,6 +22,20 @@ namespace Votify.API.Controllers
             return Ok(eventos);
         }
 
+        [HttpGet("mis-eventos")]
+        [Microsoft.AspNetCore.Authorization.Authorize]
+        public async Task<IActionResult> GetMisEventos()
+        {
+            var usuarioId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(usuarioId))
+            {
+                return Unauthorized(new { Message = "Usuario no autenticado." });
+            }
+
+            var eventos = await _service.ObtenerMisEventosAsync(usuarioId);
+            return Ok(eventos);
+        }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(string id)
         {
