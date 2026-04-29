@@ -2,76 +2,161 @@
     position: relative;
     display: flex;
     flex-direction: column;
+    min-height: 100vh;
+    background-color: #f8f9fc; /* Fondo de la app, combina con el de Eventos */
 }
 
 main {
     flex: 1;
-}
-
-.sidebar {
-    background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
-}
-
-.top-row {
-    background-color: #f7f7f7;
-    border-bottom: 1px solid #d6d5d5;
-    justify-content: flex-end;
-    height: 3.5rem;
     display: flex;
+    flex-direction: column;
+}
+
+article {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.brand-header {
+    display: flex;
+    justify-content: space-between;
     align-items: center;
+    padding: 1.5rem 2rem;
+    background-color: white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    z-index: 10;
 }
 
-    .top-row ::deep a, .top-row ::deep .btn-link {
-        white-space: nowrap;
-        margin-left: 1.5rem;
-        text-decoration: none;
-    }
-
-    .top-row ::deep a:hover, .top-row ::deep .btn-link:hover {
-        text-decoration: underline;
-    }
-
-    .top-row ::deep a:first-child {
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-@media (max-width: 640.98px) {
-    .top-row {
-        justify-content: space-between;
-    }
-
-    .top-row ::deep a, .top-row ::deep .btn-link {
-        margin-left: 0;
-    }
+.header-spacer { 
+    flex: 1; 
 }
 
-@media (min-width: 641px) {
-    .page {
-        flex-direction: row;
-    }
+.logo-container { 
+    flex: 1; 
+    display: flex; 
+    justify-content: center; 
+}
 
-    .sidebar {
-        width: 250px;
-        height: 100vh;
-        position: sticky;
-        top: 0;
-    }
+.logo-container a {
+    text-decoration: none;
+}
 
-    .top-row {
-        position: sticky;
-        top: 0;
-        z-index: 1;
-    }
+.logo-icon img {
+    height: 60px; /* Un poco más ajustado para una barra de navegación */
+    width: auto;
+    transition: transform 0.2s;
+}
 
-    .top-row.auth ::deep a:first-child {
-        flex: 1;
-        text-align: right;
-        width: 0;
-    }
+.logo-icon img:hover {
+    transform: scale(1.05);
+}
 
-    .top-row, article {
-        padding-left: 2rem !important;
-        padding-right: 1.5rem !important;
-    }
+.auth-controls { 
+    flex: 1; 
+    display: flex; 
+    justify-content: flex-end; 
+    gap: 15px; 
+    align-items: center; 
+}
+
+.user-menu-container {
+    position: relative;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+    outline: none;
+}
+
+.user-menu-container:hover, .user-menu-container:focus-within {
+    background-color: #f3f4f6;
+}
+
+.user-greeting {
+    font-weight: 600;
+    color: #4a5568;
+    font-size: 15px;
+    user-select: none;
+}
+
+.user-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 5px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    padding: 5px;
+    min-width: 160px;
+    z-index: 100;
+    border: 1px solid #e2e8f0;
+}
+
+.dropdown-item {
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    padding: 10px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: background-color 0.2s;
+}
+
+.dropdown-item:hover {
+    background-color: #f3f4f6;
+}
+
+.dropdown-item.text-danger {
+    color: #e53e3e;
+}
+
+.dropdown-item.text-danger:hover {
+    background-color: #fed7d7;
+}
+
+.btn-login, .btn-logout { 
+    background: transparent; 
+    color: #8b5cf6; 
+    border: 2px solid #8b5cf6; 
+    padding: 8px 20px; 
+    border-radius: 10px; 
+    text-decoration: none; 
+    font-weight: 700; 
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-register { 
+    background: #8b5cf6; 
+    color: white; 
+    border: 2px solid #8b5cf6; 
+    padding: 8px 20px; 
+    border-radius: 10px; 
+    text-decoration: none; 
+    font-weight: 700; 
+    font-size: 14px;
+    box-shadow: 0 4px 6px rgba(139, 92, 246, 0.2);
+    transition: all 0.2s;
+}
+
+.btn-login:hover { 
+    background: #f5f3ff; 
+}
+
+.btn-logout:hover { 
+    background: #fed7d7;
+    color: #c53030;
+    border-color: #fc8181;
+}
+
+.btn-register:hover { 
+    background: #7c3aed; 
+    border-color: #7c3aed;
+    transform: translateY(-1px);
 }

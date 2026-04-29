@@ -4,6 +4,7 @@
 @inject ProyectosService ProyectosService
 @inject VotacionesService VotacionesService
 @inject NavigationManager Nav
+@inject AuthenticationStateProvider AuthStateProvider
 
 <div class="main-container">
     <div class="header-principal">
@@ -171,19 +172,29 @@
     private string? proyectosVotables;
     private bool isVoting = false;
     private bool limiteAlcanzado = false;
-    private readonly string usuarioTesterId = "ce932822-2615-46fd-ab8c-7f5164ca2414";
+    private string? usuarioId;
 
     protected override async Task OnInitializedAsync()
     {
         try 
         {   
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+            usuarioId = user.FindFirst(c => c.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value 
+                        ?? user.FindFirst(c => c.Type == "nameid")?.Value 
+                        ?? user.FindFirst(c => c.Type == "sub")?.Value;
+            
             if (!string.IsNullOrEmpty(VotacionId))
             {
                 var vot = await VotacionesService.ObtenerVotacion(VotacionId);
                 nombreVotacion = vot?.Nombre;
                 proyectosVotables = vot?.LimiteProy.ToString() ?? "0";
-                bool puedeSeguirVotando = await VotacionesService.VerificarLimiteVotos(VotacionId, usuarioTesterId);
-                limiteAlcanzado = !puedeSeguirVotando;
+                
+                if (!string.IsNullOrEmpty(usuarioId))
+                {
+                    bool puedeSeguirVotando = await VotacionesService.VerificarLimiteVotos(VotacionId, usuarioId);
+                    limiteAlcanzado = !puedeSeguirVotando;
+                }
             }
             listaProyectos = await ProyectosService.ObtenerProyectosAsync();
         }
@@ -196,7 +207,7 @@
 
     private async Task Votar(string proyectoId)
     {
-        if (string.IsNullOrEmpty(VotacionId)) return;
+        if (string.IsNullOrEmpty(VotacionId) || string.IsNullOrEmpty(usuarioId)) return;
         
         isVoting = true;
         mensajeExito = null;
@@ -208,7 +219,7 @@
             {
                 VotacionId = VotacionId,
                 ProyectoId = proyectoId,
-                VotanteId = usuarioTesterId
+                VotanteId = usuarioId
             };
             await VotacionesService.EmitirVotoAsync(VotacionId, dto);
             mensajeExito = "¡Voto registrado con éxito! Tu apoyo ha sido añadido al proyecto.";

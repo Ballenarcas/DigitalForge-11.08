@@ -54,5 +54,16 @@ namespace Votify.Infrastructure.Repositories
 
             return comentarios;
         }
+
+        public async Task<bool> HaComentadoProyectoAsync(string proyectoId, Guid autorId)
+        {
+            if (!Guid.TryParse(proyectoId, out var guidProyectoId))
+            {
+                return false;
+            }
+
+            return await _context.Comentarios
+                .AnyAsync(c => c.Proyecto_Id == guidProyectoId && c.Autor_Id == autorId);
+        }
     }
 }
