@@ -23,7 +23,7 @@ article {
     justify-content: space-between;
     align-items: center;
     padding: 1.5rem 2rem;
-    background-color: white;
+    background-color: #621d95;
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     z-index: 10;
 }
@@ -43,7 +43,7 @@ article {
 }
 
 .logo-icon img {
-    height: 60px; /* Un poco más ajustado para una barra de navegación */
+    height: 80px; /* Tamaño aumentado según solicitud */
     width: auto;
     transition: transform 0.2s;
 }
@@ -70,14 +70,23 @@ article {
 }
 
 .user-menu-container:hover, .user-menu-container:focus-within {
-    background-color: #f3f4f6;
+    background-color: rgba(255, 255, 255, 0.1);
 }
 
 .user-greeting {
     font-weight: 600;
-    color: #4a5568;
+    color: white;
     font-size: 15px;
     user-select: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.user-logo {
+    height: 18px;
+    width: auto;
+    filter: brightness(0) invert(1); /* Hace que el logo sea blanco para contrastar con el fondo púrpura */
 }
 
 .user-dropdown {
@@ -121,8 +130,8 @@ article {
 
 .btn-login, .btn-logout { 
     background: transparent; 
-    color: #8b5cf6; 
-    border: 2px solid #8b5cf6; 
+    color: white; 
+    border: 2px solid white; 
     padding: 8px 20px; 
     border-radius: 10px; 
     text-decoration: none; 
