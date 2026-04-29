@@ -32,6 +32,26 @@ namespace Votify.Application.Services
             }).ToList();
         }
 
+        public async Task<List<EventoDto>> ObtenerMisEventosAsync(string participanteId)
+        {
+            if (!Guid.TryParse(participanteId, out var pId))
+            {
+                return new List<EventoDto>();
+            }
+
+            var entidades = await _repo.ObtenerPorParticipanteAsync(pId);
+
+            return entidades.Select(e => new EventoDto
+            {
+                Id          = e.Id.ToString(),
+                Nombre      = e.Nombre,
+                Descripcion = e.Descripcion,
+                FechaInicio = e.FechaInicio,
+                FechaFin    = e.FechaFin,
+                ImagenUrl   = e.ImagenUrl
+            }).ToList();
+        }
+
         public async Task<EventoDto?> ObtenerPorIdAsync(string id)
         {
             var e = await _repo.ObtenerPorIdAsync(id);
@@ -62,12 +82,35 @@ namespace Votify.Application.Services
 
             if (Guid.TryParse(creadorId, out var participanteId))
             {
-                var pe = new ParticipanteEvento(participanteId, e.Id, "ADMINISTRADOR");
+                var pe = new ParticipanteEvento(participanteId, e.Id, "ORGANIZADOR");
                 await _participanteEventoRepo.GuardarAsync(pe);
             }
 
             dto.Id = e.Id.ToString();
             return dto;
+        }
+
+        public async Task RegistrarParticipanteAsync(string eventoId, string participanteId)
+        {
+            if (Guid.TryParse(eventoId, out var eId) && Guid.TryParse(participanteId, out var pId))
+            {
+                // Verificar si ya está participando
+                var misEventos = await _repo.ObtenerPorParticipanteAsync(pId);
+                if (!misEventos.Any(x => x.Id == eId))
+                {
+                    var pe = new ParticipanteEvento(pId, eId, "VOTANTE");
+                    await _participanteEventoRepo.GuardarAsync(pe);
+                }
+            }
+        }
+
+        public async Task<string?> ObtenerRolEnEventoAsync(string eventoId, string participanteId)
+        {
+            if (Guid.TryParse(eventoId, out var eId) && Guid.TryParse(participanteId, out var pId))
+            {
+                return await _participanteEventoRepo.ObtenerRolAsync(eId, pId);
+            }
+            return null;
         }
     }
 }

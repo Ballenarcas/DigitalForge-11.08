@@ -12,9 +12,15 @@ namespace Votify.Client.Services
             _http = http;
         }
 
-        public async Task<List<EventoDto>> ObtenerEventos()
+        public async Task<List<EventoDto>> ObtenerEventosGenerales()
         {
             var resultado = await _http.GetFromJsonAsync<List<EventoDto>>("api/eventos");
+            return resultado ?? new List<EventoDto>();
+        }
+
+        public async Task<List<EventoDto>> ObtenerMisEventos()
+        {
+            var resultado = await _http.GetFromJsonAsync<List<EventoDto>>("api/eventos/mis-eventos");
             return resultado ?? new List<EventoDto>();
         }
 
@@ -28,6 +34,12 @@ namespace Votify.Client.Services
             var resp = await _http.PostAsJsonAsync("api/eventos", evento);
             resp.EnsureSuccessStatusCode();
             return (await resp.Content.ReadFromJsonAsync<EventoDto>())!;
+        }
+
+        public async Task ParticiparEnEvento(string eventoId)
+        {
+            var resp = await _http.PostAsync($"api/eventos/{eventoId}/participar", null);
+            resp.EnsureSuccessStatusCode();
         }
 
         public async Task<string> SubirImagen(MultipartFormDataContent content)
@@ -44,6 +56,20 @@ namespace Votify.Client.Services
             return "";
         }
 
+        public async Task<string?> ObtenerRolEnEvento(string eventoId)
+        {
+            try
+            {
+                var resp = await _http.GetFromJsonAsync<RolResponse>($"api/eventos/{eventoId}/rol");
+                return resp?.Rol;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
         private class UploadResponse { public string Url { get; set; } = ""; }
+        private class RolResponse { public string Rol { get; set; } = ""; }
     }
 }

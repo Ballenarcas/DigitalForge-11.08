@@ -695,7 +695,12 @@
     {
         if (comentario.EsAnonimo)
         {
-            return $"Votante anónimo #{indice + 1}";
+            return "Anónimo";
+        }
+
+        if (!string.IsNullOrEmpty(comentario.AutorNombre))
+        {
+            return comentario.AutorNombre;
         }
 
         if (comentario.AutorId.HasValue)
@@ -704,7 +709,7 @@
             return $"Votante {shortId}";
         }
 
-        return "Votante identificado";
+        return "Anónimo";
     }
 
     protected override async Task OnInitializedAsync()

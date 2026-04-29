@@ -5,6 +5,7 @@ namespace Votify.Client.DTOs
         public string Texto { get; set; } = string.Empty;
         public Guid? AutorId { get; set; }
         public bool EsAnonimo { get; set; }
+        public string? AutorNombre { get; set; }
         public DateTime FechaCreacion { get; set; }
     }
 }

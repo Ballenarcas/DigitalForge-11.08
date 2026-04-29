@@ -237,7 +237,12 @@
     {
         if (EsVotacionAnonima || comentario.EsAnonimo)
         {
-            return $"Votante anónimo #{index + 1}";
+            return "Anónimo";
+        }
+
+        if (!string.IsNullOrEmpty(comentario.AutorNombre))
+        {
+            return comentario.AutorNombre;
         }
 
         if (comentario.AutorId.HasValue)
@@ -246,7 +251,7 @@
             return $"Votante {shortId}";
         }
 
-        return "Votante identificado";
+        return "Anónimo";
     }
 
     private string GetAvatarLabel(ComentarioDto comentario, int index) => (EsVotacionAnonima || comentario.EsAnonimo) ? $"A{index + 1}" : "V";

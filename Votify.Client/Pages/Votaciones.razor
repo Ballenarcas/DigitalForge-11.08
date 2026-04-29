@@ -1,8 +1,10 @@
 @page "/votaciones"
 @using Votify.Client.DTOs
 @inject Votify.Client.Services.VotacionesService VotacionesService
+@inject Votify.Client.Services.EventosService EventosService
 @inject NavigationManager Nav
 @inject Votify.Client.Services.AppState AppState
+@inject AuthenticationStateProvider AuthStateProvider
 
 <div class="main-container">
     @if (mostrarModalConfirmacion)
@@ -43,10 +45,13 @@
             </svg>
             Eventos
         </button>
+        @if (Rol == "ORGANIZADOR")
+        {
+            <button class="btn-crear" @onclick="IrACrearVotacion">
+                <span>+</span> Nueva Votación
+            </button>
+        }
 
-        <button class="btn-crear" @onclick="IrACrearVotacion">
-            <span>+</span> Nueva Votación
-        </button>
     </div>
 
     <div class="page-header-row">
@@ -72,7 +77,6 @@
         {
             <div class="empty-state">
                 <p>No hay votaciones disponibles.</p>
-                <button class="btn-ver" @onclick="IrACrearVotacion">Crear nueva</button>
             </div>
         }
         else
@@ -122,17 +126,19 @@
                                 {
                                     <button class="btn-resultados" @onclick="() => VerResultados(v.Id)" disabled>Resultados</button>
                                 }
-                                @if (!yaFinalizo)
+                                @if (Rol == "ORGANIZADOR")
                                 {
-                                    <button class="btn-ver" @onclick="() => Gestionar(v.Id)">Editar</button>
+                                    @if (!yaFinalizo)
+                                    {
+                                        <button class="btn-ver" @onclick="() => Gestionar(v.Id)">Editar</button>
+                                    }
+                                    @if (yaFinalizo)
+                                    {
+                                        <button class="btn-eliminar" @onclick="() => EliminarVotacion(v.Id)">
+                                            🗑 Eliminar
+                                        </button>
+                                    }
                                 }
-                                @if (yaFinalizo)
-                                {
-                                    <button class="btn-eliminar" @onclick="() => EliminarVotacion(v.Id)">
-                                        🗑 Eliminar
-                                    </button>
-                                }
-                               
                             </div>
                         </div>
                     </div>
@@ -153,6 +159,9 @@
     private bool mostrarModalConfirmacion = false;
     private VotacionDto? votacionAEliminar;
     private bool eliminando = false;
+    private bool isAuthenticated = false;
+    private string? Rol = null;
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -165,6 +174,19 @@
             AppState.EventoId = EventoId;
         }
         await CargarVotaciones();
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        isAuthenticated = authState.User.Identity?.IsAuthenticated ?? false;
+        if (isAuthenticated)
+        {
+            var usuarioId = authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+                            ?? authState.User.FindFirst("sub")?.Value
+                            ?? authState.User.FindFirst("nameid")?.Value;
+            
+            if (!string.IsNullOrEmpty(AppState.EventoId))
+            {
+                Rol = await EventosService.ObtenerRolEnEvento(AppState.EventoId);
+            }
+        }
     }
 
     private async Task CargarVotaciones()

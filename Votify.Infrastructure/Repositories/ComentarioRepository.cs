@@ -48,11 +48,23 @@ namespace Votify.Infrastructure.Repositories
                 {
                     Texto = c.Texto,
                     AutorId = c.Autor_Id,
+                    AutorNombre = c.Autor_Id.HasValue ? _context.Participantes.Where(p => p.Id == c.Autor_Id.Value).Select(p => p.Nombre).FirstOrDefault() : null,
                     FechaCreacion = c.FechaCreacion
                 })
                 .ToListAsync();
 
             return comentarios;
+        }
+
+        public async Task<bool> HaComentadoProyectoAsync(string proyectoId, Guid autorId)
+        {
+            if (!Guid.TryParse(proyectoId, out var guidProyectoId))
+            {
+                return false;
+            }
+
+            return await _context.Comentarios
+                .AnyAsync(c => c.Proyecto_Id == guidProyectoId && c.Autor_Id == autorId);
         }
     }
 }

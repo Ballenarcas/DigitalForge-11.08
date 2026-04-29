@@ -23,6 +23,15 @@ namespace Votify.Application.Services
                 throw new ArgumentException("El comentario no puede estar vacío.");
             }
 
+            if (autorId.HasValue)
+            {
+                bool haComentado = await _comentarioRepository.HaComentadoProyectoAsync(proyectoId, autorId.Value);
+                if (haComentado)
+                {
+                    throw new InvalidOperationException("Solo puedes dejar un comentario por proyecto.");
+                }
+            }
+
             await _comentarioRepository.GuardarAsync(proyectoId, texto, autorId);
         }
 
@@ -41,6 +50,7 @@ namespace Votify.Application.Services
             {
                 Texto = c.Texto,
                 AutorId = esVotacionAnonima ? null : c.AutorId,
+                AutorNombre = esVotacionAnonima ? null : c.AutorNombre,
                 EsAnonimo = esVotacionAnonima || !c.AutorId.HasValue,
                 FechaCreacion = c.FechaCreacion
             }).ToList();

@@ -6,5 +6,6 @@ namespace Votify.Domain.Interfaces
     public interface IParticipanteEventoRepository
     {
         Task GuardarAsync(ParticipanteEvento participanteEvento);
+        Task<string?> ObtenerRolAsync(Guid eventoId, Guid participanteId);
     }
 }

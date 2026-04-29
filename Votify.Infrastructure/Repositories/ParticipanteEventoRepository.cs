@@ -28,5 +28,13 @@ namespace Votify.Infrastructure.Repositories
             await _db.ParticipantesEventos.AddAsync(entity);
             await _db.SaveChangesAsync();
         }
+
+        public async Task<string?> ObtenerRolAsync(Guid eventoId, Guid participanteId)
+        {
+            var pe = await Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.FirstOrDefaultAsync(
+                _db.ParticipantesEventos, 
+                x => x.EventoId == eventoId && x.ParticipanteId == participanteId);
+            return pe?.Rol;
+        }
     }
 }

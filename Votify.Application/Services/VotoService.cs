@@ -34,6 +34,15 @@ namespace Votify.Application.Services
                 throw new InvalidOperationException($"No puedes votar. Has alcanzado el límite de {votacion.LimiteProy} votos para esta votación.");
             }
 
+            if (!string.IsNullOrEmpty(dto.VotanteId))
+            {
+                bool haVotado = await _votoRepository.HaVotadoPorProyectoAsync(dto.VotacionId, dto.ProyectoId, dto.VotanteId);
+                if (haVotado)
+                {
+                    throw new InvalidOperationException("Ya has votado por este proyecto en esta votacion.");
+                }
+            }
+
             VotoFactory factory;
             if (string.IsNullOrEmpty(dto.VotanteId))
             {
