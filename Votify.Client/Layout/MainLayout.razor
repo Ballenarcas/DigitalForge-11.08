@@ -24,7 +24,7 @@
                             @if (showUserMenu)
                             {
                                 <div class="user-dropdown">
-                                    <button class="dropdown-item text-danger" @onclick="CerrarSesion">
+                                    <button class="dropdown-item text-danger" @onclick="CerrarSesion" @onclick:stopPropagation="true">
                                         🚪 Cerrar Sesión
                                     </button>
                                 </div>
@@ -55,6 +55,9 @@
 
     private async Task HideUserMenu()
     {
+        // Se le da tiempo a que el clic se ejecute antes de ocultar el menú
+        await Task.Delay(150);
+
         showUserMenu = false;
         StateHasChanged();
     }

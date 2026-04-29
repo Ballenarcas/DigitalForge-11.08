@@ -89,5 +89,19 @@ namespace Votify.Application.Services
             dto.Id = e.Id.ToString();
             return dto;
         }
+
+        public async Task RegistrarParticipanteAsync(string eventoId, string participanteId)
+        {
+            if (Guid.TryParse(eventoId, out var eId) && Guid.TryParse(participanteId, out var pId))
+            {
+                // Verificar si ya está participando
+                var misEventos = await _repo.ObtenerPorParticipanteAsync(pId);
+                if (!misEventos.Any(x => x.Id == eId))
+                {
+                    var pe = new ParticipanteEvento(pId, eId, "VOTANTE");
+                    await _participanteEventoRepo.GuardarAsync(pe);
+                }
+            }
+        }
     }
 }

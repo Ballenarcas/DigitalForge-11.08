@@ -53,6 +53,11 @@
 }
 
 /* 2. Cards */
+@keyframes fadeInUpCard {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
 .votaciones-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -64,29 +69,38 @@
     border-radius: 30px;
     border: 1px solid #f1f5f9;
     box-shadow: 0 4px 12px rgba(0,0,0,0.02);
-    transition: 0.3s;
+    /* Transición optimizada (hardware accelerated) y con "rebote" (spring) */
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s ease, border-color 0.4s ease;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     overflow: hidden;
+    opacity: 0;
+    animation: fadeInUpCard 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 .votacion-card:hover {
     border-color: #ddd6fe;
-    box-shadow: 0 10px 20px rgba(147, 51, 234, 0.08);
+    box-shadow: 0 16px 32px rgba(147, 51, 234, 0.1);
+    transform: translateY(-8px); /* Se levanta más la tarjeta entera */
 }
 .card-cover {
     height: 160px;
     width: 100%;
     overflow: hidden;
+    border-radius: 30px 30px 0 0; /* Para evitar bordes blancos al hacer transform en webkit */
+    /* Pequeño parche de render renderizado acelerado en webkit */
+    -webkit-mask-image: -webkit-radial-gradient(white, black); 
 }
 .card-cover img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.5s ease;
+    /* Evita repintado innecesario (will-change) y un zoom sutil sin que sea rudo */
+    will-change: transform;
+    transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .votacion-card:hover .card-cover img {
-    transform: scale(1.05);
+    transform: scale(1.06);
 }
 .card-content {
     padding: 1.5rem;
@@ -181,6 +195,44 @@
     flex-shrink: 0;
     flex-wrap: nowrap;
 }
+
+/* 5. Modal Auth */
+@keyframes fadeInOverlay {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUpModal {
+    from { opacity: 0; transform: translateY(30px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.auth-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    animation: fadeInOverlay 0.3s ease-out forwards;
+}
+.auth-modal-content {
+    background-color: white;
+    padding: 3rem 2rem;
+    border-radius: 24px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+    position: relative;
+    animation: slideUpModal 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
 .btn-crear {
     background: #9333ea;
     color: white;
@@ -194,6 +246,21 @@
 }
 .btn-crear:hover {
     background: #7e22ce;
+    transform: translateY(-1px);
+}
+.btn-login-modal {
+    background: transparent;
+    color: #9333ea;
+    border: 2px solid #9333ea;
+    padding: 0.6rem 1.2rem;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s;
+    font-size: 0.9rem;
+}
+.btn-login-modal:hover {
+    background: rgba(147, 51, 234, 0.05);
     transform: translateY(-1px);
 }
 .btn-registrar {
