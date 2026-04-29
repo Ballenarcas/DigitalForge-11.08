@@ -48,6 +48,7 @@ namespace Votify.Infrastructure.Repositories
                 {
                     Texto = c.Texto,
                     AutorId = c.Autor_Id,
+                    AutorNombre = c.Autor_Id.HasValue ? _context.Participantes.Where(p => p.Id == c.Autor_Id.Value).Select(p => p.Nombre).FirstOrDefault() : null,
                     FechaCreacion = c.FechaCreacion
                 })
                 .ToListAsync();

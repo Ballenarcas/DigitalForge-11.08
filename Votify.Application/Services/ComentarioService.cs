@@ -50,6 +50,7 @@ namespace Votify.Application.Services
             {
                 Texto = c.Texto,
                 AutorId = esVotacionAnonima ? null : c.AutorId,
+                AutorNombre = esVotacionAnonima ? null : c.AutorNombre,
                 EsAnonimo = esVotacionAnonima || !c.AutorId.HasValue,
                 FechaCreacion = c.FechaCreacion
             }).ToList();

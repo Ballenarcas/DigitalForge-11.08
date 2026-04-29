@@ -9,5 +9,6 @@ namespace Votify.Application.Interfaces
         Task<EventoDto?> ObtenerPorIdAsync(string id);
         Task<EventoDto> CrearAsync(EventoDto dto, string creadorId);
         Task RegistrarParticipanteAsync(string eventoId, string participanteId);
+        Task<string?> ObtenerRolEnEventoAsync(string eventoId, string participanteId);
     }
 }

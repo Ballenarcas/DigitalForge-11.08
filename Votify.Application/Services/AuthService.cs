@@ -25,6 +25,11 @@ namespace Votify.Application.Services
 
         public async Task<AuthResponseDto> RegisterAsync(RegisterRequestDto request)
         {
+            if (string.IsNullOrWhiteSpace(request.Email) || !System.Text.RegularExpressions.Regex.IsMatch(request.Email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
+            {
+                return new AuthResponseDto { IsSuccess = false, Message = "El formato del correo electrónico no es válido.", Token = "" };
+            }
+
             // 1. Validar si el email ya existe
             var usuarioExistente = await _participanteRepository.GetByEmailAsync(request.Email);
             if (usuarioExistente != null)
@@ -45,6 +50,11 @@ namespace Votify.Application.Services
 
         public async Task<AuthResponseDto> LoginAsync(LoginRequestDto request)
         {
+            if (string.IsNullOrWhiteSpace(request.Email) || !System.Text.RegularExpressions.Regex.IsMatch(request.Email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
+            {
+                return new AuthResponseDto { IsSuccess = false, Message = "El formato del correo electrónico no es válido.", Token = "" };
+            }
+
             // 1. Buscar usuario por email
             var usuario = await _participanteRepository.GetByEmailAsync(request.Email);
             if (usuario == null)

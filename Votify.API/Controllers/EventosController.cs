@@ -77,5 +77,26 @@ namespace Votify.API.Controllers
             await _service.RegistrarParticipanteAsync(id, usuarioId);
             return Ok();
         }
+
+        [HttpGet("{id}/rol")]
+        [Microsoft.AspNetCore.Authorization.Authorize]
+        public async Task<IActionResult> GetRol(string id)
+        {
+            var usuarioId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+                            ?? User.FindFirst("sub")?.Value
+                            ?? User.FindFirst("nameid")?.Value;
+            if (string.IsNullOrEmpty(usuarioId))
+            {
+                return Unauthorized(new { Message = "Usuario no autenticado." });
+            }
+
+            var rol = await _service.ObtenerRolEnEventoAsync(id, usuarioId);
+            if (string.IsNullOrEmpty(rol))
+            {
+                return NotFound(new { Message = "El usuario no participa en este evento." });
+            }
+
+            return Ok(new { Rol = rol });
+        }
     }
 }

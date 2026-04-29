@@ -187,6 +187,20 @@
         isLoading = true;
         errorMessage = string.Empty;
 
+        if (string.IsNullOrWhiteSpace(loginModel.Email) || string.IsNullOrWhiteSpace(loginModel.Password))
+        {
+            errorMessage = "Por favor, completa todos los campos.";
+            isLoading = false;
+            return;
+        }
+
+        if (!System.Text.RegularExpressions.Regex.IsMatch(loginModel.Email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
+        {
+            errorMessage = "El formato del correo electrónico no es válido.";
+            isLoading = false;
+            return;
+        }
+
         var response = await AuthService.LoginAsync(loginModel);
 
         if (response.IsSuccess)

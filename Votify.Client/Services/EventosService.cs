@@ -56,6 +56,20 @@ namespace Votify.Client.Services
             return "";
         }
 
+        public async Task<string?> ObtenerRolEnEvento(string eventoId)
+        {
+            try
+            {
+                var resp = await _http.GetFromJsonAsync<RolResponse>($"api/eventos/{eventoId}/rol");
+                return resp?.Rol;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
         private class UploadResponse { public string Url { get; set; } = ""; }
+        private class RolResponse { public string Rol { get; set; } = ""; }
     }
 }

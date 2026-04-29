@@ -6,6 +6,7 @@ namespace Votify.Domain.Entities
     {
         public string Texto { get; set; } = string.Empty;
         public Guid? AutorId { get; set; }
+        public string? AutorNombre { get; set; }
         public DateTime FechaCreacion { get; set; }
     }
 }

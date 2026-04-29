@@ -71,7 +71,7 @@
                             }
                             else if (yaInicio && !yaFinalizo)
                             {
-                                <button class="btn-votar" @onclick='() => { AppState.EventoNombre = e.Nombre; Nav.NavigateTo("/votaciones"); }'>
+                                <button class="btn-votar" @onclick='() => { AppState.EventoId = e.Id; AppState.EventoNombre = e.Nombre; Nav.NavigateTo("/votaciones"); }'>
                                     Ver Votaciones
                                 </button>
                             }

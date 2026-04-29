@@ -82,7 +82,7 @@ namespace Votify.Application.Services
 
             if (Guid.TryParse(creadorId, out var participanteId))
             {
-                var pe = new ParticipanteEvento(participanteId, e.Id, "ADMINISTRADOR");
+                var pe = new ParticipanteEvento(participanteId, e.Id, "ORGANIZADOR");
                 await _participanteEventoRepo.GuardarAsync(pe);
             }
 
@@ -102,6 +102,15 @@ namespace Votify.Application.Services
                     await _participanteEventoRepo.GuardarAsync(pe);
                 }
             }
+        }
+
+        public async Task<string?> ObtenerRolEnEventoAsync(string eventoId, string participanteId)
+        {
+            if (Guid.TryParse(eventoId, out var eId) && Guid.TryParse(participanteId, out var pId))
+            {
+                return await _participanteEventoRepo.ObtenerRolAsync(eId, pId);
+            }
+            return null;
         }
     }
 }
