@@ -1,4 +1,4 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
 @inject Votify.Client.Services.IAuthService AuthService
 @inject NavigationManager NavManager
 
@@ -10,7 +10,7 @@
             <div class="logo-container">
                 <a href="/">
                     <div class="logo-icon">
-                        <img src="images/votify-logo.png" alt="Votify Logo" />
+                        <img src="images/votify-logo-blanco.png" alt="Votify Logo" />
                     </div>
                 </a>
             </div>
@@ -19,7 +19,7 @@
                 <AuthorizeView>
                     <Authorized>
                         <div class="user-menu-container" @onclick="ToggleUserMenu" @onfocusout="HideUserMenu" tabindex="0">
-                            <span class="user-greeting">👤 @context.User.Identity?.Name ▼</span>
+                             <span class="user-greeting"><img src="images/usuario-logo.png" class="user-logo" alt="User Logo" /> @context.User.Identity?.Name ▼</span>
                             
                             @if (showUserMenu)
                             {

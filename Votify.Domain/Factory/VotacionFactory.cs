@@ -10,6 +10,7 @@ namespace Votify.Domain.Factory
             DateTime fin,
             int limite,
             bool comentarios,
+            Guid eventoId,
             bool esAnonima = false
         );
     }

@@ -4,6 +4,8 @@
     flex-direction: column;
     min-height: 100vh;
     background-color: #f8f9fc; /* Fondo de la app, combina con el de Eventos */
+    background-color: #f8f9fc;
+    /* Fondo de la app, combina con el de Eventos */
 }
 
 main {
@@ -21,6 +23,42 @@ article {
 .brand-header {
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    background-color: #621d95;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    z-index: 10;
+}
+
+.header-spacer {
+    flex: 1;
+}
+
+.logo-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+}
+
+.logo-container a {
+    text-decoration: none;
+}
+
+.logo-icon img {
+    height: 80px;
+    width: auto;
+    transition: transform 0.2s;
+}
+
+.logo-icon img:hover {
+    transform: scale(1.05);
+}
+
+.auth-controls {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
     align-items: center;
     padding: 1.5rem 2rem;
     background-color: white;
@@ -157,6 +195,118 @@ article {
 
 .btn-register:hover { 
     background: #7c3aed; 
+    border-color: #7c3aed;
+    transform: translateY(-1px);
+}
+.user-menu-container {
+    position: relative;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+    outline: none;
+}
+
+.user-menu-container:hover,
+.user-menu-container:focus-within {
+    background-color: #f3f4f6;
+}
+
+.user-greeting {
+    font-weight: 600;
+    color: white;
+    font-size: 15px;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.user-logo {
+    height: 24px;
+    width: auto;
+    filter: brightness(0) invert(1);
+    /* Hace que el logo sea blanco para contrastar con el fondo púrpura */
+}
+
+.user-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 5px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 5px;
+    min-width: 160px;
+    z-index: 100;
+    border: 1px solid #e2e8f0;
+}
+
+.dropdown-item {
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    padding: 10px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: background-color 0.2s;
+}
+
+.dropdown-item:hover {
+    background-color: #f3f4f6;
+}
+
+.dropdown-item.text-danger {
+    color: #e53e3e;
+}
+
+.dropdown-item.text-danger:hover {
+    background-color: #fed7d7;
+}
+
+.btn-login,
+.btn-logout {
+    background: transparent;
+    color: white;
+    border: 2px solid white;
+    padding: 8px 20px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-register {
+    background: #8b5cf6;
+    color: white;
+    border: 2px solid #8b5cf6;
+    padding: 8px 20px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 14px;
+    box-shadow: 0 4px 6px rgba(139, 92, 246, 0.2);
+    transition: all 0.2s;
+}
+
+.btn-login:hover {
+    background: #f5f3ff;
+}
+
+.btn-logout:hover {
+    background: #fed7d7;
+    color: #c53030;
+    border-color: #fc8181;
+}
+
+.btn-register:hover {
+    background: #7c3aed;
     border-color: #7c3aed;
     transform: translateY(-1px);
 }

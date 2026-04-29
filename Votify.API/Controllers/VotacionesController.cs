@@ -36,6 +36,12 @@ namespace Votify.API.Controllers
             var votaciones = await _service.ObtenerTodasAsync();
             return Ok(votaciones);
         }
+        [HttpGet("evento/{eventoId}")]
+        public async Task<ActionResult<List<CrearVotacionResponse>>> GetByEvento(string eventoId)
+        {
+            var votaciones = await _service.ObtenerPorEventoAsync(eventoId);
+            return Ok(votaciones);
+        }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<CrearVotacionResponse>> GetById(string id)

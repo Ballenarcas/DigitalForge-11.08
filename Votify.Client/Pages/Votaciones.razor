@@ -152,6 +152,9 @@
     [SupplyParameterFromQuery]
     public string? EventoNombre { get; set; }
 
+    [SupplyParameterFromQuery]
+    public string? EventoId { get; set; }
+
     private List<VotacionDto>? listaVotaciones;
     private bool mostrarModalConfirmacion = false;
     private VotacionDto? votacionAEliminar;
@@ -165,6 +168,10 @@
         if (!string.IsNullOrEmpty(EventoNombre))
         {
             AppState.EventoNombre = EventoNombre;
+        }
+        if (!string.IsNullOrEmpty(EventoId))
+        {
+            AppState.EventoId = EventoId;
         }
         await CargarVotaciones();
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
@@ -186,7 +193,15 @@
     {
         try
         {
-            listaVotaciones = await VotacionesService.ObtenerVotaciones();
+            if (!string.IsNullOrEmpty(AppState.EventoId))
+            {
+                listaVotaciones = await VotacionesService.ObtenerVotacionesPorEvento(AppState.EventoId);
+            }
+            else
+            {
+                // Si no hay evento, la lista se queda vacía o se inicializa
+                listaVotaciones = new List<VotacionDto>();
+            }
         }
         catch (Exception ex)
         {
@@ -195,7 +210,7 @@
         }
     }
 
-    private void IrACrearVotacion() => Nav.NavigateTo("/nueva-votacion");
+    private void IrACrearVotacion() => Nav.NavigateTo($"/nueva-votacion?eventoId={AppState.EventoId}");
     private void Gestionar(string id) => Nav.NavigateTo($"/votacion/{id}");
     private void VerResultados(string id) => Nav.NavigateTo($"/{id}/resultados");
     private void Votar(string id) => Nav.NavigateTo($"/{id}/proyectos/");

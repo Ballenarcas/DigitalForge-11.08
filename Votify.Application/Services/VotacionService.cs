@@ -30,12 +30,18 @@ namespace Votify.Application.Services
                 _ => throw new ArgumentException("Tipo de votación no válido.")
             };
 
+            if (!Guid.TryParse(dto.EventoId, out var eventoGuid))
+            {
+                throw new ArgumentException("El ID del evento no es válido o no se ha proporcionado.");
+            }
+
             var votacion = factory.Crear(
                 dto.Nombre,
                 dto.FechaInicio,
                 dto.FechaFin,
                 dto.LimiteProy,
                 dto.Comentarios,
+                eventoGuid,
                 dto.EsAnonima
             );
             
@@ -54,7 +60,27 @@ namespace Votify.Application.Services
                 FechaFin = e.FechaFin,
                 LimiteProy = e.LimiteProy,
                 Comentarios = e.Comentarios,
-                EsAnonima = e.EsAnonima
+                EsAnonima = e.EsAnonima,
+                EventoId = e.EventoId.ToString()
+            }).ToList();
+        }
+        public async Task<List<CrearVotacionResponse>> ObtenerPorEventoAsync(string eventoId)
+        {
+            if (!Guid.TryParse(eventoId, out var guid)) return new List<CrearVotacionResponse>();
+            
+            var entidades = await _repo.ObtenerPorEventoAsync(guid);
+
+            return entidades.Select(e => new CrearVotacionResponse
+            {
+                Id = e.Id.ToString(),
+                Nombre = e.Nombre,
+                Tipo = e.Tipo,
+                FechaInicio = e.FechaInicio,
+                FechaFin = e.FechaFin,
+                LimiteProy = e.LimiteProy,
+                Comentarios = e.Comentarios,
+                EsAnonima = e.EsAnonima,
+                EventoId = e.EventoId.ToString()
             }).ToList();
         }
 
@@ -72,7 +98,8 @@ namespace Votify.Application.Services
                 FechaFin = e.FechaFin,
                 LimiteProy = e.LimiteProy,
                 Comentarios = e.Comentarios,
-                EsAnonima = e.EsAnonima
+                EsAnonima = e.EsAnonima,
+                EventoId = e.EventoId.ToString()
             };
         }
         public async Task ActualizarVotacionAsync(string id, CrearVotacionDto dto)
@@ -92,6 +119,7 @@ namespace Votify.Application.Services
                 dto.FechaFin,
                 dto.LimiteProy,
                 dto.Comentarios,
+                Guid.Parse(dto.EventoId),
                 dto.EsAnonima
             );
 

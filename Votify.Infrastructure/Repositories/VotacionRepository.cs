@@ -27,7 +27,8 @@ namespace Votify.Infrastructure.Repositories
                 FechaFin = votacion.FechaFin.ToUniversalTime(),
                 LimiteProy = votacion.LimiteProy,
                 Comentarios = votacion.Comentarios,
-                EsAnonima = votacion.EsAnonima
+                EsAnonima = votacion.EsAnonima,
+                EventoId = votacion.EventoId
             };
 
             await _db.Votaciones.AddAsync(entity);
@@ -48,6 +49,14 @@ namespace Votify.Infrastructure.Repositories
             return entities.Select(MapToDomain).ToList();
         }
 
+        public async Task<List<Votacion>> ObtenerPorEventoAsync(Guid eventoId)
+        {
+            var entities = await _db.Votaciones
+                .Where(v => v.EventoId == eventoId)
+                .ToListAsync();
+            return entities.Select(MapToDomain).ToList();
+        }
+
         public async Task<bool> ActualizarAsync(string id, Votacion votacion)
         {
             if (!Guid.TryParse(id, out var guid)) return false;
@@ -62,6 +71,7 @@ namespace Votify.Infrastructure.Repositories
             entity.LimiteProy = votacion.LimiteProy;
             entity.Comentarios = votacion.Comentarios;
             entity.EsAnonima = votacion.EsAnonima;
+            entity.EventoId = votacion.EventoId;
 
             await _db.SaveChangesAsync();
             return true;
@@ -99,6 +109,7 @@ namespace Votify.Infrastructure.Repositories
                 entity.FechaFin,
                 entity.LimiteProy,
                 entity.Comentarios,
+                entity.EventoId,
                 entity.EsAnonima
             );
             domain.Id = entity.Id;
