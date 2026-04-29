@@ -86,7 +86,7 @@ article {
 }
 
 .user-logo {
-    height: 24px;
+    height: 16px;
     width: auto;
     filter: brightness(0) invert(1);
     /* Hace que el logo sea blanco para contrastar con el fondo púrpura */
@@ -131,7 +131,19 @@ article {
     background-color: #fed7d7;
 }
 
-.btn-login,
+.btn-login {
+    background: white;
+    color: #621d95;
+    border: 2px solid white;
+    padding: 8px 20px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
 .btn-logout {
     background: transparent;
     color: white;
@@ -146,20 +158,21 @@ article {
 }
 
 .btn-register {
-    background: #8b5cf6;
-    color: white;
-    border: 2px solid #8b5cf6;
+    background: white;
+    color: #621d95;
+    border: 2px solid white;
     padding: 8px 20px;
     border-radius: 10px;
     text-decoration: none;
     font-weight: 700;
     font-size: 14px;
-    box-shadow: 0 4px 6px rgba(139, 92, 246, 0.2);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     transition: all 0.2s;
 }
 
 .btn-login:hover {
-    background: #f5f3ff;
+    background: #f3f4f6;
+    transform: translateY(-1px);
 }
 
 .btn-logout:hover {
@@ -169,7 +182,6 @@ article {
 }
 
 .btn-register:hover {
-    background: #7c3aed;
-    border-color: #7c3aed;
+    background: #f3f4f6;
     transform: translateY(-1px);
 }
