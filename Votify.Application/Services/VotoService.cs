@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Votify.Application.DTOs;
 using Votify.Application.Interfaces;
+using Votify.Domain.Entities;
 using Votify.Domain.Factory;
 using Votify.Domain.Interfaces;
 
@@ -11,16 +12,19 @@ namespace Votify.Application.Services
     {
         private readonly IVotoRepository _votoRepository;
         private readonly IVotacionRepository _votacionRepository;
+        private readonly IParticipanteEventoRepository _participanteEventoRepository;
 
-        public VotoService(IVotoRepository votoRepository, IVotacionRepository votacionRepository)
+        public VotoService(IVotoRepository votoRepository, IVotacionRepository votacionRepository, IParticipanteEventoRepository participanteEventoRepository)
         {
             _votoRepository = votoRepository;
             _votacionRepository = votacionRepository;
+            _participanteEventoRepository = participanteEventoRepository;
         }
 
         public async Task VotarAsync(VotarDto dto)
         {
             var votacion = await _votacionRepository.ObtenerAsync(dto.VotacionId);
+            var EventoId = await _votacionRepository.ObtenerEventoIdAsync(dto.VotacionId);
             
             if (votacion == null)
             {
@@ -33,7 +37,10 @@ namespace Votify.Application.Services
             {
                 throw new InvalidOperationException($"No puedes votar. Has alcanzado el límite de {votacion.LimiteProy} votos para esta votación.");
             }
-
+            if (await _participanteEventoRepository.ObtenerRolAsync(Guid.Parse(EventoId), Guid.Parse(dto.VotanteId)) == "ORGANIZADOR")
+            {
+                throw new InvalidOperationException("Los organizadores no pueden votar en sus propios eventos.");
+            }
             if (!string.IsNullOrEmpty(dto.VotanteId))
             {
                 bool haVotado = await _votoRepository.HaVotadoPorProyectoAsync(dto.VotacionId, dto.ProyectoId, dto.VotanteId);
