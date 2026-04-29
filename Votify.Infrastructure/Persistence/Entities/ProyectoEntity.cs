@@ -9,11 +9,7 @@ public class ProyectoEntity
 {
     [Key]
     [Column("id")]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public Guid Id { get; set; } 
-
-    [Column("categoria_id")]
-    public Guid? Categoria_Id { get; set; } 
 
     [Column("nombre")]
     public string Nombre { get; set; } = default!;
@@ -23,5 +19,11 @@ public class ProyectoEntity
 
     [Column("equipo")]
     public string? Equipo_Id { get; set; }
+
+    [Column("votacion_id")]
+    public Guid VotacionId { get; set; }
+
+    [Column("imagen_url")]
+    public string? ImagenUrl { get; set; }
 }
 }

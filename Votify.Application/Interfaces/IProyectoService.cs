@@ -7,5 +7,6 @@ namespace Votify.Application.Interfaces
         Task<string> CrearProyectoAsync(ProyectoDto dto);
         Task<ProyectoDto?> ObtenerProyectoAsync(string id);
         Task<List<ProyectoDto>> ObtenerProyectosAsync();
+        Task<List<ProyectoDto>> ObtenerProyectosPorVotacionAsync(string votacionId);
     }
 }

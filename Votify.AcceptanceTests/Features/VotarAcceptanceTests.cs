@@ -28,7 +28,7 @@ namespace Votify.AcceptanceTests.Features
         public async Task Votar_UsuarioEstandarEnVotacionEstandar_DebeRegistrarVotoExitosamente()
         {
             var votacion = TestDataFactory.CrearVotacionEstandar(nombre: "Votación Estándar", limiteProyectos: 2);
-            var proyecto = TestDataFactory.CrearProyecto(nombre: "Proyecto A");
+            var proyecto = TestDataFactory.CrearProyecto(nombre: "Proyecto A", votacionId: votacion.Id);
             var votanteId = Guid.NewGuid().ToString();
 
             DbContext.Votaciones.Add(votacion);
@@ -52,7 +52,7 @@ namespace Votify.AcceptanceTests.Features
         public async Task Votar_UsuarioAnonimoEnVotacionAnonima_DebeRegistrarVotoExitosamente()
         {
             var votacion = TestDataFactory.CrearVotacionAnonima(nombre: "Votación Anónima", limiteProyectos: 3);
-            var proyecto = TestDataFactory.CrearProyecto(nombre: "Proyecto B");
+            var proyecto = TestDataFactory.CrearProyecto(nombre: "Proyecto B", votacionId: votacion.Id);
 
             DbContext.Votaciones.Add(votacion);
             DbContext.Proyectos.Add(proyecto);
@@ -74,8 +74,8 @@ namespace Votify.AcceptanceTests.Features
         public async Task Votar_UsuarioPuedeMúltiplesVotosHastaLimite_DebeRegistrarTodos()
         {
             var votacion = TestDataFactory.CrearVotacionEstandar(nombre: "Votación Multi", limiteProyectos: 2);
-            var proyecto1 = TestDataFactory.CrearProyecto(nombre: "Proyecto 1");
-            var proyecto2 = TestDataFactory.CrearProyecto(nombre: "Proyecto 2");
+            var proyecto1 = TestDataFactory.CrearProyecto(nombre: "Proyecto 1", votacionId: votacion.Id);
+            var proyecto2 = TestDataFactory.CrearProyecto(nombre: "Proyecto 2", votacionId: votacion.Id);
             var votanteId = Guid.NewGuid().ToString();
 
             DbContext.Votaciones.Add(votacion);
@@ -103,8 +103,8 @@ namespace Votify.AcceptanceTests.Features
         public async Task Votar_ConsultarResultadosPorVotacion_DebeRetornarVotosOrdenados()
         {
             var votacion = TestDataFactory.CrearVotacionEstandar(nombre: "Votación Resultados", limiteProyectos: 3);
-            var proyecto1 = TestDataFactory.CrearProyecto(nombre: "Proyecto Popular");
-            var proyecto2 = TestDataFactory.CrearProyecto(nombre: "Proyecto Menos Popular");
+            var proyecto1 = TestDataFactory.CrearProyecto(nombre: "Proyecto Popular", votacionId: votacion.Id);
+            var proyecto2 = TestDataFactory.CrearProyecto(nombre: "Proyecto Menos Popular", votacionId: votacion.Id);
 
             DbContext.Votaciones.Add(votacion);
             DbContext.Proyectos.AddRange(proyecto1, proyecto2);
@@ -141,8 +141,8 @@ namespace Votify.AcceptanceTests.Features
         public async Task Votar_CuandoSeAlcanzaLimite_LanzaInvalidOperationException()
         {
             // Arrange: Votación con límite de 1
-            var proyecto1 = TestDataFactory.CrearProyecto(nombre: "Proyecto 1");
-            var proyecto2 = TestDataFactory.CrearProyecto(nombre: "Proyecto 2");
+            var proyecto1 = TestDataFactory.CrearProyecto(nombre: "Proyecto 1", votacionId: votacion.Id);
+            var proyecto2 = TestDataFactory.CrearProyecto(nombre: "Proyecto 2", votacionId: votacion.Id);
             var votanteId = Guid.NewGuid().ToString();
 
             DbContext.Votaciones.Add(votacion);
@@ -197,7 +197,7 @@ DbContext.Proyectos.Add(proyecto);
         {
             // Arrange: Votación anónima donde múltiples usuarios anónimos pueden votar
             var votacion = TestDataFactory.CrearVotacionAnonima(nombre: "Anónima Multi", limiteProyectos: 1);
-            var proyecto = TestDataFactory.CrearProyecto();
+            var proyecto = TestDataFactory.CrearProyecto(votacionId: votacion.Id);
 DbContext.Votaciones.Add(votacion);
             DbContext.Proyectos.Add(proyecto);
             await DbContext.SaveChangesAsync();

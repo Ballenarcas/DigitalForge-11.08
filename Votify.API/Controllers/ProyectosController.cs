@@ -19,8 +19,15 @@ namespace Votify.API.Controllers
         [HttpPost]
         public async Task<ActionResult<string>> CrearProyecto([FromBody] ProyectoDto dto)
         {
-            var id = await _proyectoService.CrearProyectoAsync(dto);
-            return Ok(id);
+            try
+            {
+                var id = await _proyectoService.CrearProyectoAsync(dto);
+                return Ok(id);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error interno: {ex.Message} | StackTrace: {ex.StackTrace}");
+            }
         }
 
         [HttpGet("{id}")]
@@ -31,19 +38,19 @@ namespace Votify.API.Controllers
             {
                 return NotFound();
             }
-            return Ok(new ProyectoDto
-            {
-                Id = proyecto.Id,
-                Categoria_Id = proyecto.Categoria_Id,
-                Nombre = proyecto.Nombre,
-                Descripcion = proyecto.Descripcion,
-                Equipo_Id = proyecto.Equipo_Id
-            });
+            return Ok(proyecto);
         }
-        [HttpGet]
+
         public async Task<ActionResult<List<ProyectoDto>>> ObtenerProyectos()
         {
             var proyectos = await _proyectoService.ObtenerProyectosAsync();
+            return Ok(proyectos);
+        }
+
+        [HttpGet("votacion/{votacionId}")]
+        public async Task<ActionResult<List<ProyectoDto>>> ObtenerProyectosPorVotacion(string votacionId)
+        {
+            var proyectos = await _proyectoService.ObtenerProyectosPorVotacionAsync(votacionId);
             return Ok(proyectos);
         }
     }

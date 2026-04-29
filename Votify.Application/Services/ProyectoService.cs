@@ -16,7 +16,7 @@ public class ProyectoService : IProyectoService
 
     public async Task<string> CrearProyectoAsync(ProyectoDto dto)
     {
-        var proyecto = new Proyecto(dto.Categoria_Id, dto.Nombre, dto.Descripcion, dto.Equipo_Id);
+        var proyecto = new Proyecto(dto.Nombre, dto.Descripcion, dto.Equipo_Id, dto.VotacionId, dto.ImagenUrl);
         await _proyectoRepository.GuardarAsync(proyecto);
         return proyecto.Id;
     }
@@ -31,10 +31,11 @@ public class ProyectoService : IProyectoService
         return new ProyectoDto
         {
             Id = proyecto.Id,
-            Categoria_Id = proyecto.Categoria_Id,
             Nombre = proyecto.Nombre,
             Descripcion = proyecto.Descripcion,
-            Equipo_Id = proyecto.Equipo_Id
+            Equipo_Id = proyecto.Equipo_Id,
+            VotacionId = proyecto.VotacionId,
+            ImagenUrl = proyecto.ImagenUrl
         };
     }
 
@@ -44,10 +45,25 @@ public class ProyectoService : IProyectoService
         return proyectos.Select(p => new ProyectoDto
         {
             Id = p.Id,
-            Categoria_Id = p.Categoria_Id,
             Nombre = p.Nombre,
             Descripcion = p.Descripcion,
-            Equipo_Id = p.Equipo_Id
+            Equipo_Id = p.Equipo_Id,
+            VotacionId = p.VotacionId,
+            ImagenUrl = p.ImagenUrl
+        }).ToList();
+    }
+
+    public async Task<List<ProyectoDto>> ObtenerProyectosPorVotacionAsync(string votacionId)
+    {
+        var proyectos = await _proyectoRepository.ObtenerPorVotacionAsync(votacionId);
+        return proyectos.Select(p => new ProyectoDto
+        {
+            Id = p.Id,
+            Nombre = p.Nombre,
+            Descripcion = p.Descripcion,
+            Equipo_Id = p.Equipo_Id,
+            VotacionId = p.VotacionId,
+            ImagenUrl = p.ImagenUrl
         }).ToList();
     }
 }

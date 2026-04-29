@@ -42,15 +42,16 @@ namespace Votify.AcceptanceTests.Helpers
 
         public static ProyectoEntity CrearProyecto(
             string nombre = "Proyecto Test",
-            string descripcion = "Descripción test")
+            string descripcion = "Descripción test",
+            Guid? votacionId = null)
         {
             return new ProyectoEntity
             {
                 Id = Guid.NewGuid(),
                 Nombre = nombre,
                 Descripcion = descripcion,
-                Categoria_Id = null,
-                Equipo_Id = null
+                Equipo_Id = null,
+                VotacionId = votacionId ?? Guid.NewGuid()
             };
         }
 

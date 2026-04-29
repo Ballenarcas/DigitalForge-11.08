@@ -20,14 +20,15 @@ namespace Votify.Infrastructure.Repositories
         {
             var entity = new ProyectoEntity
             {
-                Categoria_Id = string.IsNullOrEmpty(proyecto.Categoria_Id) ? null : Guid.Parse(proyecto.Categoria_Id),
+                Id = Guid.Parse(proyecto.Id),
                 Nombre = proyecto.Nombre,
                 Descripcion = proyecto.Descripcion,
-                Equipo_Id = string.IsNullOrEmpty(proyecto.Equipo_Id) ? null : proyecto.Equipo_Id
+                Equipo_Id = string.IsNullOrEmpty(proyecto.Equipo_Id) ? null : proyecto.Equipo_Id,
+                VotacionId = proyecto.VotacionId,
+                ImagenUrl = proyecto.ImagenUrl
             };
             _context.Proyectos.Add(entity);
             await _context.SaveChangesAsync();
-            proyecto.Id = entity.Id.ToString();
         }
 
         public async Task<Proyecto?> ObtenerAsync(string proyectoId)
@@ -40,10 +41,11 @@ namespace Votify.Infrastructure.Repositories
                 return null;
             }
             return new Proyecto(
-                entity.Categoria_Id?.ToString(), 
                 entity.Nombre, 
                 entity.Descripcion, 
                 entity.Equipo_Id, 
+                entity.VotacionId,
+                entity.ImagenUrl,
                 entity.Id.ToString());
         }
 
@@ -51,10 +53,11 @@ namespace Votify.Infrastructure.Repositories
         {
             var entities = await _context.Proyectos.ToListAsync();
             return entities.Select(p => new Proyecto(
-                p.Categoria_Id?.ToString(), 
                 p.Nombre, 
                 p.Descripcion, 
                 p.Equipo_Id, 
+                p.VotacionId,
+                p.ImagenUrl,
                 p.Id.ToString())).ToList();
         }
 
@@ -63,21 +66,16 @@ namespace Votify.Infrastructure.Repositories
             if (!Guid.TryParse(votacionId, out var votacionGuid))
                 return new List<Proyecto>();
 
-            var proyectoIds = await _context.Votos
-                .Where(v => v.VotacionId == votacionGuid)
-                .Select(v => v.ProyectoId)
-                .Distinct()
-                .ToListAsync();
-
             var entities = await _context.Proyectos
-                .Where(p => proyectoIds.Contains(p.Id))
+                .Where(p => p.VotacionId == votacionGuid)
                 .ToListAsync();
-
+            
             return entities.Select(p => new Proyecto(
-                p.Categoria_Id?.ToString(), 
                 p.Nombre, 
                 p.Descripcion, 
                 p.Equipo_Id, 
+                p.VotacionId,
+                p.ImagenUrl,
                 p.Id.ToString())).ToList();
         }
     }

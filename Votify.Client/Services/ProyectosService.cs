@@ -12,9 +12,10 @@ namespace Votify.Client.Services
             _httpClient = httpClient;
         }
 
-        public async Task<List<ProyectoDto>> ObtenerProyectosAsync()
+        public async Task<List<ProyectoDto>> ObtenerProyectosAsync(string? votacionId = null)
         {
-            var response = await _httpClient.GetFromJsonAsync<List<ProyectoDto>>("api/proyectos");
+            var url = string.IsNullOrEmpty(votacionId) ? "api/proyectos" : $"api/proyectos/votacion/{votacionId}";
+            var response = await _httpClient.GetFromJsonAsync<List<ProyectoDto>>(url);
             return response ?? new List<ProyectoDto>();
         }
 
@@ -22,6 +23,29 @@ namespace Votify.Client.Services
         {
             return await _httpClient.GetFromJsonAsync<ProyectoDto>($"api/proyectos/{id}");
         }
+
+        public async Task<string> CrearProyectoAsync(ProyectoDto proyecto)
+        {
+            var resp = await _httpClient.PostAsJsonAsync("api/proyectos", proyecto);
+            resp.EnsureSuccessStatusCode();
+            return await resp.Content.ReadAsStringAsync();
+        }
+
+        public async Task<string> SubirImagen(MultipartFormDataContent content)
+        {
+            var resp = await _httpClient.PostAsync("api/files/upload", content);
+            resp.EnsureSuccessStatusCode();
+            var result = await resp.Content.ReadFromJsonAsync<UploadResponse>();
+            
+            if (result != null && !string.IsNullOrEmpty(result.Url))
+            {
+                return _httpClient.BaseAddress + result.Url;
+            }
+            return "";
+        }
+
+        private class UploadResponse { public string Url { get; set; } = ""; }
+
 
         public async Task AgregarComentarioAsync(string proyectoId, string texto, string? autorId = null)
         {
