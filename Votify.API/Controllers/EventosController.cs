@@ -26,7 +26,9 @@ namespace Votify.API.Controllers
         [Microsoft.AspNetCore.Authorization.Authorize]
         public async Task<IActionResult> GetMisEventos()
         {
-            var usuarioId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var usuarioId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+                            ?? User.FindFirst("sub")?.Value
+                            ?? User.FindFirst("nameid")?.Value;
             if (string.IsNullOrEmpty(usuarioId))
             {
                 return Unauthorized(new { Message = "Usuario no autenticado." });
@@ -48,7 +50,9 @@ namespace Votify.API.Controllers
         [Microsoft.AspNetCore.Authorization.Authorize]
         public async Task<IActionResult> Create([FromBody] EventoDto dto)
         {
-            var usuarioId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var usuarioId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+                            ?? User.FindFirst("sub")?.Value
+                            ?? User.FindFirst("nameid")?.Value;
             if (string.IsNullOrEmpty(usuarioId))
             {
                 return Unauthorized(new { Message = "Usuario no autenticado." });
@@ -56,6 +60,22 @@ namespace Votify.API.Controllers
 
             var result = await _service.CrearAsync(dto, usuarioId);
             return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+        }
+
+        [HttpPost("{id}/participar")]
+        [Microsoft.AspNetCore.Authorization.Authorize]
+        public async Task<IActionResult> Participar(string id)
+        {
+            var usuarioId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+                            ?? User.FindFirst("sub")?.Value
+                            ?? User.FindFirst("nameid")?.Value;
+            if (string.IsNullOrEmpty(usuarioId))
+            {
+                return Unauthorized(new { Message = "Usuario no autenticado." });
+            }
+
+            await _service.RegistrarParticipanteAsync(id, usuarioId);
+            return Ok();
         }
     }
 }
