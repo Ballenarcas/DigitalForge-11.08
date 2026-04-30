@@ -161,6 +161,8 @@
     private bool eliminando = false;
     private bool isAuthenticated = false;
     private string? Rol = null;
+    private Dictionary<string, bool> operacionesEnProgreso = new();
+    private Dictionary<string, string?> mensajesErrores = new();
 
 
     protected override async Task OnInitializedAsync()

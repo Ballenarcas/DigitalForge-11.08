@@ -284,6 +284,61 @@
     background: #93c5fd;
     cursor: not-allowed;
 }
+
+.btn-estado {
+    border: none;
+    padding: 0 0.8rem;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.8rem;
+    line-height: 1.2;
+    cursor: pointer;
+    transition: 0.2s;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+}
+
+.btn-pausar {
+    background: #fef08a;
+    color: #92400e;
+    border: 1px solid #fbbf24;
+}
+
+.btn-pausar:hover {
+    background: #fbbf24;
+    border-color: #f59e0b;
+}
+
+.btn-detener {
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+}
+
+.btn-detener:hover {
+    background: #fecaca;
+    border-color: #f87171;
+}
+
+.btn-abrir {
+    background: #dbeafe;
+    color: #0c4a6e;
+    border: 1px solid #bae6fd;
+}
+
+.btn-abrir:hover {
+    background: #bae6fd;
+    border-color: #7dd3fc;
+}
+
+.btn-estado:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 .btn-volver {
     background: white;
     border: 1px solid #e2e8f0;

@@ -41,6 +41,7 @@ namespace Votify.Application.Services
                 dto.FechaFin,
                 dto.LimiteProy,
                 dto.Comentarios,
+                dto.ComentariosObligatorios,
                 eventoGuid,
                 dto.EsAnonima
             );
@@ -60,8 +61,10 @@ namespace Votify.Application.Services
                 FechaFin = e.FechaFin,
                 LimiteProy = e.LimiteProy,
                 Comentarios = e.Comentarios,
+                ComentariosObligatorios = e.ComentariosObligatorios,
                 EsAnonima = e.EsAnonima,
-                EventoId = e.EventoId.ToString()
+                EventoId = e.EventoId.ToString(),
+                Estado = (int)e.Estado
             }).ToList();
         }
         public async Task<List<CrearVotacionResponse>> ObtenerPorEventoAsync(string eventoId)
@@ -79,8 +82,10 @@ namespace Votify.Application.Services
                 FechaFin = e.FechaFin,
                 LimiteProy = e.LimiteProy,
                 Comentarios = e.Comentarios,
+                ComentariosObligatorios = e.ComentariosObligatorios,
                 EsAnonima = e.EsAnonima,
-                EventoId = e.EventoId.ToString()
+                EventoId = e.EventoId.ToString(),
+                Estado = (int)e.Estado
             }).ToList();
         }
 
@@ -98,8 +103,10 @@ namespace Votify.Application.Services
                 FechaFin = e.FechaFin,
                 LimiteProy = e.LimiteProy,
                 Comentarios = e.Comentarios,
+                ComentariosObligatorios = e.ComentariosObligatorios,
                 EsAnonima = e.EsAnonima,
-                EventoId = e.EventoId.ToString()
+                EventoId = e.EventoId.ToString(),
+                Estado = (int)e.Estado
             };
         }
         public async Task ActualizarVotacionAsync(string id, CrearVotacionDto dto)
@@ -119,6 +126,7 @@ namespace Votify.Application.Services
                 dto.FechaFin,
                 dto.LimiteProy,
                 dto.Comentarios,
+                dto.ComentariosObligatorios,
                 Guid.Parse(dto.EventoId),
                 dto.EsAnonima
             );
@@ -161,6 +169,42 @@ namespace Votify.Application.Services
                 .ToList();
 
             return resultados;
+        }
+
+        public async Task PausarVotacionAsync(string id)
+        {
+            var votacion = await _repo.ObtenerAsync(id);
+            if (votacion is null)
+                throw new KeyNotFoundException($"No se encontró la votación con id {id}.");
+
+            votacion.Pausar();
+            var actualizado = await _repo.ActualizarAsync(id, votacion);
+            if (!actualizado)
+                throw new InvalidOperationException("No se pudo actualizar el estado de la votación.");
+        }
+
+        public async Task DetenerVotacionAsync(string id)
+        {
+            var votacion = await _repo.ObtenerAsync(id);
+            if (votacion is null)
+                throw new KeyNotFoundException($"No se encontró la votación con id {id}.");
+
+            votacion.Detener();
+            var actualizado = await _repo.ActualizarAsync(id, votacion);
+            if (!actualizado)
+                throw new InvalidOperationException("No se pudo actualizar el estado de la votación.");
+        }
+
+        public async Task AbrirVotacionAsync(string id)
+        {
+            var votacion = await _repo.ObtenerAsync(id);
+            if (votacion is null)
+                throw new KeyNotFoundException($"No se encontró la votación con id {id}.");
+
+            votacion.Abrir();
+            var actualizado = await _repo.ActualizarAsync(id, votacion);
+            if (!actualizado)
+                throw new InvalidOperationException("No se pudo actualizar el estado de la votación.");
         }
     }
 }

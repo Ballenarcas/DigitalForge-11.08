@@ -100,5 +100,35 @@ namespace Votify.Client.Services
                 return true;
             }
         }
+
+        public async Task PausarVotacion(string id)
+        {
+            var response = await _http.PatchAsync($"api/votaciones/{id}/pausar", null);
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Error al pausar la votación: {error}");
+            }
+        }
+
+        public async Task DetenerVotacion(string id)
+        {
+            var response = await _http.PatchAsync($"api/votaciones/{id}/detener", null);
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Error al detener la votación: {error}");
+            }
+        }
+
+        public async Task AbrirVotacion(string id)
+        {
+            var response = await _http.PatchAsync($"api/votaciones/{id}/abrir", null);
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Error al abrir la votación: {error}");
+            }
+        }
     }
 }

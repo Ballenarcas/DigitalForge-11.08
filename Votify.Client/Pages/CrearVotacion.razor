@@ -69,6 +69,20 @@
                 </label>
             </div>
 
+            @if (Comentarios)
+            {
+                <div class="option-row" style="background: #fef3c7; border: 1px solid #fbbf24;">
+                    <div class="option-info">
+                        <p class="option-title">Comentarios obligatorios</p>
+                        <p class="option-desc">Los comentarios deberán ser completados por los votantes</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" @bind="ComentariosObligatorios">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+            }
+
 
             <div class="option-row">
                 <div class="option-info">
@@ -384,6 +398,7 @@ input:checked + .slider:before {
     DateTime FechaFin = DateTime.Now.AddDays(1);
     int LimiteProy = 1;
     bool Comentarios = true;
+    bool ComentariosObligatorios = false;
     string? Mensaje;
 
     protected override void OnInitialized()
@@ -422,7 +437,8 @@ input:checked + .slider:before {
                 Nombre = Nombre, Tipo = Tipo, 
                 FechaInicio = FechaInicio.ToUniversalTime(), 
                 FechaFin = FechaFin.ToUniversalTime(),
-                LimiteProy = LimiteProy, Comentarios = Comentarios,
+                LimiteProy = LimiteProy, Comentarios = Comentarios, 
+                ComentariosObligatorios = ComentariosObligatorios,
                 EsAnonima = EsAnonima,
                 EventoId = AppState.EventoId ?? ""
             };

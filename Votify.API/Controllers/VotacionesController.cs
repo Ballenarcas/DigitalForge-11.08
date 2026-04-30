@@ -78,5 +78,59 @@ namespace Votify.API.Controllers
             var resultados = await _service.ObtenerResultadosAsync(id);
             return Ok(resultados);
         }
+
+        [HttpPatch("{id}/pausar")]
+        public async Task<IActionResult> PausarVotacion(string id)
+        {
+            try
+            {
+                await _service.PausarVotacionAsync(id);
+                return Ok(new { mensaje = "La votación ha sido pausada exitosamente." });
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
+        [HttpPatch("{id}/detener")]
+        public async Task<IActionResult> DetenerVotacion(string id)
+        {
+            try
+            {
+                await _service.DetenerVotacionAsync(id);
+                return Ok(new { mensaje = "La votación ha sido detenida exitosamente." });
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
+        [HttpPatch("{id}/abrir")]
+        public async Task<IActionResult> AbrirVotacion(string id)
+        {
+            try
+            {
+                await _service.AbrirVotacionAsync(id);
+                return Ok(new { mensaje = "La votación ha sido abierta exitosamente." });
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
     }
 }
