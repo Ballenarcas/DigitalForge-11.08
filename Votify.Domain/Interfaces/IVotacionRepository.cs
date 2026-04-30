@@ -10,5 +10,6 @@ namespace Votify.Domain.Interfaces
         Task<List<Votacion>> ObtenerPorEventoAsync(Guid eventoId);
         Task<bool> ActualizarAsync(string id, Votacion votacion);
         Task<bool> EliminarAsync(string id);
+        Task<string?> ObtenerEventoIdAsync(string votacionId);
     }   
 }

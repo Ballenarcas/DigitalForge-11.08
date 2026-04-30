@@ -115,5 +115,12 @@ namespace Votify.Infrastructure.Repositories
             domain.Id = entity.Id;
             return domain;
         }
+        public async Task<string?> ObtenerEventoIdAsync(string votacionId)
+        {
+            if (!Guid.TryParse(votacionId, out var guid)) return null;
+
+            var entity = await _db.Votaciones.FindAsync(guid);
+            return entity?.EventoId.ToString();
+        }
     }
 }
