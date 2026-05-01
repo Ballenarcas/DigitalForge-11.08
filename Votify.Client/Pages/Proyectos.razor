@@ -80,9 +80,7 @@
                         <div class="card-content">
                             <div class="card-top-row">
                                 <div class="card-badge">Proyecto</div>
-                                <div class="status-pill pill-active">
-                                    Participante
-                                </div>
+
                             </div>
                             <h3>@p.Nombre</h3>
                             <p class="descripcion-breve">@p.Descripcion</p>
@@ -101,7 +99,7 @@
                             </button>
 
                             <div class="card-footer">
-                                <span class="stats">ID: @p.Id.Substring(0, 8)</span>
+                                <span class="stats">Equipo: @(p.Equipo_Id ?? "N/A")</span>
                                 <div class="footer-actions">
                                     <button class="btn-ver" @onclick="() => VerDetalles(p.Id)">Detalles</button>
                                 </div>
@@ -122,7 +120,7 @@
     .header-principal { display: flex; justify-content: space-between; align-items: center; max-width: 1000px; margin: 0 auto 2rem; gap: 1rem; }
     .header-actions { display: flex; gap: 0.75rem; align-items: center; }
     .votables-text { font-size: 0.75rem; font-weight: 700; color: #94a3b8; letter-spacing: 0.05em; text-transform: uppercase; }
-    .page-title-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+    .page-title-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 2rem; }
     .brand-name { font-weight: 800; font-size: 1.2rem; color: #4c1d95; letter-spacing: -0.02em; }
     .proyectos-logo-img { width: 20px; height: 20px; }
 
@@ -170,8 +168,8 @@
     }
     .btn-votar:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(147, 51, 234, 0.25); filter: brightness(1.1); }
     .btn-votar:disabled { background: #dbc2e2; color: white; cursor: not-allowed; box-shadow: none; transform: none; }
-    .btn-ver { background: white; border: 1px solid #e2e8f0; color: #7c3aed; padding: 0 0.8rem; border-radius: 8px; font-weight: 700; font-size: 0.8rem; line-height: 1.2; cursor: pointer; transition: 0.2s; height: 2rem; display: flex; align-items: center; justify-content: center; white-space: nowrap; }
-    .btn-ver:hover { background: #f5f3ff; border-color: #ddd6fe; }
+    .btn-ver { background: #bf65b0; border: none; color: white; padding: 0 0.8rem; border-radius: 8px; font-weight: 700; font-size: 0.8rem; line-height: 1.2; cursor: pointer; transition: 0.2s; height: 2rem; display: flex; align-items: center; justify-content: center; white-space: nowrap; }
+    .btn-ver:hover { background: #a54d96; transform: translateY(-1px); }
 
     /* 5. Loaders */
     .loader-container { text-align: center; padding: 4rem; color: #64748b; }

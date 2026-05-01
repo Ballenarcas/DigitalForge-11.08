@@ -29,7 +29,7 @@
                     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="16" height="16">
                         <path d="M15 19L8 12L15 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
-                    Votaciones
+                    Proyectos
                 </button>
             </div>
 
@@ -65,29 +65,24 @@
                 }
 
                 <!-- Imagen / Banner del proyecto -->
-                <div class="proyecto-imagen" style="background: @GetGradient(proyecto?.Id ?? string.Empty)">
-                    <div class="imagen-overlay">
-                        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" width="48" height="48" opacity="0.35">
-                            <rect x="8" y="16" width="48" height="34" rx="6" stroke="white" stroke-width="3"/>
-                            <circle cx="24" cy="29" r="5" stroke="white" stroke-width="3"/>
-                            <path d="M8 42l12-10 8 8 10-12 14 12" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                    </div>
+                <div class="proyecto-imagen">
+                    <img src="@(string.IsNullOrEmpty(proyecto?.ImagenUrl) ? "images/Proyectos-default.jpg" : proyecto.ImagenUrl)" alt="@proyecto?.Nombre" style="width:100%; height:100%; object-fit:cover;" />
                 </div>
 
                 <!-- Descripción -->
                 <div class="descripcion-card">
                     <div class="descripcion-titulo">
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="18" height="18">
-                            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" stroke="#9333ea" stroke-width="2" stroke-linecap="round"/>
-                            <rect x="9" y="3" width="6" height="4" rx="1" stroke="#9333ea" stroke-width="2"/>
-                            <path d="M9 12h6M9 16h4" stroke="#9333ea" stroke-width="2" stroke-linecap="round"/>
-                        </svg>
+                        <img src="images/portafolio-logo.png" alt="Portafolio" class="descripcion-icon" />
                         <h2>Descripción del Proyecto</h2>
                     </div>
                     <p class="descripcion-texto">@(proyecto?.Descripcion ?? "")</p>
                     <div class="descripcion-acciones">
                         <button class="btn-ver-comentarios" @onclick="VerComentarios">Ver comentarios</button>
+                    </div>
+
+                    <div class="descripcion-titulo team-section">
+                        <img src="images/equipo-logo.png" alt="Equipo" class="descripcion-icon" />
+                        <h2 class="team-name-text">Equipo: @(proyecto?.Equipo_Id ?? "N/A")</h2>
                     </div>
                 </div>
 
@@ -367,7 +362,20 @@
         margin: 0;
         font-size: 1rem;
         font-weight: 700;
-        color: #9333ea;
+        color: #bf65b0;
+    }
+    .descripcion-icon {
+        width: 24px;
+        height: 24px;
+        object-fit: contain;
+    }
+    .team-section {
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #f1f5f9;
+    }
+    .team-name-text {
+        color: #000000 !important;
     }
     .descripcion-texto {
         color: #475569;
@@ -809,7 +817,7 @@
         }
     }
 
-    private void Volver() => Nav.NavigateTo("/votaciones");
+    private void Volver() => Nav.NavigateTo($"/{VotacionId}/proyectos/");
 
     private void VerComentarios() => Nav.NavigateTo($"/{VotacionId}/proyectos/{ProyectoId}/comentarios");
 

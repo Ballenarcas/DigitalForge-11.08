@@ -313,9 +313,9 @@
     transform: none;
 }
 .btn-ver {
-    background: white;
-    border: 1px solid #e2e8f0;
-    color: #7c3aed;
+    background: #bf65b0;
+    border: none;
+    color: white;
     padding: 0 0.8rem;
     border-radius: 8px;
     font-weight: 700;
@@ -330,8 +330,8 @@
     white-space: nowrap;
 }
 .btn-ver:hover {
-    background: #f5f3ff;
-    border-color: #ddd6fe;
+    background: #a54d96;
+    transform: translateY(-1px);
 }
 .btn-eliminar {
     background: #fee2e2;
