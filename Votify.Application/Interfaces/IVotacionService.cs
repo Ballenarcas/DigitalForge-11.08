@@ -11,5 +11,8 @@ namespace Votify.Application.Interfaces
         Task ActualizarVotacionAsync(string id, CrearVotacionDto dto);
         Task EliminarVotacionAsync(string id);
         Task<List<ResultadoProyectoDto>> ObtenerResultadosAsync(string votacionId);
+        Task PausarVotacionAsync(string id);
+        Task DetenerVotacionAsync(string id);
+        Task AbrirVotacionAsync(string id);
     }
 }

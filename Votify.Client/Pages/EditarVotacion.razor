@@ -158,6 +158,20 @@
                     </label>
                 </div>
 
+                @if (Comentarios)
+                {
+                    <div class="option-row" style="background: #fef3c7; border: 1px solid #fbbf24;">
+                        <div class="option-info">
+                            <p class="option-title">Comentarios obligatorios</p>
+                            <p class="option-desc">Los comentarios deberán ser completados por los votantes</p>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" @bind="ComentariosObligatorios" disabled="@YaInicio">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                }
+
                 <div class="option-row">
                     <div class="option-info">
                         <p class="option-title">Límite de proyectos por votar</p>
@@ -192,6 +206,65 @@
                             <span>💾 Guardar cambios</span>
                         }
                     </button>
+                </div>
+
+                <h4 class="section-divider" style="margin-top: 2.5rem;">Gestionar estado</h4>
+
+                <div class="estado-buttons">
+                    @if (Estado == 0)
+                    {
+                        <button class="btn-estado btn-pausar" @onclick="PausarVotacion" disabled="@operacionesEnProgreso">
+                            @if (operacionesEnProgreso)
+                            {
+                                <span class="btn-spinner"></span>
+                            }
+                            else
+                            {
+                                <span>⏸</span>
+                            }
+                            Pausar votación
+                        </button>
+                        <button class="btn-estado btn-detener" @onclick="DetenerVotacion" disabled="@operacionesEnProgreso">
+                            @if (operacionesEnProgreso)
+                            {
+                                <span class="btn-spinner"></span>
+                            }
+                            else
+                            {
+                                <span>⏹</span>
+                            }
+                            Detener votación
+                        </button>
+                    }
+                    @if (Estado == 1)
+                    {
+                        <button class="btn-estado btn-abrir" @onclick="AbrirVotacion" disabled="@operacionesEnProgreso">
+                            @if (operacionesEnProgreso)
+                            {
+                                <span class="btn-spinner"></span>
+                            }
+                            else
+                            {
+                                <span>▶</span>
+                            }
+                            Abrir votación
+                        </button>
+                        <button class="btn-estado btn-detener" @onclick="DetenerVotacion" disabled="@operacionesEnProgreso">
+                            @if (operacionesEnProgreso)
+                            {
+                                <span class="btn-spinner"></span>
+                            }
+                            else
+                            {
+                                <span>⏹</span>
+                            }
+                            Detener votación
+                        </button>
+                    }
+                    @if (Estado == 2)
+                    {
+                        <p style="color: #64748b; font-style: italic;">Votación finalizada. No se pueden cambiar los estados.</p>
+                    }
                 </div>
 
                 @if (!string.IsNullOrEmpty(Mensaje))
@@ -629,6 +702,70 @@ input:checked + .slider:before {
     cursor: not-allowed;
 }
 
+/* ── Estado Buttons ── */
+.estado-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.btn-estado {
+    border: none;
+    padding: 0.75rem 1.2rem;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 2.5rem;
+}
+
+.btn-pausar {
+    background: #fef08a;
+    color: #92400e;
+    border: 1px solid #fbbf24;
+}
+
+.btn-pausar:hover:not(:disabled) {
+    background: #fbbf24;
+    border-color: #f59e0b;
+    transform: translateY(-1px);
+}
+
+.btn-detener {
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+}
+
+.btn-detener:hover:not(:disabled) {
+    background: #fecaca;
+    border-color: #f87171;
+    transform: translateY(-1px);
+}
+
+.btn-abrir {
+    background: #dbeafe;
+    color: #0c4a6e;
+    border: 1px solid #bae6fd;
+}
+
+.btn-abrir:hover:not(:disabled) {
+    background: #bae6fd;
+    border-color: #7dd3fc;
+    transform: translateY(-1px);
+}
+
+.btn-estado:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 /* ── Button spinner ── */
 .btn-spinner {
     display: inline-block;
@@ -879,7 +1016,9 @@ input:checked + .slider:before {
     DateTime FechaFin = DateTime.Now.AddDays(1);
     int LimiteProy = 1;
     bool Comentarios = true;
+    bool ComentariosObligatorios = false;
     bool EsAnonima = false;
+    int Estado = 0;
     string? Mensaje;
 
     bool cargando = true;
@@ -887,6 +1026,7 @@ input:checked + .slider:before {
     bool guardando = false;
     bool eliminando = false;
     bool mostrarModalConfirmacion = false;
+    bool operacionesEnProgreso = false;
     
     DateTime FechaInicioOriginal = DateTime.Now;
     DateTime FechaFinOriginal = DateTime.Now.AddDays(1);
@@ -919,7 +1059,9 @@ input:checked + .slider:before {
             FechaFinOriginal    = votacion.FechaFin.ToLocalTime();
             LimiteProy    = votacion.LimiteProy;
             Comentarios = votacion.Comentarios;
+            ComentariosObligatorios = votacion.ComentariosObligatorios;
             EsAnonima = votacion.EsAnonima;
+            Estado = votacion.Estado;
         }
         catch
         {
@@ -957,6 +1099,7 @@ input:checked + .slider:before {
                 FechaFin          = FechaFin.ToUniversalTime(),
                 LimiteProy   = LimiteProy,
                 Comentarios = Comentarios,
+                ComentariosObligatorios = ComentariosObligatorios,
                 EsAnonima = EsAnonima
             };
             await VotacionesService.ActualizarVotacion(Id, request);
@@ -1006,6 +1149,66 @@ input:checked + .slider:before {
     void CerrarModal()
     {
         mostrarModalConfirmacion = false;
+    }
+
+    async Task PausarVotacion()
+    {
+        operacionesEnProgreso = true;
+        Mensaje = null;
+        try
+        {
+            await VotacionesService.PausarVotacion(Id);
+            Estado = 1;
+            Mensaje = "Votación pausada correctamente.";
+        }
+        catch (Exception ex)
+        {
+            Mensaje = $"Error al pausar: {ex.Message}";
+        }
+        finally
+        {
+            operacionesEnProgreso = false;
+        }
+    }
+
+    async Task DetenerVotacion()
+    {
+        operacionesEnProgreso = true;
+        Mensaje = null;
+        try
+        {
+            await VotacionesService.DetenerVotacion(Id);
+            Estado = 2;
+            Mensaje = "Votación detenida correctamente.";
+        }
+        catch (Exception ex)
+        {
+            Mensaje = $"Error al detener: {ex.Message}";
+        }
+        finally
+        {
+            operacionesEnProgreso = false;
+        }
+    }
+
+    async Task AbrirVotacion()
+    {
+        operacionesEnProgreso = true;
+        Mensaje = null;
+        try
+        {
+            await VotacionesService.AbrirVotacion(Id);
+            Estado = 0;
+            Mensaje = "Votación abierta correctamente.";
+        }
+        catch (Exception ex)
+        {
+            Mensaje = $"Error al abrir: {ex.Message}";
+        }
+        finally
+        {
+            operacionesEnProgreso = false;
+        }
     }
 
     void HandleVolver() => Nav.NavigateTo("/votaciones");
