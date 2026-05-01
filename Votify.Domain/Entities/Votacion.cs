@@ -13,6 +13,7 @@ namespace Votify.Domain.Entities
         public bool EsAnonima { get; }
         public Guid EventoId { get; set; }
         public EstadoVotacion Estado { get; set; }
+        private IEstadoVotacion _estado;
 
         protected Votacion(string nombre, DateTime inicio, DateTime fin, int limite, bool comentarios, bool comentariosObligatorios, string tipo, bool esAnonima, Guid eventoId)
         {
@@ -31,23 +32,26 @@ namespace Votify.Domain.Entities
 
         public void Pausar()
         {
-            if (Estado == EstadoVotacion.Detenida)
-                throw new InvalidOperationException("No se puede pausar una votación detenida.");
-            Estado = EstadoVotacion.Pausada;
+            _estado.PausarVotacion(this);
         }
 
         public void Detener()
         {
-            if (Estado == EstadoVotacion.Detenida)
-                throw new InvalidOperationException("La votación ya está detenida.");
-            Estado = EstadoVotacion.Detenida;
+            _estado.FinalizarVotacion(this);
         }
 
         public void Abrir()
         {
-            if (Estado == EstadoVotacion.Abierta)
-                throw new InvalidOperationException("La votación ya está abierta.");
-            Estado = EstadoVotacion.Abierta;
+            _estado.IniciarVotacion(this);
+        }
+        public void Reanudar()
+        {
+            _estado.ReanudarVotacion(this);
+        }
+
+        public void CambiarEstado(IEstadoVotacion nuevoEstado)
+        {
+            _estado = nuevoEstado;
         }
     }
 }
