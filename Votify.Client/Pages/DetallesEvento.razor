@@ -1,0 +1,295 @@
+@page "/detalles-evento/{EventoId}"
+@using Votify.Client.DTOs
+@using Votify.Client.Services
+@inject EventosService EventosService
+@inject NavigationManager Nav
+@inject AppState AppState
+@inject AuthenticationStateProvider AuthStateProvider
+
+<div class="detalles-wrapper">
+    @if (cargando)
+    {
+        <div class="loader-center">
+            <div class="spinner"></div>
+            <p>Cargando evento...</p>
+        </div>
+    }
+    else if (evento == null)
+    {
+        <div class="error-state">
+            <p>No se pudo cargar el evento.</p>
+        </div>
+    }
+    else
+    {
+        <div class="detalles-layout">
+
+            <!-- breadcrumb -->
+            <div class="header-principal">
+                <button class="btn-volver" @onclick="Volver">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="16" height="16">
+                        <path d="M15 19L8 12L15 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Eventos
+                </button>
+            </div>
+
+            <div class="page-header-row">
+                <div class="logo-icon small">
+                    <img src="images/evento-logo.png" alt="Logo" class="evento-logo-img" style="width:20px;height:20px;" />
+                </div>
+                <span class="brand-name">Detalles del Evento</span>
+            </div>
+
+            <!-- COLUMNA IZQUIERDA: Información del evento -->
+            <main class="col-info">
+                <div class="status-badge">
+                    <div class="dot-pulse"></div>
+                    <span>@(YaFinalizo ? "FINALIZADO" : YaInicio ? "EN CURSO" : "PENDIENTE")</span>
+                </div>
+
+                <h1 class="proyecto-titulo">@evento.Nombre</h1>
+
+                <!-- Imagen / Banner -->
+                <div class="proyecto-imagen">
+                    <img src="@(string.IsNullOrEmpty(evento.ImagenUrl) ? "images/evento-default.png" : evento.ImagenUrl)" alt="@evento.Nombre" style="width:100%; height:100%; object-fit:cover;" />
+                </div>
+
+                <!-- Descripción -->
+                <div class="descripcion-card">
+                    <div class="descripcion-titulo">
+                        <img src="images/portafolio-logo.png" alt="Información" class="descripcion-icon" />
+                        <h2>Descripción del Evento</h2>
+                    </div>
+                    <p class="descripcion-texto">@evento.Descripcion</p>
+                </div>
+            </main>
+
+            <!-- COLUMNA DERECHA: Estado + Acción -->
+            <aside class="col-sidebar">
+                <div class="sidebar-card info-card">
+                    <h3 class="sidebar-title">Información del Evento</h3>
+                    <p class="sidebar-subtitle">Fechas importantes</p>
+
+                    <div class="info-item">
+                        <span class="info-label">INICIO</span>
+                        <span class="info-value">@evento.FechaInicio.ToLocalTime().ToString("dd MMM yyyy, HH:mm")</span>
+                    </div>
+
+                    <div class="info-item">
+                        <span class="info-label">FIN</span>
+                        <span class="info-value">@evento.FechaFin.ToLocalTime().ToString("dd MMM yyyy, HH:mm")</span>
+                    </div>
+                </div>
+
+                <div class="sidebar-card action-card">
+                    @if (!estaInscripto)
+                    {
+                        <button class="btn-votar-proyecto" @onclick="Participar" disabled="@procesando">
+                            @if (procesando)
+                            {
+                                <span class="spinner-sm"></span>
+                                <span>Procesando...</span>
+                            }
+                            else
+                            {
+                                <span>Participar en Evento</span>
+                            }
+                        </button>
+                    }
+                    else if (YaInicio && !YaFinalizo)
+                    {
+                        <button class="btn-votar-proyecto" @onclick="IrAVotaciones">
+                            <span>Ver Votaciones</span>
+                        </button>
+                    }
+                    else
+                    {
+                        <button class="btn-votar-proyecto" disabled>
+                            <span>@(YaFinalizo ? "Evento Finalizado" : "Próximamente")</span>
+                        </button>
+                    }
+                    <p class="votar-nota">DEBES ESTAR INSCRIPTO PARA VER LAS VOTACIONES</p>
+                </div>
+            </aside>
+        </div>
+    }
+</div>
+
+<style>
+    .detalles-wrapper {
+        min-height: 100vh;
+        background-color: #f8f9fc;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .header-principal {
+        grid-column: 1 / -1;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        margin-bottom: 0.25rem;
+    }
+
+    .btn-volver {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        background: white;
+        border: 1px solid #e2e8f0;
+        color: #64748b;
+        padding: 0.4rem 0.8rem;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-volver:hover { background: #f8f9fc; border-color: #ddd6fe; color: #7c3aed; }
+
+    .page-header-row {
+        grid-column: 1 / -1;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .brand-name {
+        font-weight: 800; font-size: 1.2rem; color: #4c1d95; letter-spacing: -0.02em;
+    }
+
+    .detalles-layout {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+        display: grid;
+        grid-template-columns: 1fr 380px;
+        gap: 2rem;
+        align-items: start;
+    }
+
+    .col-info { display: flex; flex-direction: column; gap: 1.5rem; }
+
+    .status-badge {
+        display: inline-flex; align-items: center; gap: 0.5rem;
+        background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d;
+        font-size: 0.72rem; font-weight: 800; padding: 0.3rem 0.8rem;
+        border-radius: 20px; letter-spacing: 0.05em; width: fit-content;
+    }
+    .dot-pulse { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; animation: pulse-green 1.5s ease-in-out infinite; }
+    @@keyframes pulse-green { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.8); } }
+
+    .proyecto-titulo {
+        font-size: 2.4rem; font-weight: 900; color: #0f172a; line-height: 1.15; letter-spacing: -0.03em; margin: 0;
+    }
+
+    .proyecto-imagen {
+        height: 400px; border-radius: 20px; overflow: hidden;
+    }
+
+    .descripcion-card {
+        background: white; border-radius: 20px; padding: 1.5rem; border: 1px solid #f1f5f9; box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    .descripcion-titulo { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1rem; }
+    .descripcion-titulo h2 { margin: 0; font-size: 1rem; font-weight: 700; color: #bf65b0; }
+    .descripcion-icon { width: 24px; height: 24px; object-fit: contain; }
+    .descripcion-texto { color: #475569; line-height: 1.75; font-size: 0.95rem; margin: 0; }
+
+    .col-sidebar { display: flex; flex-direction: column; gap: 1rem; position: sticky; top: 5rem; }
+    .sidebar-card { background: white; border-radius: 20px; border: 1px solid #f1f5f9; box-shadow: 0 4px 16px rgba(0,0,0,0.04); padding: 1.5rem; }
+    .sidebar-title { font-size: 1.1rem; font-weight: 800; color: #0f172a; margin: 0 0 0.25rem 0; }
+    .sidebar-subtitle { color: #94a3b8; font-size: 0.82rem; margin: 0 0 1.25rem 0; }
+
+    .info-item { display: flex; flex-direction: column; margin-bottom: 1rem; }
+    .info-label { font-size: 0.7rem; font-weight: 800; color: #94a3b8; letter-spacing: 0.05em; margin-bottom: 0.25rem; }
+    .info-value { font-size: 0.95rem; font-weight: 600; color: #1e293b; }
+
+    .btn-votar-proyecto {
+        width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.6rem;
+        background: linear-gradient(135deg, #9333ea 0%, #7c3aed 100%); color: white; border: none;
+        border-radius: 16px; padding: 1rem 1.5rem; font-size: 1rem; font-weight: 800; cursor: pointer;
+        transition: all 0.3s; box-shadow: 0 6px 20px rgba(147, 51, 234, 0.3);
+    }
+    .btn-votar-proyecto:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(147, 51, 234, 0.4); filter: brightness(1.08); }
+    .btn-votar-proyecto:disabled { background: #dbc2e2; color: white; cursor: not-allowed; box-shadow: none; }
+
+    .votar-nota { text-align: center; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; color: #94a3b8; margin-top: 0.75rem; }
+
+    .loader-center { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5rem; color: #64748b; }
+    .spinner { width: 36px; height: 36px; border: 4px solid #f3e8ff; border-top: 4px solid #9333ea; border-radius: 50%; animation: spin 0.9s linear infinite; margin-bottom: 1rem; }
+    .spinner-sm { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.4); border-top: 2px solid white; border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @@keyframes spin { to { transform: rotate(360deg); } }
+
+    @@media (max-width: 900px) {
+        .detalles-layout { grid-template-columns: 1fr; padding: 1rem; }
+        .col-sidebar { position: static; }
+        .proyecto-titulo { font-size: 1.8rem; }
+        .proyecto-imagen { height: 250px; }
+    }
+</style>
+
+@code {
+    [Parameter] public string? EventoId { get; set; }
+    private EventoDto? evento;
+    private bool cargando = true;
+    private bool procesando = false;
+    private bool estaInscripto = false;
+
+    private bool YaInicio => evento != null && DateTime.UtcNow >= evento.FechaInicio;
+    private bool YaFinalizo => evento != null && DateTime.UtcNow >= evento.FechaFin;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (string.IsNullOrEmpty(EventoId)) return;
+
+        try
+        {
+            evento = await EventosService.ObtenerEvento(EventoId);
+            
+            var misEventos = await EventosService.ObtenerMisEventos();
+            estaInscripto = misEventos.Any(e => e.Id == EventoId);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error cargando evento: {ex.Message}");
+        }
+        finally
+        {
+            cargando = false;
+        }
+    }
+
+    private void Volver() => Nav.NavigateTo("/");
+
+    private async Task Participar()
+    {
+        if (string.IsNullOrEmpty(EventoId)) return;
+        procesando = true;
+        try
+        {
+            await EventosService.ParticiparEnEvento(EventoId);
+            estaInscripto = true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al participar: {ex.Message}");
+        }
+        finally
+        {
+            procesando = false;
+        }
+    }
+
+    private void IrAVotaciones()
+    {
+        if (evento == null) return;
+        if (AppState != null)
+        {
+            AppState.EventoNombre = evento.Nombre;
+            AppState.EventoId = evento.Id!;
+        }
+        Nav.NavigateTo($"/votaciones?eventoId={evento.Id}&eventoNombre={Uri.EscapeDataString(evento.Nombre)}");
+    }
+}

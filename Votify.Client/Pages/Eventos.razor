@@ -35,7 +35,6 @@
         {
             <div class="empty-state">
                 <p>No hay eventos disponibles.</p>
-                <button class="btn-ver">Crear nuevo</button>
             </div>
         }
         else
@@ -93,7 +92,7 @@
                                     }
                                     else
                                     {
-                                        <button class="btn-ver">Detalles</button>
+                                        <button class="btn-ver" @onclick="() => IrADetalles(e.Id!)">Detalles</button>
                                     }
                                 </div>
                             </div>
@@ -172,6 +171,11 @@
         {
             Console.WriteLine($"Error al registrarse en el evento: {ex.Message}");
         }
+    }
+
+    private void IrADetalles(string id)
+    {
+        Nav.NavigateTo($"/detalles-evento/{id}");
     }
 }
 

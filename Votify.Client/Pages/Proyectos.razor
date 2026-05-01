@@ -85,14 +85,7 @@
                             <h3>@p.Nombre</h3>
                             <p class="descripcion-breve">@p.Descripcion</p>
                             
-                            @if (!string.IsNullOrEmpty(p.Equipo_Id))
-                            {
-                                <p class="fecha">Equipo: @p.Equipo_Id</p>
-                            }
-                            else
-                            {
-                                <p class="fecha">&nbsp;</p>
-                            }
+
 
                             <button class="btn-votar" @onclick="() => Votar(p.Id)" disabled="@(isVoting || limiteAlcanzado)">
                                 Votar Proyecto
