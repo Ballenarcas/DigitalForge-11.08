@@ -247,6 +247,9 @@
         catch (Exception ex)
         {
             Console.WriteLine($"Error eliminando votación: {ex.Message}");
+        }
+        finally
+        {
             eliminando = false;
         }
     }
