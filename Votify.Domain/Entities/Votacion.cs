@@ -13,7 +13,14 @@ namespace Votify.Domain.Entities
         public bool EsAnonima { get; }
         public Guid EventoId { get; set; }
         public EstadoVotacion Estado { get; set; }
-        private IEstadoVotacion _estado;
+        
+        private IEstadoVotacion _estado => Estado switch
+        {
+            EstadoVotacion.Abierta => new EstadoActiva(),
+            EstadoVotacion.Pausada => new EstadoPausada(),
+            EstadoVotacion.Detenida => new EstadoFinalizada(),
+            _ => new EstadoActiva()
+        };
 
         protected Votacion(string nombre, DateTime inicio, DateTime fin, int limite, bool comentarios, bool comentariosObligatorios, string tipo, bool esAnonima, Guid eventoId)
         {
@@ -49,9 +56,13 @@ namespace Votify.Domain.Entities
             _estado.ReanudarVotacion(this);
         }
 
-        public void CambiarEstado(IEstadoVotacion nuevoEstado)
+        public void ValidarVoto()
         {
-            _estado = nuevoEstado;
+            if (DateTime.Now < FechaInicio || DateTime.Now > FechaFin)
+            {
+                throw new InvalidOperationException("La votación no está dentro del período permitido.");
+            }
+            _estado.ValidarVoto(this);
         }
     }
 }

@@ -1,6 +1,7 @@
 @page "/{VotacionId}/proyectos/"
 @using Votify.Client.DTOs
 @using Votify.Client.Services
+@using Votify.Domain.Entities
 @inject ProyectosService ProyectosService
 @inject VotacionesService VotacionesService
 @inject NavigationManager Nav
@@ -35,6 +36,20 @@
             <div class="alert-limite">
                 <svg viewBox="0 0 24 24" fill="none" width="20" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M12 8v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
                 Ya has usado todos tus votos disponibles para esta votación. No puedes votar más proyectos.
+            </div>
+        }
+        @if (estadoVotacion() == 1)
+        {
+            <div class="alert-info">
+                <svg viewBox="0 0 24 24" fill="none" width="20" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M12 8v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                La votación está pausada. No se pueden emitir votos en este momento.
+            </div>
+        }
+        @if (estadoVotacion() == 2)
+        {
+            <div class="alert-info">
+                <svg viewBox="0 0 24 24" fill="none" width="20" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M12 8v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                La votación ha finalizado. No se pueden emitir más votos.
             </div>
         }
 
@@ -164,6 +179,53 @@
     .btn-ver { background: #bf65b0; border: none; color: white; padding: 0 0.8rem; border-radius: 8px; font-weight: 700; font-size: 0.8rem; line-height: 1.2; cursor: pointer; transition: 0.2s; height: 2rem; display: flex; align-items: center; justify-content: center; white-space: nowrap; }
     .btn-ver:hover { background: #a54d96; transform: translateY(-1px); }
 
+
+    /* Alertas de Estado */
+    .alert-pausada {
+        background-color: #fef3c7;
+        border-left: 4px solid #f59e0b;
+        color: #92400e;
+    }
+
+    .alert-finalizada {
+        background-color: #e0e7ff;
+        border-left: 4px solid #6366f1;
+        color: #312e81;
+    }
+
+    /* Badges de Estado */
+    .estado-badge {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 999px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-align: center;
+    }
+
+    .badge-abierta {
+        background-color: #dcfce7;
+        color: #166534;
+        border: 1px solid #22c55e;
+    }
+
+    .badge-pausada {
+        background-color: #fef3c7;
+        color: #92400e;
+        border: 1px solid #fbbf24;
+    }
+
+    .badge-finalizada {
+        background-color: #e0e7ff;
+        color: #312e81;
+        border: 1px solid #818cf8;
+    }
     /* 5. Loaders */
     .loader-container { text-align: center; padding: 4rem; color: #64748b; }
     .spinner { width: 35px; height: 35px; border: 4px solid #f3e8ff; border-top: 4px solid #9333ea; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem; }
@@ -182,6 +244,7 @@
     private bool isVoting = false;
     private bool limiteAlcanzado = false;
     private string? usuarioId;
+     private VotacionDto? votacion;
 
     protected override async Task OnInitializedAsync()
     {
@@ -196,6 +259,7 @@
             if (!string.IsNullOrEmpty(VotacionId))
             {
                 var vot = await VotacionesService.ObtenerVotacion(VotacionId);
+                votacion = vot;
                 nombreVotacion = vot?.Nombre;
                 proyectosVotables = vot?.LimiteProy.ToString() ?? "0";
                 
@@ -275,5 +339,10 @@
         var colors = new[] { "#2E8B98", "#4D6B4A", "#337C76", "#2A3C38", "#5C8C85", "#9333ea", "#7c3aed" };
         var index = Math.Abs(id.GetHashCode()) % colors.Length;
         return colors[index];
+    }
+    private int estadoVotacion()
+    {
+        if (string.IsNullOrEmpty(VotacionId)) return -1;
+        return votacion?.Estado ?? -1;
     }
 }

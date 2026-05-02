@@ -49,6 +49,22 @@
                 </div>
             }
 
+            @if (votacion != null && votacion.Estado == 1)
+            {
+                <div class="alert-pausada alert-top">
+                    <svg viewBox="0 0 24 24" fill="none" width="20" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M9 9h2v6H9zM13 9h2v6h-2z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    <span>⏸️ Esta votación está <strong>PAUSADA</strong>. No puedes emitir votos en este momento.</span>
+                </div>
+            }
+
+            @if (votacion != null && votacion.Estado == 2)
+            {
+                <div class="alert-finalizada alert-top">
+                    <svg viewBox="0 0 24 24" fill="none" width="20" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M8 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    <span>✓ Esta votación ha <strong>FINALIZADO</strong>. Ya no se aceptan votos.</span>
+                </div>
+            }
+
             <!-- COLUMNA IZQUIERDA: Información del proyecto -->
             <main class="col-info">
 
@@ -166,11 +182,30 @@
                 <!-- Botón de votar -->
                 <div class="sidebar-card votar-card">
 
+                    <!-- Badge de estado -->
+                    @if (votacion != null)
+                    {
+                        <div class="estado-badge" style="margin-bottom: 1rem;">
+                            @if (votacion.Estado == 0)
+                            {
+                                <span class="badge badge-abierta">🟢 Votación Abierta</span>
+                            }
+                            else if (votacion.Estado == 1)
+                            {
+                                <span class="badge badge-pausada">⏸️ Votación Pausada</span>
+                            }
+                            else if (votacion.Estado == 2)
+                            {
+                                <span class="badge badge-finalizada">✓ Votación Finalizada</span>
+                            }
+                        </div>
+                    }
+
                     @if (!string.IsNullOrEmpty(mensajeVoto))
                     {
                         <div class="alert-voto @(votoOk ? "alert-ok" : "alert-err")">@mensajeVoto</div>
                     }
-                    <button class="btn-votar-proyecto" @onclick="Votar" disabled="@(votando || votoOk || limiteAlcanzado)">
+                    <button class="btn-votar-proyecto" @onclick="Votar" disabled="@(votando || votoOk || limiteAlcanzado || (votacion?.Estado != 0))">
                         @if (votando)
                         {
                             <span class="spinner-sm"></span>
@@ -182,6 +217,14 @@
                                 <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
                             <span>¡Voto Registrado!</span>
+                        }
+                        else if (votacion?.Estado == 1)
+                        {
+                            <span>Votación Pausada</span>
+                        }
+                        else if (votacion?.Estado == 2)
+                        {
+                            <span>Votación Finalizada</span>
                         }
                         else
                         {
@@ -663,6 +706,53 @@
         color: #94a3b8;
     }
 
+    /* Alertas de Estado */
+    .alert-pausada {
+        background-color: #fef3c7;
+        border-left: 4px solid #f59e0b;
+        color: #92400e;
+    }
+
+    .alert-finalizada {
+        background-color: #e0e7ff;
+        border-left: 4px solid #6366f1;
+        color: #312e81;
+    }
+
+    /* Badges de Estado */
+    .estado-badge {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 999px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-align: center;
+    }
+
+    .badge-abierta {
+        background-color: #dcfce7;
+        color: #166534;
+        border: 1px solid #22c55e;
+    }
+
+    .badge-pausada {
+        background-color: #fef3c7;
+        color: #92400e;
+        border: 1px solid #fbbf24;
+    }
+
+    .badge-finalizada {
+        background-color: #e0e7ff;
+        color: #312e81;
+        border: 1px solid #818cf8;
+    }
+
     @@media (max-width: 900px) {
         .detalles-layout {
             grid-template-columns: 1fr;
@@ -784,6 +874,15 @@
     private async Task Votar()
     {
         if (string.IsNullOrEmpty(VotacionId) || string.IsNullOrEmpty(ProyectoId)) return;
+
+        if (votacion?.Estado != 0)
+        {
+            mensajeVoto = votacion?.Estado == 1 
+                ? "No se pueden emitir votos en una votación pausada."
+                : "No se pueden emitir votos en una votación finalizada.";
+            votoOk = false;
+            return;
+        }
 
         votando = true;
         mensajeVoto = null;

@@ -210,6 +210,25 @@
 
                 <h4 class="section-divider" style="margin-top: 2.5rem;">Gestionar estado</h4>
 
+                <!-- Estado Actual -->
+                <div class="estado-actual-section">
+                    <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 0.75rem;">Estado actual:</p>
+                    <div class="estado-badge" style="margin-bottom: 1.5rem;">
+                        @if (Estado == 0)
+                        {
+                            <span class="badge badge-abierta">🟢 Votación Abierta</span>
+                        }
+                        else if (Estado == 1)
+                        {
+                            <span class="badge badge-pausada">⏸️ Votación Pausada</span>
+                        }
+                        else if (Estado == 2)
+                        {
+                            <span class="badge badge-finalizada">✓ Votación Finalizada</span>
+                        }
+                    </div>
+                </div>
+
                 <div class="estado-buttons">
                     @if (Estado == 0)
                     {
@@ -986,6 +1005,48 @@ input:checked + .slider:before {
 .error-state p {
     color: #64748b;
     margin-bottom: 1.5rem;
+}
+
+/* ── Estado Actual Section ── */
+.estado-actual-section {
+    background: #f1f5f9;
+    padding: 1rem;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+}
+
+.estado-badge {
+    display: flex;
+    justify-content: flex-start;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.badge {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+.badge-abierta {
+    background-color: #dcfce7;
+    color: #166534;
+    border: 1px solid #22c55e;
+}
+
+.badge-pausada {
+    background-color: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fbbf24;
+}
+
+.badge-finalizada {
+    background-color: #e0e7ff;
+    color: #312e81;
+    border: 1px solid #818cf8;
 }
 
 /* ── Responsive ── */

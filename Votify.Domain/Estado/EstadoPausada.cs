@@ -3,13 +3,11 @@ public class EstadoPausada : IEstadoVotacion
 {
     public void IniciarVotacion(Votacion votacion)
     {
-        votacion.CambiarEstado(new EstadoActiva());
         votacion.Estado = EstadoVotacion.Abierta;
     }
 
     public void FinalizarVotacion(Votacion votacion)
     {
-       votacion.CambiarEstado(new EstadoFinalizada());
        votacion.Estado = EstadoVotacion.Detenida;
     }
 
@@ -20,8 +18,12 @@ public class EstadoPausada : IEstadoVotacion
 
     public void ReanudarVotacion(Votacion votacion)
     {
-       votacion.CambiarEstado(new EstadoActiva());
        votacion.Estado = EstadoVotacion.Abierta;
+    }
+
+    public void ValidarVoto(Votacion votacion)
+    {
+        throw new InvalidOperationException("No se pueden emitir votos en una votación pausada.");
     }
 
     public string ObtenerResultados()

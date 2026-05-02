@@ -31,6 +31,9 @@ namespace Votify.Application.Services
                 throw new ArgumentException("La votación especificada no existe.");
             }
 
+            // Validar de acuerdo al estado y línea de tiempo usando el Patrón Estado
+            votacion.ValidarVoto();
+
             int votosActuales = await _votoRepository.ContarVotosPorUsuarioYVotacionAsync(dto.VotacionId, dto.VotanteId ?? string.Empty);
 
             if (votosActuales >= votacion.LimiteProy)
