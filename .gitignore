@@ -43,4 +43,5 @@ projdata/
 Thumbs.db
 ehthumbs.db
 
+*.bootstrap
 .env

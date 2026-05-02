@@ -40,14 +40,14 @@
         }
         @if (estadoVotacion() == 1)
         {
-            <div class="alert-info">
+            <div class="alert-pausada">
                 <svg viewBox="0 0 24 24" fill="none" width="20" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M12 8v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
                 La votación está pausada. No se pueden emitir votos en este momento.
             </div>
         }
         @if (estadoVotacion() == 2)
         {
-            <div class="alert-info">
+            <div class="alert-finalizada">
                 <svg viewBox="0 0 24 24" fill="none" width="20" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M12 8v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
                 La votación ha finalizado. No se pueden emitir más votos.
             </div>
