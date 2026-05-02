@@ -1,9 +1,12 @@
+using Microsoft.VisualBasic;
 using Votify.Domain.Entities;
 public class EstadoFinalizada : IEstadoVotacion
 {
+    
     public void IniciarVotacion(Votacion votacion)
     {
         votacion.CambiarEstado(new EstadoActiva());
+        votacion.Estado = EstadoVotacion.Abierta;
     }
 
     public void FinalizarVotacion(Votacion votacion)

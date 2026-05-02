@@ -181,6 +181,7 @@ namespace Votify.Application.Services
             var actualizado = await _repo.ActualizarAsync(id, votacion);
             if (!actualizado)
                 throw new InvalidOperationException("No se pudo actualizar el estado de la votación.");
+                
         }
 
         public async Task DetenerVotacionAsync(string id)
