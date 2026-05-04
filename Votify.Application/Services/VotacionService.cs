@@ -11,16 +11,23 @@ namespace Votify.Application.Services
         private readonly IVotacionRepository _repo;
         private readonly IVotoRepository _votoRepo;
         private readonly IProyectoRepository _proyectoRepo;
+        private readonly IEventoRepository _eventoRepo;
 
-        public VotacionService(IVotacionRepository repo, IVotoRepository votoRepo, IProyectoRepository proyectoRepo)
+        public VotacionService(
+            IVotacionRepository repo,
+            IVotoRepository votoRepo,
+            IProyectoRepository proyectoRepo,
+            IEventoRepository eventoRepo)
         {
             _repo = repo;
             _votoRepo = votoRepo;
             _proyectoRepo = proyectoRepo;
+            _eventoRepo = eventoRepo;
         }
 
         public async Task CrearVotacionAsync(CrearVotacionDto dto)
         {
+            await ValidarFechasContraEventoAsync(dto);
             var votacion = CreateEntityFromDto(dto);
             await _repo.GuardarAsync(votacion);
         }
@@ -46,6 +53,7 @@ namespace Votify.Application.Services
         }
         public async Task ActualizarVotacionAsync(string id, CrearVotacionDto dto)
         {
+            await ValidarFechasContraEventoAsync(dto);
             var votacion = CreateEntityFromDto(dto);
 
             var actualizado = await _repo.ActualizarAsync(id, votacion);
@@ -171,6 +179,20 @@ namespace Votify.Application.Services
                 eventoGuid,
                 dto.EsAnonima
             );
+        }
+        private async Task ValidarFechasContraEventoAsync(CrearVotacionDto dto)
+        {
+            if (!Guid.TryParse(dto.EventoId, out _)) return; // se valida luego en CreateEntityFromDto
+
+            var evento = await _eventoRepo.ObtenerPorIdAsync(dto.EventoId);
+            if (evento is null) return; // si no existe el evento, que falle en FK
+
+            if (dto.FechaInicio < evento.FechaInicio || dto.FechaFin > evento.FechaFin)
+            {
+                throw new ArgumentException(
+                    $"Las fechas de la votación deben estar dentro del evento " +
+                    $"({evento.FechaInicio:dd/MM/yyyy HH:mm} – {evento.FechaFin:dd/MM/yyyy HH:mm}).");
+            }
         }
     }
 }

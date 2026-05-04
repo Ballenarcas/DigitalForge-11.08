@@ -18,17 +18,23 @@ namespace Votify.API.Controllers
         [HttpPost]
         public async Task<IActionResult> CrearVotacionn([FromBody] CrearVotacionDto dto)
         {
-            await _service.CrearVotacionAsync(dto);
-
-            return Ok(new
+            try
             {
-                dto.Nombre,
-                dto.Tipo,
-                dto.FechaInicio,
-                dto.FechaFin,
-                dto.LimiteProy,
-                dto.Comentarios
-            });
+                await _service.CrearVotacionAsync(dto);
+                return Ok(new
+                {
+                    dto.Nombre,
+                    dto.Tipo,
+                    dto.FechaInicio,
+                    dto.FechaFin,
+                    dto.LimiteProy,
+                    dto.Comentarios
+                });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
         [HttpGet]
         public async Task<ActionResult<List<CrearVotacionResponse>>> Get()
@@ -54,8 +60,19 @@ namespace Votify.API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Actualizar(string id, [FromBody] CrearVotacionDto dto)
         {
-            await _service.ActualizarVotacionAsync(id, dto);
-            return NoContent();
+            try
+            {
+                await _service.ActualizarVotacionAsync(id, dto);
+                return NoContent();
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
         }
 
         [HttpDelete("{id}")]
