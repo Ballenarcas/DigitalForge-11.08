@@ -530,12 +530,12 @@ input:checked + .slider:before {
             StateHasChanged();
             await Task.Delay(400); 
             
-            Nav.NavigateTo("/votaciones");
+            Nav.NavigateTo($"/votaciones?eventoId={AppState.EventoId}");
         } 
         catch (Exception ex) 
         { 
             Mensaje = $"Error al crear la votación: {ex.Message}"; 
         }
     }
-    private void HandleVolver() => Nav.NavigateTo("/votaciones");
+    private void HandleVolver() => Nav.NavigateTo($"/votaciones?eventoId={AppState.EventoId}");
 }

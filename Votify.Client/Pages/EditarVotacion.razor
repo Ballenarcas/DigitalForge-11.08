@@ -1255,7 +1255,7 @@ input:checked + .slider:before {
             Mensaje = "Votación actualizada correctamente.";
             StateHasChanged();
             await Task.Delay(800);
-            Nav.NavigateTo("/");
+            Nav.NavigateTo($"/votaciones?eventoId={EventoId}");
         }
         catch
         {
@@ -1282,7 +1282,7 @@ input:checked + .slider:before {
             Mensaje = "Votación eliminada correctamente.";
             StateHasChanged();
             await Task.Delay(800);
-            Nav.NavigateTo("/");
+            Nav.NavigateTo($"/votaciones?eventoId={EventoId}");
         }
         catch
         {
@@ -1363,5 +1363,5 @@ input:checked + .slider:before {
         }
     }
 
-    void HandleVolver() => Nav.NavigateTo("/votaciones");
+    void HandleVolver() => Nav.NavigateTo($"/votaciones?eventoId={EventoId}");
 }

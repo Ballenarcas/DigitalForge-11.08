@@ -414,6 +414,7 @@
     
     private List<ResultadoProyectoDto>? listaResultados;
     private string? nombreVotacion;
+    private string? eventoId;
 
     protected override async Task OnInitializedAsync()
     {
@@ -421,6 +422,7 @@
         {
             var votacion = await VotacionesService.ObtenerVotacion(VotacionId);
             nombreVotacion = votacion?.Nombre;
+            eventoId = votacion?.EventoId;
             await CargarResultados();
         }
     }
@@ -438,7 +440,7 @@
         }
     }
 
-    private void HandleVolver() => Nav.NavigateTo("/votaciones");
+    private void HandleVolver() => Nav.NavigateTo($"/votaciones?eventoId={eventoId}");
 
     private string GetOrdinalSuffix(int number)
     {

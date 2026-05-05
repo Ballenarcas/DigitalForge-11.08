@@ -383,7 +383,7 @@
         }
     }
 
-    private void Volver() => Nav.NavigateTo("/votaciones");
+    private void Volver() => Nav.NavigateTo($"/votaciones?eventoId={votacion?.EventoId}");
     
     private void IrACrearProyecto() => Nav.NavigateTo($"/{VotacionId}/nuevo-proyecto");
     

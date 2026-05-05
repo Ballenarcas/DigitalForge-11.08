@@ -272,7 +272,7 @@
 
     private void IrACrearVotacion() => Nav.NavigateTo($"/nueva-votacion?eventoId={AppState.EventoId}");
     private void Gestionar(string id) => Nav.NavigateTo($"/votacion/{id}");
-    private void VerResultados(string id) => Nav.NavigateTo($"/{id}/resultados");
+    private void VerResultados(string id) => Nav.NavigateTo($"/{id}/resultados/");
     private void Votar(string id) => Nav.NavigateTo($"/{id}/proyectos/");
 
     private void EliminarVotacion(string id)

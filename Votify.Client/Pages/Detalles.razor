@@ -159,24 +159,6 @@
                         <span>Tu feedback será compartido de forma constructiva con los creadores del proyecto.</span>
                     </div>
 
-                    <!-- Comentarios ya enviados -->
-                    @if (comentarios.Any())
-                    {
-                        <div class="comentarios-lista">
-                            <div class="comentarios-lista-titulo">@comentarios.Count comentario(s) enviado(s)</div>
-                            @for (var index = 0; index < comentarios.Count; index++)
-                            {
-                                var comentario = comentarios[index];
-                                <div class="comentario-item comentario-card">
-                                    <div class="comentario-info">
-                                        <span class="comentario-meta">@GetAutorEtiqueta(comentario, index)</span>
-                                        <span class="comentario-fecha">@comentario.FechaCreacion.ToLocalTime().ToString("dd MMM yyyy HH:mm")</span>
-                                    </div>
-                                    <p>@comentario.Texto</p>
-                                </div>
-                            }
-                        </div>
-                    }
                 </div>
 
                 <!-- Botón de votar -->
