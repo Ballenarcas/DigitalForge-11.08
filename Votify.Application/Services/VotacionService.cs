@@ -1,5 +1,6 @@
 using Votify.Application.DTOs;
 using Votify.Application.Interfaces;
+using Votify.Domain.Entities;
 using Votify.Domain.Factory;
 using Votify.Domain.Interfaces;
 
@@ -10,83 +11,37 @@ namespace Votify.Application.Services
         private readonly IVotacionRepository _repo;
         private readonly IVotoRepository _votoRepo;
         private readonly IProyectoRepository _proyectoRepo;
+        private readonly IEventoRepository _eventoRepo;
 
-        public VotacionService(IVotacionRepository repo, IVotoRepository votoRepo, IProyectoRepository proyectoRepo)
+        public VotacionService(
+            IVotacionRepository repo,
+            IVotoRepository votoRepo,
+            IProyectoRepository proyectoRepo,
+            IEventoRepository eventoRepo)
         {
             _repo = repo;
             _votoRepo = votoRepo;
             _proyectoRepo = proyectoRepo;
+            _eventoRepo = eventoRepo;
         }
 
         public async Task CrearVotacionAsync(CrearVotacionDto dto)
         {
-            if (dto.FechaInicio >= dto.FechaFin)
-            {
-                throw new ArgumentException("La fecha de inicio debe ser menor a la fecha de fin.");
-            }
-            VotacionFactory factory = dto.Tipo.ToUpper() switch
-            {
-                "ESTANDAR" => new VotacionEstandarFactory(),
-                _ => throw new ArgumentException("Tipo de votación no válido.")
-            };
-
-            if (!Guid.TryParse(dto.EventoId, out var eventoGuid))
-            {
-                throw new ArgumentException("El ID del evento no es válido o no se ha proporcionado.");
-            }
-
-            var votacion = factory.Crear(
-                dto.Nombre,
-                dto.FechaInicio,
-                dto.FechaFin,
-                dto.LimiteProy,
-                dto.Comentarios,
-                dto.ComentariosObligatorios,
-                eventoGuid,
-                dto.EsAnonima
-            );
-            
+            await ValidarFechasContraEventoAsync(dto);
+            var votacion = CreateEntityFromDto(dto);
             await _repo.GuardarAsync(votacion);
         }
         public async Task<List<CrearVotacionResponse>> ObtenerTodasAsync()
         {
             var entidades = await _repo.ObtenerTodasAsync();
-
-            return entidades.Select(e => new CrearVotacionResponse
-            {
-                Id = e.Id.ToString(), 
-                Nombre = e.Nombre,
-                Tipo = e.Tipo,
-                FechaInicio = e.FechaInicio,
-                FechaFin = e.FechaFin,
-                LimiteProy = e.LimiteProy,
-                Comentarios = e.Comentarios,
-                ComentariosObligatorios = e.ComentariosObligatorios,
-                EsAnonima = e.EsAnonima,
-                EventoId = e.EventoId.ToString(),
-                Estado = (int)e.Estado
-            }).ToList();
+            return entidades.Select(MapToResponse).ToList();
         }
         public async Task<List<CrearVotacionResponse>> ObtenerPorEventoAsync(string eventoId)
         {
             if (!Guid.TryParse(eventoId, out var guid)) return new List<CrearVotacionResponse>();
             
             var entidades = await _repo.ObtenerPorEventoAsync(guid);
-
-            return entidades.Select(e => new CrearVotacionResponse
-            {
-                Id = e.Id.ToString(),
-                Nombre = e.Nombre,
-                Tipo = e.Tipo,
-                FechaInicio = e.FechaInicio,
-                FechaFin = e.FechaFin,
-                LimiteProy = e.LimiteProy,
-                Comentarios = e.Comentarios,
-                ComentariosObligatorios = e.ComentariosObligatorios,
-                EsAnonima = e.EsAnonima,
-                EventoId = e.EventoId.ToString(),
-                Estado = (int)e.Estado
-            }).ToList();
+            return entidades.Select(MapToResponse).ToList();
         }
 
         public async Task<CrearVotacionResponse?> ObtenerPorIdAsync(string id)
@@ -94,42 +49,12 @@ namespace Votify.Application.Services
             var e = await _repo.ObtenerAsync(id);
             if (e is null) return null;
 
-            return new CrearVotacionResponse
-            {
-                Id = e.Id.ToString(),
-                Nombre = e.Nombre,
-                Tipo = e.Tipo,
-                FechaInicio = e.FechaInicio,
-                FechaFin = e.FechaFin,
-                LimiteProy = e.LimiteProy,
-                Comentarios = e.Comentarios,
-                ComentariosObligatorios = e.ComentariosObligatorios,
-                EsAnonima = e.EsAnonima,
-                EventoId = e.EventoId.ToString(),
-                Estado = (int)e.Estado
-            };
+            return MapToResponse(e);
         }
         public async Task ActualizarVotacionAsync(string id, CrearVotacionDto dto)
         {
-            if (dto.FechaInicio >= dto.FechaFin)
-                throw new ArgumentException("La fecha de inicio debe ser menor a la fecha de fin.");
-
-            VotacionFactory factory = dto.Tipo.ToUpper() switch
-            {
-                "ESTANDAR" => new VotacionEstandarFactory(),
-                _ => throw new ArgumentException("Tipo de votación no válido.")
-            };
-
-            var votacion = factory.Crear(
-                dto.Nombre,
-                dto.FechaInicio,
-                dto.FechaFin,
-                dto.LimiteProy,
-                dto.Comentarios,
-                dto.ComentariosObligatorios,
-                Guid.Parse(dto.EventoId),
-                dto.EsAnonima
-            );
+            await ValidarFechasContraEventoAsync(dto);
+            var votacion = CreateEntityFromDto(dto);
 
             var actualizado = await _repo.ActualizarAsync(id, votacion);
             if (!actualizado)
@@ -206,6 +131,68 @@ namespace Votify.Application.Services
             var actualizado = await _repo.ActualizarAsync(id, votacion);
             if (!actualizado)
                 throw new InvalidOperationException("No se pudo actualizar el estado de la votación.");
+        }
+
+        private CrearVotacionResponse MapToResponse(Votacion e)
+        {
+            return new CrearVotacionResponse
+            {
+                Id = e.Id.ToString(),
+                Nombre = e.Nombre,
+                Tipo = e.Tipo,
+                FechaInicio = e.FechaInicio,
+                FechaFin = e.FechaFin,
+                LimiteProy = e.LimiteProy,
+                Comentarios = e.Comentarios,
+                ComentariosObligatorios = e.ComentariosObligatorios,
+                EsAnonima = e.EsAnonima,
+                EventoId = e.EventoId.ToString(),
+                Estado = (int)e.Estado
+            };
+        }
+
+        private Votacion CreateEntityFromDto(CrearVotacionDto dto)
+        {
+            if (dto.FechaInicio >= dto.FechaFin)
+            {
+                throw new ArgumentException("La fecha de inicio debe ser menor a la fecha de fin.");
+            }
+
+            VotacionFactory factory = dto.Tipo.ToUpper() switch
+            {
+                "ESTANDAR" => new VotacionEstandarFactory(),
+                _ => throw new ArgumentException("Tipo de votación no válido.")
+            };
+
+            if (!Guid.TryParse(dto.EventoId, out var eventoGuid))
+            {
+                throw new ArgumentException("El ID del evento no es válido o no se ha proporcionado.");
+            }
+
+            return factory.Crear(
+                dto.Nombre,
+                dto.FechaInicio,
+                dto.FechaFin,
+                dto.LimiteProy,
+                dto.Comentarios,
+                dto.ComentariosObligatorios,
+                eventoGuid,
+                dto.EsAnonima
+            );
+        }
+        private async Task ValidarFechasContraEventoAsync(CrearVotacionDto dto)
+        {
+            if (!Guid.TryParse(dto.EventoId, out _)) return; // se valida luego en CreateEntityFromDto
+
+            var evento = await _eventoRepo.ObtenerPorIdAsync(dto.EventoId);
+            if (evento is null) return; // si no existe el evento, que falle en FK
+
+            if (dto.FechaInicio < evento.FechaInicio || dto.FechaFin > evento.FechaFin)
+            {
+                throw new ArgumentException(
+                    $"Las fechas de la votación deben estar dentro del evento " +
+                    $"({evento.FechaInicio:dd/MM/yyyy HH:mm} – {evento.FechaFin:dd/MM/yyyy HH:mm}).");
+            }
         }
     }
 }

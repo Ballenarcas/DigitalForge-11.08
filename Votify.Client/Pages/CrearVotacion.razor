@@ -37,13 +37,29 @@
             <div class="grid-dates">
                 <div class="form-group">
                     <label>Inicio del periodo <span class="required-asterisk">*</span></label>
-                    <input type="datetime-local" class="form-control" @bind="FechaInicio" />
+                    <input type="datetime-local" class="form-control"
+                           @bind="FechaInicio"
+                           min="@EventoMinStr"
+                           max="@EventoMaxStr" />
                 </div>
                 <div class="form-group">
                     <label>Fin del periodo <span class="required-asterisk">*</span></label>
-                    <input type="datetime-local" class="form-control" @bind="FechaFin" />
+                    <input type="datetime-local" class="form-control"
+                           @bind="FechaFin"
+                           min="@EventoMinStr"
+                           max="@EventoMaxStr" />
                 </div>
             </div>
+
+            @if (AppState.EventoFechaInicio.HasValue && AppState.EventoFechaFin.HasValue)
+            {
+                <p class="dates-hint">
+                    ⌛ Rango permitido del evento: 
+                    <strong>@AppState.EventoFechaInicio.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</strong>
+                    &rarr;
+                    <strong>@AppState.EventoFechaFin.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</strong>
+                </p>
+            }
 
             <h4 class="section-divider">Opciones adicionales</h4>
 
@@ -239,6 +255,41 @@
     gap: 1.5rem;
 }
 
+.dates-hint {
+    margin-top: -0.5rem;
+    margin-bottom: 1.5rem;
+    padding: 0.65rem 1rem;
+    background: #f5f3ff;
+    border: 1px solid #ddd6fe;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    color: #6d28d9;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+}
+
+input[type="datetime-local"].form-control {
+    box-sizing: border-box;
+    width: 100%;
+    height: 52px;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    color-scheme: light;
+    font-size: 0.95rem;
+}
+
+input[type="datetime-local"].form-control::-webkit-calendar-picker-indicator {
+    opacity: 0.6;
+    cursor: pointer;
+    filter: invert(30%) sepia(80%) saturate(500%) hue-rotate(240deg);
+}
+
+input[type="datetime-local"].form-control::-webkit-datetime-edit {
+    padding: 0;
+}
+
 
 .section-divider {
     color: #7e22ce;
@@ -394,12 +445,21 @@ input:checked + .slider:before {
 
     [SupplyParameterFromQuery]
     public string? EventoId { get; set; }
-    DateTime FechaInicio = DateTime.Now;
-    DateTime FechaFin = DateTime.Now.AddDays(1);
+
+    DateTime FechaInicio;
+    DateTime FechaFin;
     int LimiteProy = 1;
     bool Comentarios = true;
     bool ComentariosObligatorios = false;
     string? Mensaje;
+
+    // Helpers para los atributos min/max del input (formato yyyy-MM-ddTHH:mm)
+    private string? EventoMinStr => AppState.EventoFechaInicio.HasValue
+        ? AppState.EventoFechaInicio.Value.ToLocalTime().ToString("yyyy-MM-ddTHH:mm")
+        : null;
+    private string? EventoMaxStr => AppState.EventoFechaFin.HasValue
+        ? AppState.EventoFechaFin.Value.ToLocalTime().ToString("yyyy-MM-ddTHH:mm")
+        : null;
 
     protected override void OnInitialized()
     {
@@ -407,6 +467,13 @@ input:checked + .slider:before {
         {
             AppState.EventoId = EventoId;
         }
+
+        // Inicializar fechas dentro del rango del evento si están disponibles
+        var inicio = AppState.EventoFechaInicio?.ToLocalTime() ?? DateTime.Now;
+        var fin   = AppState.EventoFechaFin?.ToLocalTime()   ?? DateTime.Now.AddDays(1);
+
+        FechaInicio = inicio;
+        FechaFin    = fin;
     }
 
     async Task HandleCrearVotacion()
@@ -421,6 +488,21 @@ input:checked + .slider:before {
             Mensaje = "Error: La fecha de fin debe ser posterior a la de inicio.";
             return;
         }
+
+        // Validar rango del evento
+        if (AppState.EventoFechaInicio.HasValue && AppState.EventoFechaFin.HasValue)
+        {
+            var eventoInicioLocal = AppState.EventoFechaInicio.Value.ToLocalTime();
+            var eventoFinLocal    = AppState.EventoFechaFin.Value.ToLocalTime();
+
+            if (FechaInicio < eventoInicioLocal || FechaFin > eventoFinLocal)
+            {
+                Mensaje = $"Error: Las fechas de la votación deben estar dentro del evento " +
+                          $"({eventoInicioLocal:dd/MM/yyyy HH:mm} – {eventoFinLocal:dd/MM/yyyy HH:mm}).";
+                return;
+            }
+        }
+
         if (LimiteProy < 1)
         {
             Mensaje = "Error: El límite de proyectos debe ser al menos 1.";

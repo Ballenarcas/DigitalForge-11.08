@@ -175,6 +175,22 @@
         {
             AppState.EventoId = EventoId;
         }
+
+        // Cargar fechas del evento para restringir la creación de votaciones
+        if (!string.IsNullOrEmpty(AppState.EventoId))
+        {
+            try
+            {
+                var evento = await EventosService.ObtenerEvento(AppState.EventoId);
+                if (evento != null)
+                {
+                    AppState.EventoFechaInicio = evento.FechaInicio;
+                    AppState.EventoFechaFin = evento.FechaFin;
+                }
+            }
+            catch { /* no crítico, la validación de fechas es secundaria */ }
+        }
+
         await CargarVotaciones();
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         isAuthenticated = authState.User.Identity?.IsAuthenticated ?? false;

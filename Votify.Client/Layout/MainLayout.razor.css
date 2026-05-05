@@ -3,6 +3,9 @@
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    width: 100%;
+    margin: 0;
+    padding: 0;
     background-color: #f8f9fc;
 }
 
@@ -10,12 +13,17 @@ main {
     flex: 1;
     display: flex;
     flex-direction: column;
+    width: 100%;
+    margin: 0;
+    padding: 0;
 }
 
 article {
     flex: 1;
     display: flex;
     flex-direction: column;
+    padding: 0;
+    margin: 0;
 }
 
 .brand-header {
@@ -26,6 +34,8 @@ article {
     background-color: #621d95;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     z-index: 10;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .header-spacer {
@@ -62,6 +72,31 @@ article {
     justify-content: flex-end;
     gap: 15px;
     align-items: center;
+}
+
+.user-header-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.user-header-info {
+    display: flex;
+    flex-direction: column;
+    text-align: right;
+}
+
+.header-user-name {
+    font-size: 14px;
+    font-weight: 800;
+    color: white;
+    line-height: 1.2;
+}
+
+.header-user-email {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.75);
+    line-height: 1.2;
 }
 
 .user-menu-container {
