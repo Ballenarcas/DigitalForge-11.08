@@ -100,7 +100,7 @@ namespace Votify.Application.Services
                 var misEventos = await _repo.ObtenerPorParticipanteAsync(pId);
                 if (!misEventos.Any(x => x.Id == eId))
                 {
-                    var pe = new ParticipanteEvento(pId, eId, "Público");
+                    var pe = new ParticipanteEvento(pId, eId, "PÚBLICO");
                     await _participanteEventoRepo.GuardarAsync(pe);
                 }
             }
@@ -216,12 +216,12 @@ namespace Votify.Application.Services
         {
             return rol.Trim().ToUpperInvariant() switch
             {
-                "ORGANIZADOR" => "Organizador",
-                "JURADO" => "Jurado",
-                "COMPETIDOR" => "Competidor",
-                "PUBLICO" => "Público",
-                "PÚBLICO" => "Público",
-                _ => rol.Trim()
+                "ORGANIZADOR" => "ORGANIZADOR",
+                "JURADO" => "JURADO",
+                "COMPETIDOR" => "COMPETIDOR",
+                "PUBLICO" => "PÚBLICO",
+                "PÚBLICO" => "PÚBLICO",
+                _ => rol.Trim().ToUpperInvariant()
             };
         }
     }
