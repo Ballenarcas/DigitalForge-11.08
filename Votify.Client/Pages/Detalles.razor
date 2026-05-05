@@ -53,7 +53,7 @@
             {
                 <div class="alert-pausada alert-top">
                     <svg viewBox="0 0 24 24" fill="none" width="20" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M9 9h2v6H9zM13 9h2v6h-2z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-                    <span>⏸️ Esta votación está <strong>PAUSADA</strong>. No puedes emitir votos en este momento.</span>
+                    <span>Esta votación está <strong>PAUSADA</strong>. No puedes emitir votos en este momento.</span>
                 </div>
             }
 
@@ -61,7 +61,7 @@
             {
                 <div class="alert-finalizada alert-top">
                     <svg viewBox="0 0 24 24" fill="none" width="20" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M8 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-                    <span>✓ Esta votación ha <strong>FINALIZADO</strong>. Ya no se aceptan votos.</span>
+                    <span>Esta votación ha <strong>FINALIZADO</strong>. Ya no se aceptan votos.</span>
                 </div>
             }
 
@@ -188,15 +188,15 @@
                         <div class="estado-badge" style="margin-bottom: 1rem;">
                             @if (votacion.Estado == 0)
                             {
-                                <span class="badge badge-abierta">🟢 Votación Abierta</span>
+                                <span class="badge badge-abierta">Votación Abierta</span>
                             }
                             else if (votacion.Estado == 1)
                             {
-                                <span class="badge badge-pausada">⏸️ Votación Pausada</span>
+                                <span class="badge badge-pausada">Votación Pausada</span>
                             }
                             else if (votacion.Estado == 2)
                             {
-                                <span class="badge badge-finalizada">✓ Votación Finalizada</span>
+                                <span class="badge badge-finalizada">Votación Finalizada</span>
                             }
                         </div>
                     }
@@ -209,29 +209,50 @@
                         @if (votando)
                         {
                             <span class="spinner-sm"></span>
-                            <span>Procesando...</span>
+                            <span>Procesando tu voto...</span>
                         }
                         else if (votoOk)
                         {
                             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
                                 <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
-                            <span>¡Voto Registrado!</span>
+                            <span>✓ ¡Voto registrado!</span>
+                        }
+                        else if (limiteAlcanzado)
+                        {
+                            <span>Límite de votos alcanzado</span>
                         }
                         else if (votacion?.Estado == 1)
                         {
-                            <span>Votación Pausada</span>
+                            <span>Votación en pausa</span>
                         }
                         else if (votacion?.Estado == 2)
                         {
-                            <span>Votación Finalizada</span>
+                            <span>Votación finalizada</span>
                         }
                         else
                         {
-                            <span>Votar</span>
+                            <span>Votar por este proyecto</span>
                         }
                     </button>
-                    <p class="votar-nota">TU ELECCIÓN ES ÚNICA Y FINAL PARA ESTE EVENTO</p>
+                    <p class="votar-nota">
+                        @if (!votoOk && votacion?.Estado == 0 && !limiteAlcanzado)
+                        {
+                            <span>Tu voto es único y final para este evento</span>
+                        }
+                        else if (limiteAlcanzado)
+                        {
+                            <span>Ya no puedes votar por más proyectos</span>
+                        }
+                        else if (votacion?.Estado != 0)
+                        {
+                            <span>Esta votación no está disponible en este momento</span>
+                        }
+                        else if (votoOk)
+                        {
+                            <span>Gracias por tu participación</span>
+                        }
+                    </p>
                 </div>
 
             </aside>

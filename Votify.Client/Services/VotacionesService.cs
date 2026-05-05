@@ -103,7 +103,8 @@ namespace Votify.Client.Services
 
         public async Task PausarVotacion(string id)
         {
-            var response = await _http.PatchAsync($"api/votaciones/{id}/pausar", null);
+            var content = new StringContent("{}", System.Text.Encoding.UTF8, "application/json");
+            var response = await _http.PatchAsync($"api/votaciones/{id}/pausar", content);
             if (!response.IsSuccessStatusCode)
             {
                 var error = await response.Content.ReadAsStringAsync();
@@ -113,7 +114,8 @@ namespace Votify.Client.Services
 
         public async Task DetenerVotacion(string id)
         {
-            var response = await _http.PatchAsync($"api/votaciones/{id}/detener", null);
+            var content = new StringContent("{}", System.Text.Encoding.UTF8, "application/json");
+            var response = await _http.PatchAsync($"api/votaciones/{id}/detener", content);
             if (!response.IsSuccessStatusCode)
             {
                 var error = await response.Content.ReadAsStringAsync();
@@ -123,7 +125,8 @@ namespace Votify.Client.Services
 
         public async Task AbrirVotacion(string id)
         {
-            var response = await _http.PatchAsync($"api/votaciones/{id}/abrir", null);
+            var content = new StringContent("{}", System.Text.Encoding.UTF8, "application/json");
+            var response = await _http.PatchAsync($"api/votaciones/{id}/abrir", content);
             if (!response.IsSuccessStatusCode)
             {
                 var error = await response.Content.ReadAsStringAsync();

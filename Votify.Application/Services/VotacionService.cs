@@ -34,6 +34,8 @@ namespace Votify.Application.Services
         public async Task<List<CrearVotacionResponse>> ObtenerTodasAsync()
         {
             var entidades = await _repo.ObtenerTodasAsync();
+            // Actualizar estados automáticamente según fechas
+            await ActualizarEstadosAutomaticosAsync(entidades);
             return entidades.Select(MapToResponse).ToList();
         }
         public async Task<List<CrearVotacionResponse>> ObtenerPorEventoAsync(string eventoId)
@@ -41,6 +43,8 @@ namespace Votify.Application.Services
             if (!Guid.TryParse(eventoId, out var guid)) return new List<CrearVotacionResponse>();
             
             var entidades = await _repo.ObtenerPorEventoAsync(guid);
+            // Actualizar estados automáticamente según fechas
+            await ActualizarEstadosAutomaticosAsync(entidades);
             return entidades.Select(MapToResponse).ToList();
         }
 
@@ -49,12 +53,23 @@ namespace Votify.Application.Services
             var e = await _repo.ObtenerAsync(id);
             if (e is null) return null;
 
+            // Actualizar estado automáticamente según fechas
+            ActualizarEstadoAutomatico(e);
+            await _repo.ActualizarAsync(id, e);
+            
             return MapToResponse(e);
         }
         public async Task ActualizarVotacionAsync(string id, CrearVotacionDto dto)
         {
             await ValidarFechasContraEventoAsync(dto);
             var votacion = CreateEntityFromDto(dto);
+            votacion.Id = Guid.Parse(id);
+
+            // Actualizar Estado si se proporciona
+            if (dto.Estado.HasValue)
+            {
+                votacion.Estado = (EstadoVotacion)dto.Estado.Value;
+            }
 
             var actualizado = await _repo.ActualizarAsync(id, votacion);
             if (!actualizado)
@@ -98,39 +113,17 @@ namespace Votify.Application.Services
 
         public async Task PausarVotacionAsync(string id)
         {
-            var votacion = await _repo.ObtenerAsync(id);
-            if (votacion is null)
-                throw new KeyNotFoundException($"No se encontró la votación con id {id}.");
-
-            votacion.Pausar();
-            var actualizado = await _repo.ActualizarAsync(id, votacion);
-            if (!actualizado)
-                throw new InvalidOperationException("No se pudo actualizar el estado de la votación.");
-                
+            await _repo.ActualizarEstadoAsync(id, EstadoVotacion.Pausada);
         }
 
         public async Task DetenerVotacionAsync(string id)
         {
-            var votacion = await _repo.ObtenerAsync(id);
-            if (votacion is null)
-                throw new KeyNotFoundException($"No se encontró la votación con id {id}.");
-
-            votacion.Detener();
-            var actualizado = await _repo.ActualizarAsync(id, votacion);
-            if (!actualizado)
-                throw new InvalidOperationException("No se pudo actualizar el estado de la votación.");
+            await _repo.ActualizarEstadoAsync(id, EstadoVotacion.Detenida);
         }
 
         public async Task AbrirVotacionAsync(string id)
         {
-            var votacion = await _repo.ObtenerAsync(id);
-            if (votacion is null)
-                throw new KeyNotFoundException($"No se encontró la votación con id {id}.");
-
-            votacion.Abrir();
-            var actualizado = await _repo.ActualizarAsync(id, votacion);
-            if (!actualizado)
-                throw new InvalidOperationException("No se pudo actualizar el estado de la votación.");
+            await _repo.ActualizarEstadoAsync(id, EstadoVotacion.Abierta);
         }
 
         private CrearVotacionResponse MapToResponse(Votacion e)
@@ -149,6 +142,46 @@ namespace Votify.Application.Services
                 EventoId = e.EventoId.ToString(),
                 Estado = (int)e.Estado
             };
+        }
+
+        /// <summary>
+        /// Actualiza automáticamente el estado de una votación según las fechas actuales.
+        /// - Si FechaFin ha pasado y no está detenida: la detiene
+        /// </summary>
+        private void ActualizarEstadoAutomatico(Votacion votacion)
+        {
+            var ahora = DateTime.UtcNow;
+            
+            // Si ya pasó la fecha final, detener la votación (a menos que ya esté detenida)
+            if (ahora >= votacion.FechaFin && votacion.Estado != EstadoVotacion.Detenida)
+            {
+                votacion.Detener();
+            }
+        }
+
+        /// <summary>
+        /// Actualiza automáticamente el estado de múltiples votaciones según las fechas actuales.
+        /// </summary>
+        private async Task ActualizarEstadosAutomaticosAsync(List<Votacion> votaciones)
+        {
+            var votacionesActualizadas = new List<(Votacion votacion, bool cambio)>();
+            
+            foreach (var votacion in votaciones)
+            {
+                var estadoAnterior = votacion.Estado;
+                ActualizarEstadoAutomatico(votacion);
+                
+                if (estadoAnterior != votacion.Estado)
+                {
+                    votacionesActualizadas.Add((votacion, true));
+                }
+            }
+            
+            // Guardar los cambios en la base de datos
+            foreach (var (votacion, cambio) in votacionesActualizadas.Where(x => x.cambio))
+            {
+                await _repo.ActualizarAsync(votacion.Id.ToString(), votacion);
+            }
         }
 
         private Votacion CreateEntityFromDto(CrearVotacionDto dto)
