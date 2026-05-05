@@ -21,15 +21,7 @@ namespace Votify.Application.Services
         {
             var entidades = await _repo.ObtenerTodosAsync();
 
-            return entidades.Select(e => new EventoDto
-            {
-                Id          = e.Id.ToString(),
-                Nombre      = e.Nombre,
-                Descripcion = e.Descripcion,
-                FechaInicio = e.FechaInicio,
-                FechaFin    = e.FechaFin,
-                ImagenUrl   = e.ImagenUrl
-            }).ToList();
+            return entidades.Select(MapToEventoDTO).ToList();
         }
 
         public async Task<List<EventoDto>> ObtenerMisEventosAsync(string participanteId)
@@ -41,15 +33,7 @@ namespace Votify.Application.Services
 
             var entidades = await _repo.ObtenerPorParticipanteAsync(pId);
 
-            return entidades.Select(e => new EventoDto
-            {
-                Id          = e.Id.ToString(),
-                Nombre      = e.Nombre,
-                Descripcion = e.Descripcion,
-                FechaInicio = e.FechaInicio,
-                FechaFin    = e.FechaFin,
-                ImagenUrl   = e.ImagenUrl
-            }).ToList();
+            return entidades.Select(MapToEventoDTO).ToList();
         }
 
         public async Task<EventoDto?> ObtenerPorIdAsync(string id)
@@ -57,20 +41,12 @@ namespace Votify.Application.Services
             var e = await _repo.ObtenerPorIdAsync(id);
             if (e is null) return null;
 
-            return new EventoDto
-            {
-                Id          = e.Id.ToString(),
-                Nombre      = e.Nombre,
-                Descripcion = e.Descripcion,
-                FechaInicio = e.FechaInicio,
-                FechaFin    = e.FechaFin,
-                ImagenUrl   = e.ImagenUrl
-            };
+            return MapToEventoDTO(e);
         }
 
         public async Task<EventoDto> CrearAsync(EventoDto dto, string creadorId)
         {
-            var e = new Votify.Domain.Entities.Evento(
+            var e = new Evento(
                 dto.Nombre,
                 dto.Descripcion,
                 dto.FechaInicio,
@@ -112,5 +88,15 @@ namespace Votify.Application.Services
             }
             return null;
         }
+
+        private static EventoDto MapToEventoDTO(Evento e) => new EventoDto
+        {
+            Id          = e.Id.ToString(),
+            Nombre      = e.Nombre,
+            Descripcion = e.Descripcion,
+            FechaInicio = e.FechaInicio,
+            FechaFin    = e.FechaFin,
+            ImagenUrl   = e.ImagenUrl
+        };
     }
 }
