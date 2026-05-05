@@ -1,3 +1,4 @@
+@using System.Security.Claims
 @inherits LayoutComponentBase
 @inject Votify.Client.Services.IAuthService AuthService
 @inject NavigationManager NavManager
@@ -18,17 +19,24 @@
             <div class="auth-controls">
                 <AuthorizeView>
                     <Authorized>
-                        <div class="user-menu-container" @onclick="ToggleUserMenu" @onfocusout="HideUserMenu" tabindex="0">
-                             <span class="user-greeting"><img src="images/usuario-logo.png" class="user-logo" alt="User Logo" /> @context.User.Identity?.Name ▼</span>
-                            
-                            @if (showUserMenu)
-                            {
-                                <div class="user-dropdown">
-                                    <button class="dropdown-item text-danger" @onclick="CerrarSesion" @onclick:stopPropagation="true">
-                                        🚪 Cerrar Sesión
-                                    </button>
-                                </div>
-                            }
+                        <div class="user-header-wrapper">
+                            <div class="user-header-info">
+                                <div class="header-user-name">@GetUserName(context.User)</div>
+                                <div class="header-user-email">@GetUserEmail(context.User)</div>
+                            </div>
+
+                            <div class="user-menu-container" @onclick="ToggleUserMenu" @onfocusout="HideUserMenu" tabindex="0">
+                                <span class="user-greeting"><img src="images/usuario-logo.png" class="user-logo" alt="User Logo" /> ▼</span>
+
+                                @if (showUserMenu)
+                                {
+                                    <div class="user-dropdown">
+                                        <button class="dropdown-item text-danger" @onclick="CerrarSesion" @onclick:stopPropagation="true">
+                                            🚪 Cerrar Sesión
+                                        </button>
+                                    </div>
+                                }
+                            </div>
                         </div>
                     </Authorized>
                     <NotAuthorized>
@@ -60,6 +68,18 @@
 
         showUserMenu = false;
         StateHasChanged();
+    }
+
+    private string GetUserName(ClaimsPrincipal user)
+    {
+        var nameClaim = user?.FindFirst(c => c.Type == ClaimTypes.Name || c.Type == ClaimTypes.NameIdentifier || c.Type == "unique_name");
+        return nameClaim?.Value ?? user?.Identity?.Name ?? "Usuario";
+    }
+
+    private string GetUserEmail(ClaimsPrincipal user)
+    {
+        var emailClaim = user?.FindFirst(c => c.Type == ClaimTypes.Email || c.Type == "email");
+        return emailClaim?.Value ?? string.Empty;
     }
 
     private async Task CerrarSesion()
