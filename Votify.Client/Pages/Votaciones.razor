@@ -47,9 +47,14 @@
         </button>
         @if (Rol == "ORGANIZADOR")
         {
-            <button class="btn-crear" @onclick="IrACrearVotacion">
-                <span>+</span> Nueva Votación
-            </button>
+            <div class="header-actions" style="display:flex; gap:0.75rem; flex-wrap:wrap;">
+                <button class="btn-crear" @onclick="IrACrearVotacion">
+                    <span>+</span> Nueva Votación
+                </button>
+                <button class="btn-crear" @onclick="IrAGestionRoles" style="background-color:#6f42c1; border-color:#6f42c1;">
+                    Gestionar Roles
+                </button>
+            </div>
         }
 
     </div>
@@ -271,6 +276,7 @@
     }
 
     private void IrACrearVotacion() => Nav.NavigateTo($"/nueva-votacion?eventoId={AppState.EventoId}");
+    private void IrAGestionRoles() => Nav.NavigateTo($"/evento/{AppState.EventoId}/roles");
     private void Gestionar(string id) => Nav.NavigateTo($"/votacion/{id}");
     private void VerResultados(string id) => Nav.NavigateTo($"/{id}/resultados/");
     private void Votar(string id) => Nav.NavigateTo($"/{id}/proyectos/");

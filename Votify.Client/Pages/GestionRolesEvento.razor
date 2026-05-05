@@ -1,0 +1,811 @@
+@page "/evento/{EventoId:guid}/roles"
+@using System.Linq
+@using Votify.Client.DTOs
+@inject Votify.Client.Services.EventosService EventosService
+@inject NavigationManager Nav
+@inject Votify.Client.Services.AppState AppState
+@inject AuthenticationStateProvider AuthStateProvider
+
+<div class="roles-container">
+    <!-- Header Section -->
+    <div class="roles-header">
+        <div>
+            <span class="roles-breadcrumb-badge">VOTACIÓN ABIERTA</span>
+            <h1 class="roles-page-title">Gestión de Roles del Evento</h1>
+            <p class="roles-page-description">Administra los permisos y categorías de los miembros del equipo y participantes asignados a este evento.</p>
+        </div>
+        <button class="btn roles-invite-btn" @onclick="VolverAlaVotaciones">
+            <span class="roles-invite-icon">←</span> Volver
+        </button>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(StatusMessage))
+    {
+        <div class="roles-message @(IsErrorMessage ? "roles-message-error" : "roles-message-success")">
+            @StatusMessage
+        </div>
+    }
+
+    <!-- Users Section -->
+    <div class="roles-users-card">
+        <div class="roles-users-header">
+            <div>
+                <h3 class="roles-users-title">Usuarios Registrados</h3>
+            </div>
+            <div class="roles-search-container">
+                <svg class="roles-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
+                <input type="text" class="roles-search-input" placeholder="Buscar por nombre o correo..."
+                       @oninput="HandleSearch"
+                       value="@SearchTerm" />
+            </div>
+        </div>
+
+        @if (!isAuthorized)
+        {
+            <div class="roles-empty">No tienes permisos</div>
+        }
+        else if (isLoading)
+        {
+            <div class="roles-loading">Cargando participantes...</div>
+        }
+        else if (!Participantes.Any())
+        {
+            <div class="roles-empty">No hay participantes registrados para este evento.</div>
+        }
+        else
+        {
+            <div class="roles-table-wrapper">
+                <table class="roles-users-table">
+                    <thead>
+                        <tr>
+                            <th class="roles-col-user">NOMBRE Y USUARIO</th>
+                            <th class="roles-col-email">CORREO ELECTRÓNICO</th>
+                            <th class="roles-col-role">ROL ASIGNADO</th>
+                            <th class="roles-col-actions">ACCIONES</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var user in PageParticipantes)
+                        {
+                            <tr class="roles-table-row">
+                                <td class="roles-col-user">
+                                    <div class="roles-user-cell">
+                                        <div class="roles-user-avatar">@GetInitials(user.Nombre)</div>
+                                        <div class="roles-user-info">
+                                            <div class="roles-user-name">@user.Nombre</div>
+                                            <div class="roles-user-handle">@user.Username</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="roles-col-email">@user.Email</td>
+                                <td class="roles-col-role">
+                                    <select class="roles-role-dropdown" disabled="@IsCurrentUser(user)" title="@(IsCurrentUser(user) ? "No puedes cambiar tu propio rol" : "Cambiar rol")" @onchange="async e => await UpdateRole(user, e.Value?.ToString() ?? user.Rol)">
+                                        @foreach (var rol in RolesDisponibles)
+                                        {
+                                            <option value="@rol" selected="@(user.Rol == rol)">@rol</option>
+                                        }
+                                    </select>
+                                    @if (IsCurrentUser(user))
+                                    {
+                                        <div class="roles-inline-warning">No puedes cambiar tu propio rol</div>
+                                    }
+                                </td>
+                                <td class="roles-col-actions">
+                                    <button class="roles-action-btn" disabled="@IsCurrentUser(user)" title="@(IsCurrentUser(user) ? "No puedes cambiar tu propio rol" : "Quitar participante")" @onclick="() => QuitarParticipante(user)">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M20 21H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2z"></path>
+                                            <polyline points="10 11 10 17 14 11 14 17"></polyline>
+                                        </svg>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="roles-pagination-wrapper">
+                <span class="roles-pagination-info">Mostrando @PageFrom a @PageTo de @Participantes.Count usuarios</span>
+                <nav class="roles-pagination">
+                    <button class="roles-page-btn @(CurrentPage == 1 ? "disabled" : "")" @onclick="PreviousPage">‹</button>
+                    @for (var page = 1; page <= TotalPages; page++)
+                    {
+                        var currentPageValue = page;
+                        <button class="roles-page-btn @(currentPageValue == CurrentPage ? "active" : "")" @onclick="() => GoToPage(currentPageValue)">@currentPageValue</button>
+                    }
+                    <button class="roles-page-btn @(CurrentPage == TotalPages ? "disabled" : "")" @onclick="NextPage">›</button>
+                </nav>
+            </div>
+        }
+    </div>
+
+    <!-- Stats Section -->
+    <div class="roles-stats-grid">
+        <div class="roles-stat-card roles-stat-primary">
+            <div class="roles-stat-icon">✓</div>
+            <div class="roles-stat-content">
+                <div class="roles-stat-value">@Stats.Organizadores</div>
+                <div class="roles-stat-label">ORGANIZADORES</div>
+            </div>
+        </div>
+        <div class="roles-stat-card roles-stat-primary">
+            <div class="roles-stat-icon">⚖</div>
+            <div class="roles-stat-content">
+                <div class="roles-stat-value">@Stats.Jurados</div>
+                <div class="roles-stat-label">MIEMBROS DEL JURADO</div>
+            </div>
+        </div>
+        <div class="roles-stat-card roles-stat-primary">
+            <div class="roles-stat-icon">C</div>
+            <div class="roles-stat-content">
+                <div class="roles-stat-value">@Stats.Competidores</div>
+                <div class="roles-stat-label">COMPETIDORES</div>
+            </div>
+        </div>
+        <div class="roles-stat-card roles-stat-accent">
+            <div class="roles-stat-icon">P</div>
+            <div class="roles-stat-content">
+                <div class="roles-stat-value">@Stats.Publicos</div>
+                <div class="roles-stat-label">PÚBLICO</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .roles-container {
+        background: #f5f5f7;
+        min-height: 100vh;
+        padding: 3rem 2rem;
+    }
+
+    .roles-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 3rem;
+        margin-bottom: 3rem;
+    }
+
+    .roles-breadcrumb-badge {
+        display: inline-block;
+        background: rgba(111, 66, 193, 0.1);
+        color: #6f42c1;
+        padding: 0.4rem 0.8rem;
+        border-radius: 999px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        margin-bottom: 1rem;
+    }
+
+    .roles-page-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: #1a1a1a;
+        margin: 0 0 0.75rem 0;
+    }
+
+    .roles-page-description {
+        font-size: 1rem;
+        color: #666;
+        margin: 0;
+        line-height: 1.5;
+        max-width: 500px;
+    }
+
+    .roles-invite-btn {
+        background: #a855f7;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        white-space: nowrap;
+    }
+
+    .roles-invite-btn:hover {
+        background: #9333ea;
+        transform: translateY(-2px);
+    }
+
+    .roles-invite-icon {
+        font-size: 1.1rem;
+    }
+
+    .roles-users-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .roles-users-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 2rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .roles-users-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1a1a1a;
+        margin: 0;
+    }
+
+    .roles-search-container {
+        position: relative;
+        width: 100%;
+        max-width: 300px;
+    }
+
+    .roles-search-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 20px;
+        height: 20px;
+        color: #999;
+        pointer-events: none;
+    }
+
+    .roles-search-input {
+        width: 100%;
+        padding: 0.75rem 1rem 0.75rem 2.8rem;
+        border: 1px solid #e5e5e7;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        background: #f9f9fb;
+        transition: all 0.3s ease;
+    }
+
+    .roles-search-input:focus {
+        outline: none;
+        border-color: #a855f7;
+        background: white;
+        box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
+    }
+
+    .roles-table-wrapper {
+        overflow-x: auto;
+    }
+
+    .roles-users-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 1.5rem;
+    }
+
+    .roles-users-table thead {
+        border-bottom: 1px solid #e5e5e7;
+    }
+
+    .roles-users-table th {
+        padding: 1rem 0;
+        text-align: left;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #999;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    .roles-table-row {
+        border-bottom: 1px solid #f0f0f2;
+        transition: background 0.2s ease;
+    }
+
+    .roles-table-row:hover {
+        background: #fafbfc;
+    }
+
+    .roles-users-table td {
+        padding: 1.2rem 0;
+        vertical-align: middle;
+    }
+
+    .roles-col-user {
+        width: 35%;
+    }
+
+    .roles-col-email {
+        width: 25%;
+    }
+
+    .roles-col-role {
+        width: 25%;
+    }
+
+    .roles-col-actions {
+        width: 15%;
+        text-align: right;
+    }
+
+    .roles-user-cell {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .roles-user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #a855f7, #7c3aed);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+
+    .roles-user-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+    }
+
+    .roles-user-name {
+        font-weight: 500;
+        color: #1a1a1a;
+        font-size: 0.95rem;
+    }
+
+    .roles-user-handle {
+        font-size: 0.85rem;
+        color: #999;
+    }
+
+    .roles-role-dropdown {
+        padding: 0.5rem 0.75rem;
+        border: 1px solid #e5e5e7;
+        border-radius: 8px;
+        background: white;
+        color: #a855f7;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .roles-role-dropdown:hover {
+        border-color: #a855f7;
+        background: #faf9ff;
+    }
+
+    .roles-role-dropdown:focus {
+        outline: none;
+        border-color: #a855f7;
+        box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
+    }
+
+    .roles-role-dropdown:disabled,
+    .roles-action-btn:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+    }
+
+    .roles-inline-warning {
+        margin-top: 0.35rem;
+        color: #b45309;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .roles-action-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 999px;
+        border: 1px solid #e5e5e7;
+        background: white;
+        color: #999;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    .roles-action-btn:hover {
+        border-color: #a855f7;
+        color: #a855f7;
+        background: #faf9ff;
+    }
+
+    .roles-action-btn svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    .roles-pagination-wrapper {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #f0f0f2;
+    }
+
+    .roles-pagination-info {
+        font-size: 0.85rem;
+        color: #999;
+    }
+
+    .roles-pagination {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .roles-page-btn {
+        width: 36px;
+        height: 36px;
+        border: 1px solid #e5e5e7;
+        background: white;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 500;
+        color: #666;
+        transition: all 0.3s ease;
+    }
+
+    .roles-page-btn:hover:not(.disabled):not(.active) {
+        border-color: #a855f7;
+        color: #a855f7;
+    }
+
+    .roles-page-btn.active {
+        background: #a855f7;
+        color: white;
+        border-color: #a855f7;
+    }
+
+    .roles-page-btn.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .roles-loading,
+    .roles-empty {
+        padding: 3rem 2rem;
+        text-align: center;
+        color: #999;
+        font-size: 1rem;
+    }
+
+    .roles-message {
+        border-radius: 12px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        padding: 1rem 1.25rem;
+    }
+
+    .roles-message-error {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #b91c1c;
+    }
+
+    .roles-message-success {
+        background: #ecfdf5;
+        border: 1px solid #bbf7d0;
+        color: #047857;
+    }
+
+    .roles-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .roles-stat-card {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        padding: 1.8rem;
+        border-radius: 20px;
+        background: white;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .roles-stat-primary {
+        background: white;
+        border: 1px solid #f0f0f2;
+    }
+
+    .roles-stat-accent {
+        background: linear-gradient(135deg, #a855f7, #9333ea);
+        border: none;
+    }
+
+    .roles-stat-icon {
+        font-size: 2rem;
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: rgba(168, 85, 247, 0.1);
+    }
+
+    .roles-stat-accent .roles-stat-icon {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .roles-stat-content {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .roles-stat-value {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #1a1a1a;
+    }
+
+    .roles-stat-accent .roles-stat-value {
+        color: white;
+    }
+
+    .roles-stat-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #999;
+    }
+
+    .roles-stat-accent .roles-stat-label {
+        color: rgba(255, 255, 255, 0.75);
+    }
+
+    @@media (max-width: 768px) {
+        .roles-header {
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .roles-users-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .roles-search-container {
+            width: 100%;
+            max-width: none;
+        }
+
+        .roles-col-email,
+        .roles-col-role {
+            display: none;
+        }
+
+        .roles-stats-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+@code {
+    [Parameter] public Guid EventoId { get; set; }
+
+    private string EventName = string.Empty;
+    private string SearchTerm = string.Empty;
+    private int CurrentPage = 1;
+    private int PageSize = 10;
+    private bool isLoading = true;
+    private bool isAuthorized = true;
+    private string? CurrentUserId;
+    private string StatusMessage = string.Empty;
+    private bool IsErrorMessage = false;
+
+    private readonly string[] RolesDisponibles = new[] { "Organizador", "Jurado", "Competidor", "Público" };
+
+    private List<ParticipanteRolDto> Participantes { get; set; } = new();
+    private RoleStatisticsDto Stats { get; set; } = new();
+
+    private IEnumerable<ParticipanteRolDto> PageParticipantes => Participantes
+        .Skip((CurrentPage - 1) * PageSize)
+        .Take(PageSize);
+
+    private int TotalPages => Math.Max(1, (int)Math.Ceiling(Participantes.Count / (double)PageSize));
+    private int PageFrom => Participantes.Count == 0 ? 0 : ((CurrentPage - 1) * PageSize) + 1;
+    private int PageTo => Math.Min(Participantes.Count, CurrentPage * PageSize);
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (EventoId == Guid.Empty)
+        {
+            return;
+        }
+
+        AppState.EventoId = EventoId.ToString();
+        await LoadEventInfo();
+
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        CurrentUserId = authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+                        ?? authState.User.FindFirst("sub")?.Value
+                        ?? authState.User.FindFirst("nameid")?.Value;
+
+        var rol = await EventosService.ObtenerRolEnEvento(EventoId.ToString());
+        isAuthorized = EsOrganizador(rol);
+        if (!isAuthorized)
+        {
+            ShowError("No tienes permisos");
+            isLoading = false;
+            return;
+        }
+
+        await LoadParticipantesAsync();
+    }
+
+    private async Task LoadEventInfo()
+    {
+        var evento = await EventosService.ObtenerEvento(EventoId.ToString());
+        if (evento != null)
+        {
+            EventName = evento.Nombre;
+            AppState.EventoNombre = evento.Nombre;
+        }
+    }
+
+    private async Task LoadParticipantesAsync()
+    {
+        isLoading = true;
+        try
+        {
+            Participantes = await EventosService.ObtenerParticipantesPorEvento(EventoId.ToString(), SearchTerm);
+            Stats = await EventosService.ObtenerEstadisticasRoles(EventoId.ToString());
+            CurrentPage = 1;
+        }
+        catch (Exception ex)
+        {
+            Participantes = new List<ParticipanteRolDto>();
+            Stats = new RoleStatisticsDto();
+            isAuthorized = false;
+            ShowError(ex.Message.Contains("No tienes permisos", StringComparison.OrdinalIgnoreCase) ? "No tienes permisos" : ex.Message);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task HandleSearch(ChangeEventArgs e)
+    {
+        SearchTerm = e.Value?.ToString() ?? string.Empty;
+        await LoadParticipantesAsync();
+    }
+
+    private async Task UpdateRole(ParticipanteRolDto user, string newRole)
+    {
+        if (string.IsNullOrWhiteSpace(newRole) || user.Rol == newRole)
+        {
+            return;
+        }
+
+        if (IsCurrentUser(user))
+        {
+            ShowError("No puedes cambiar tu propio rol");
+            return;
+        }
+
+        var previousRole = user.Rol;
+        try
+        {
+            user.Rol = newRole;
+            await EventosService.CambiarRolParticipante(EventoId.ToString(), user.Id, newRole);
+            Stats = await EventosService.ObtenerEstadisticasRoles(EventoId.ToString());
+            ShowSuccess(string.IsNullOrWhiteSpace(previousRole) ? "Rol asignado correctamente" : "Rol cambiado exitosamente");
+        }
+        catch (Exception ex)
+        {
+            user.Rol = previousRole;
+            ShowError(ex.Message);
+        }
+    }
+
+    private async Task QuitarParticipante(ParticipanteRolDto user)
+    {
+        if (IsCurrentUser(user))
+        {
+            ShowError("No puedes cambiar tu propio rol");
+            return;
+        }
+
+        try
+        {
+            await EventosService.EliminarParticipanteDeEvento(EventoId.ToString(), user.Id);
+            ShowSuccess("Participante quitado correctamente");
+            await LoadParticipantesAsync();
+        }
+        catch (Exception ex)
+        {
+            ShowError(ex.Message);
+        }
+    }
+
+    private void VolverAlaVotaciones()
+    {
+        Nav.NavigateTo($"/votaciones?eventoId={EventoId}&eventoNombre={Uri.EscapeDataString(EventName)}");
+    }
+
+    private void PreviousPage()
+    {
+        if (CurrentPage > 1)
+        {
+            CurrentPage--;
+        }
+    }
+
+    private void NextPage()
+    {
+        if (CurrentPage < TotalPages)
+        {
+            CurrentPage++;
+        }
+    }
+
+    private void GoToPage(int page)
+    {
+        CurrentPage = page;
+    }
+
+    private string GetInitials(string nombre)
+    {
+        if (string.IsNullOrWhiteSpace(nombre))
+        {
+            return "?";
+        }
+
+        var parts = nombre.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length == 1)
+        {
+            return parts[0].Length >= 2 ? parts[0][..2].ToUpper() : parts[0].ToUpper();
+        }
+
+        return string.Concat(parts[0][0], parts[^1][0]).ToUpper();
+    }
+
+    private bool IsCurrentUser(ParticipanteRolDto user)
+    {
+        return !string.IsNullOrWhiteSpace(CurrentUserId)
+            && string.Equals(user.Id, CurrentUserId, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool EsOrganizador(string? rol)
+    {
+        return string.Equals(rol?.Trim(), "ORGANIZADOR", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(rol?.Trim(), "Organizador", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private void ShowError(string message)
+    {
+        StatusMessage = string.IsNullOrWhiteSpace(message) ? "No tienes permisos" : message;
+        IsErrorMessage = true;
+    }
+
+    private void ShowSuccess(string message)
+    {
+        StatusMessage = message;
+        IsErrorMessage = false;
+    }
+}
