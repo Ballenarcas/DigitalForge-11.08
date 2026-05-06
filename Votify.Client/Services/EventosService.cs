@@ -69,6 +69,47 @@ namespace Votify.Client.Services
             }
         }
 
+        public async Task<List<ParticipanteRolDto>> ObtenerParticipantesPorEvento(string eventoId, string search = "")
+        {
+            var query = string.IsNullOrWhiteSpace(search) ? string.Empty : $"?search={Uri.EscapeDataString(search)}";
+            var response = await _http.GetAsync($"api/eventos/{eventoId}/participantes{query}");
+            await EnsureSuccessWithMessage(response);
+            var resultado = await response.Content.ReadFromJsonAsync<List<ParticipanteRolDto>>();
+            return resultado ?? new List<ParticipanteRolDto>();
+        }
+
+        public async Task<RoleStatisticsDto> ObtenerEstadisticasRoles(string eventoId)
+        {
+            var response = await _http.GetAsync($"api/eventos/{eventoId}/roles/count");
+            await EnsureSuccessWithMessage(response);
+            var resultado = await response.Content.ReadFromJsonAsync<RoleStatisticsDto>();
+            return resultado ?? new RoleStatisticsDto();
+        }
+
+        public async Task CambiarRolParticipante(string eventoId, string participanteId, string rol)
+        {
+            var response = await _http.PutAsJsonAsync($"api/eventos/{eventoId}/participantes/{participanteId}/rol", new { Rol = rol });
+            await EnsureSuccessWithMessage(response);
+        }
+
+        public async Task EliminarParticipanteDeEvento(string eventoId, string participanteId)
+        {
+            var response = await _http.DeleteAsync($"api/eventos/{eventoId}/participantes/{participanteId}");
+            await EnsureSuccessWithMessage(response);
+        }
+
+        private static async Task EnsureSuccessWithMessage(HttpResponseMessage response)
+        {
+            if (response.IsSuccessStatusCode)
+            {
+                return;
+            }
+
+            var error = await response.Content.ReadFromJsonAsync<ApiMessageResponse>();
+            throw new InvalidOperationException(error?.Message ?? "No tienes permisos");
+        }
+
+        private class ApiMessageResponse { public string Message { get; set; } = ""; }
         private class UploadResponse { public string Url { get; set; } = ""; }
         private class RolResponse { public string Rol { get; set; } = ""; }
     }

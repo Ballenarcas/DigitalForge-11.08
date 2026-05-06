@@ -10,5 +10,7 @@ public class CrearVotacionDto
     public bool Comentarios { get; set; }
     public bool ComentariosObligatorios { get; set; }
     public bool EsAnonima { get; set; }
-    public string EventoId { get; set; } = default!;
+    public string? EventoId { get; set; }
+    public int? Estado { get; set; }
+    public List<CriterioDto> Criterios { get; set; } = new();
 }

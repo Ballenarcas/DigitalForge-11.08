@@ -63,7 +63,7 @@
     else if (errorCarga)
     {
         <div class="error-state">
-            <div class="error-icon">⚠️</div>
+            <div class="error-icon">!</div>
             <h3>No se pudo cargar la votación</h3>
             <p>Verifica que la votación exista e inténtalo de nuevo.</p>
             <button class="btn-back" @onclick="HandleVolver">← Volver a votaciones</button>
@@ -73,31 +73,65 @@
     {
         <div class="card">
             <div class="card-header">
-                <div class="edit-badge">
-                    <span class="edit-icon">✏️</span>
-                    Editando
-                </div>
-                <h2 class="title">Editar votación</h2>
-                <p class="subtitle">Modifica los parámetros de esta votación.</p>
+                <h2 class="title">Editar votación de @Nombre</h2>
 
                 @if (YaFinalizo)
                 {
                     <div class="status-banner banner-ended">
-                        🔒 Esta votación ya ha <strong>finalizado</strong>. No se pueden modificar las fechas.
+                        Esta votación ya ha <strong>finalizado</strong>. No se pueden modificar las fechas.
                     </div>
                 }
                 else if (YaInicio)
                 {
                     <div class="status-banner banner-active">
-                        🟢 Votación <strong>en curso</strong>. Solo puedes modificar la fecha de finalización.
+                        Votación <strong>en curso</strong>. Solo puedes modificar la fecha de finalización.
                     </div>
                 }
                 else
                 {
                     <div class="status-banner banner-pending">
-                        ⏳ Votación <strong>pendiente de inicio</strong>. Puedes editar todas las fechas.
+                        Votación <strong>pendiente de inicio</strong>. Puedes editar todas las fechas.
                     </div>
                 }
+
+                <h4 class="section-divider">Cambiar estado manualmente</h4>
+                <div class="state-controls">
+                    @if (EstadoActual == 0)
+                    {
+                        <div class="state-badge active-state">
+                            <span class="state-text">Votación Activa</span>
+                        </div>
+                        <div class="state-buttons">
+                            <button class="btn-state btn-pause" @onclick="PausarVotacion" disabled="@(cambiandoEstado)">
+                                Pausar votación
+                            </button>
+                            <button class="btn-state btn-end" @onclick="DetenerVotacion" disabled="@(cambiandoEstado)">
+                                Finalizar votación
+                            </button>
+                        </div>
+                    }
+                    else if (EstadoActual == 1)
+                    {
+                        <div class="state-badge paused-state">
+                            <span class="state-text">Votación Pausada</span>
+                        </div>
+                        <div class="state-buttons">
+                            <button class="btn-state btn-resume" @onclick="AbrirVotacion" disabled="@(cambiandoEstado)">
+                                Reanudar votación
+                            </button>
+                            <button class="btn-state btn-end" @onclick="DetenerVotacion" disabled="@(cambiandoEstado)">
+                                Finalizar votación
+                            </button>
+                        </div>
+                    }
+                    else if (EstadoActual == 2)
+                    {
+                        <div class="state-badge ended-state">
+                            <span class="state-text">Votación Finalizada</span>
+                        </div>
+                        <p class="state-info">Esta votación ha finalizado y no se puede cambiar a otro estado.</p>
+                    }
+                </div>
             </div>
 
             <div class="form-body">
@@ -110,12 +144,44 @@
                     <label for="select-tipo">Tipo de votación</label>
                     <div class="select-wrapper">
                         <select id="select-tipo" class="form-control select-custom" @bind="Tipo" disabled="@YaInicio">
-                            <option value="ESTANDAR">Recuento de votos</option>
-                            <option value="ANONIMA">Votación anónima</option>
+                            <option value="Recuento de votos">Recuento de votos</option>
+                            <option value="ESTANDAR">Recuento de votos (compatibilidad)</option>
+                            <option value="Multicriterio">Multicriterio</option>
                         </select>
                         <span class="select-arrow">▾</span>
                     </div>
                 </div>
+
+                @if (EsMulticriterio)
+                {
+                    <div class="criteria-panel">
+                        <div class="criteria-header">
+                            <div>
+                                <h4>Criterios de evaluación</h4>
+                                <p>Define los criterios y pesos. La suma debe ser 100%.</p>
+                            </div>
+                            <div class="criteria-total @(PesosValidos ? "criteria-total-ok" : "criteria-total-error")">
+                                @PesoTotal.ToString("0.##")%
+                            </div>
+                        </div>
+
+                        @foreach (var criterio in Criterios)
+                        {
+                            <div class="criteria-row">
+                                <input class="form-control" @bind="criterio.Nombre" placeholder="Innovación" disabled="@YaInicio" />
+                                <input class="limit-input criteria-weight" type="number" @bind="criterio.Peso" min="1" max="100" disabled="@YaInicio" />
+                                <button type="button" class="btn-remove-criterion" disabled="@YaInicio" @onclick="() => QuitarCriterio(criterio)">Quitar</button>
+                            </div>
+                        }
+
+                        <button type="button" class="btn-add-criterion" disabled="@YaInicio" @onclick="AgregarCriterio">+ Añadir criterio</button>
+
+                        @if (!PesosValidos)
+                        {
+                            <div class="criteria-warning">Los pesos deben sumar exactamente 100% para guardar.</div>
+                        }
+                    </div>
+                }
 
                 <div class="grid-dates">
                     <div class="form-group">
@@ -195,7 +261,7 @@
                     <button class="btn-cancel" @onclick="HandleVolver" id="btn-cancelar">
                         Cancelar
                     </button>
-                    <button class="btn-submit" @onclick="HandleGuardar" id="btn-guardar" disabled="@guardando">
+                    <button class="btn-submit" @onclick="HandleGuardar" id="btn-guardar" disabled="@(guardando || (EsMulticriterio && !PesosValidos))">
                         @if (guardando)
                         {
                             <span class="btn-spinner"></span>
@@ -206,84 +272,6 @@
                             <span>💾 Guardar cambios</span>
                         }
                     </button>
-                </div>
-
-                <h4 class="section-divider" style="margin-top: 2.5rem;">Gestionar estado</h4>
-
-                <!-- Estado Actual -->
-                <div class="estado-actual-section">
-                    <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 0.75rem;">Estado actual:</p>
-                    <div class="estado-badge" style="margin-bottom: 1.5rem;">
-                        @if (Estado == 0)
-                        {
-                            <span class="badge badge-abierta">🟢 Votación Abierta</span>
-                        }
-                        else if (Estado == 1)
-                        {
-                            <span class="badge badge-pausada">⏸️ Votación Pausada</span>
-                        }
-                        else if (Estado == 2)
-                        {
-                            <span class="badge badge-finalizada">✓ Votación Finalizada</span>
-                        }
-                    </div>
-                </div>
-
-                <div class="estado-buttons">
-                    @if (Estado == 0)
-                    {
-                        <button class="btn-estado btn-pausar" @onclick="PausarVotacion" disabled="@operacionesEnProgreso">
-                            @if (operacionesEnProgreso)
-                            {
-                                <span class="btn-spinner"></span>
-                            }
-                            else
-                            {
-                                <span>⏸</span>
-                            }
-                            Pausar votación
-                        </button>
-                        <button class="btn-estado btn-detener" @onclick="DetenerVotacion" disabled="@operacionesEnProgreso">
-                            @if (operacionesEnProgreso)
-                            {
-                                <span class="btn-spinner"></span>
-                            }
-                            else
-                            {
-                                <span>⏹</span>
-                            }
-                            Detener votación
-                        </button>
-                    }
-                    @if (Estado == 1)
-                    {
-                        <button class="btn-estado btn-abrir" @onclick="AbrirVotacion" disabled="@operacionesEnProgreso">
-                            @if (operacionesEnProgreso)
-                            {
-                                <span class="btn-spinner"></span>
-                            }
-                            else
-                            {
-                                <span>▶</span>
-                            }
-                            Abrir votación
-                        </button>
-                        <button class="btn-estado btn-detener" @onclick="DetenerVotacion" disabled="@operacionesEnProgreso">
-                            @if (operacionesEnProgreso)
-                            {
-                                <span class="btn-spinner"></span>
-                            }
-                            else
-                            {
-                                <span>⏹</span>
-                            }
-                            Detener votación
-                        </button>
-                    }
-                    @if (Estado == 2)
-                    {
-                        <p style="color: #64748b; font-style: italic;">Votación finalizada. No se pueden cambiar los estados.</p>
-                    }
                 </div>
 
                 @if (!string.IsNullOrEmpty(Mensaje))
@@ -622,6 +610,89 @@ input:checked + .slider:before {
     outline: none;
     border-color: #a855f7;
     box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.12);
+}
+
+.criteria-panel {
+    background: #faf5ff;
+    border: 1px solid #e9d5ff;
+    border-radius: 20px;
+    margin: 1rem 0 1.5rem;
+    padding: 1.25rem;
+}
+
+.criteria-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.criteria-header h4 {
+    color: #581c87;
+    margin: 0 0 0.25rem;
+}
+
+.criteria-header p {
+    color: #64748b;
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+.criteria-total {
+    align-items: center;
+    border-radius: 12px;
+    display: flex;
+    font-weight: 800;
+    justify-content: center;
+    min-width: 80px;
+    padding: 0.6rem 0.8rem;
+}
+
+.criteria-total-ok {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.criteria-total-error {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.criteria-row {
+    display: grid;
+    grid-template-columns: 1fr 90px auto;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.criteria-weight {
+    width: 90px;
+}
+
+.btn-add-criterion,
+.btn-remove-criterion {
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 700;
+    padding: 0.65rem 0.9rem;
+}
+
+.btn-add-criterion {
+    background: #9333ea;
+    color: white;
+}
+
+.btn-remove-criterion {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.criteria-warning {
+    color: #b91c1c;
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-top: 0.8rem;
 }
 
 /* ── Action row ── */
@@ -1049,6 +1120,132 @@ input:checked + .slider:before {
     border: 1px solid #818cf8;
 }
 
+/* ── Cambio de Estado ── */
+.state-controls {
+    background: linear-gradient(135deg, #f8f9fc 0%, #f1f5f9 100%);
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.state-badge {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+}
+
+.state-icon {
+    font-size: 2rem;
+}
+
+.state-text {
+    font-size: 1rem;
+}
+
+.active-state {
+    background: linear-gradient(135deg, #dcfce7 0%, #c6f6d5 100%);
+    color: #166534;
+    border: 2px solid #22c55e;
+}
+
+.paused-state {
+    background: linear-gradient(135deg, #fef3c7 0%, #fce68a 100%);
+    color: #92400e;
+    border: 2px solid #f59e0b;
+}
+
+.ended-state {
+    background: linear-gradient(135deg, #e0e7ff 0%, #ddd6fe 100%);
+    color: #312e81;
+    border: 2px solid #818cf8;
+}
+
+.state-buttons {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.btn-state {
+    flex: 1;
+    min-width: 150px;
+    padding: 0.75rem 1.25rem;
+    border: none;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.btn-pause {
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);
+}
+
+.btn-pause:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(245, 158, 11, 0.35);
+}
+
+.btn-pause:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-resume {
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.25);
+}
+
+.btn-resume:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(34, 197, 94, 0.35);
+}
+
+.btn-resume:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-end {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+}
+
+.btn-end:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(239, 68, 68, 0.35);
+}
+
+.btn-end:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.state-info {
+    color: #64748b;
+    font-size: 0.95rem;
+    font-style: italic;
+    margin: 0;
+    padding: 1rem;
+    background: #f1f5f9;
+    border-left: 4px solid #94a3b8;
+    border-radius: 8px;
+}
+
 /* ── Responsive ── */
 @@media (max-width: 600px) {
     .card {
@@ -1072,7 +1269,7 @@ input:checked + .slider:before {
     public string Id { get; set; } = default!;
 
     string Nombre = "";
-    string Tipo = "ESTANDAR";
+    string Tipo = "Recuento de votos";
     DateTime FechaInicio = DateTime.Now;
     DateTime FechaFin = DateTime.Now.AddDays(1);
     int LimiteProy = 1;
@@ -1080,20 +1277,28 @@ input:checked + .slider:before {
     bool ComentariosObligatorios = false;
     bool EsAnonima = false;
     int Estado = 0;
+    string EventoId = "";
     string? Mensaje;
+    List<CriterioDto> Criterios = new();
 
     bool cargando = true;
     bool errorCarga = false;
     bool guardando = false;
     bool eliminando = false;
     bool mostrarModalConfirmacion = false;
-    bool operacionesEnProgreso = false;
+    bool cambiandoEstado = false;
+    int EstadoActual = 0;
     
     DateTime FechaInicioOriginal = DateTime.Now;
     DateTime FechaFinOriginal = DateTime.Now.AddDays(1);
     
     bool YaInicio    => DateTime.Now >= FechaInicioOriginal;
     bool YaFinalizo  => DateTime.Now >= FechaFinOriginal;
+    bool EsMulticriterio => Tipo == "Multicriterio";
+    decimal PesoTotal => Criterios.Sum(c => c.Peso);
+    bool PesosValidos => Criterios.Count > 0
+        && Criterios.All(c => !string.IsNullOrWhiteSpace(c.Nombre) && c.Peso > 0)
+        && Math.Abs(PesoTotal - 100m) <= 0.01m;
 
     protected override async Task OnInitializedAsync()
     {
@@ -1122,7 +1327,16 @@ input:checked + .slider:before {
             Comentarios = votacion.Comentarios;
             ComentariosObligatorios = votacion.ComentariosObligatorios;
             EsAnonima = votacion.EsAnonima;
+            EventoId = votacion.EventoId;
             Estado = votacion.Estado;
+            EstadoActual = votacion.Estado;
+            Criterios = votacion.Criterios?.Any() == true
+                ? votacion.Criterios
+                : new List<CriterioDto>
+                {
+                    new CriterioDto { Nombre = "Innovación", Peso = 40 },
+                    new CriterioDto { Nombre = "Diseño", Peso = 60 }
+                };
         }
         catch
         {
@@ -1146,6 +1360,11 @@ input:checked + .slider:before {
             Mensaje = "Error: La fecha de fin debe ser posterior a la de inicio.";
             return;
         }
+        if (EsMulticriterio && !PesosValidos)
+        {
+            Mensaje = "Error: Los pesos de los criterios deben sumar 100%.";
+            return;
+        }
 
         guardando = true;
         Mensaje   = null;
@@ -1158,16 +1377,19 @@ input:checked + .slider:before {
                 Tipo              = Tipo,
                 FechaInicio       = FechaInicio.ToUniversalTime(),
                 FechaFin          = FechaFin.ToUniversalTime(),
-                LimiteProy   = LimiteProy,
-                Comentarios = Comentarios,
+                LimiteProy        = LimiteProy,
+                Comentarios       = Comentarios,
                 ComentariosObligatorios = ComentariosObligatorios,
-                EsAnonima = EsAnonima
+                EsAnonima         = EsAnonima,
+                EventoId          = EventoId,
+                Estado            = EstadoActual,
+                Criterios         = EsMulticriterio ? Criterios : new List<CriterioDto>()
             };
             await VotacionesService.ActualizarVotacion(Id, request);
             Mensaje = "Votación actualizada correctamente.";
             StateHasChanged();
             await Task.Delay(800);
-            Nav.NavigateTo("/");
+            Nav.NavigateTo($"/votaciones?eventoId={EventoId}");
         }
         catch
         {
@@ -1194,7 +1416,7 @@ input:checked + .slider:before {
             Mensaje = "Votación eliminada correctamente.";
             StateHasChanged();
             await Task.Delay(800);
-            Nav.NavigateTo("/");
+            Nav.NavigateTo($"/votaciones?eventoId={EventoId}");
         }
         catch
         {
@@ -1212,65 +1434,77 @@ input:checked + .slider:before {
         mostrarModalConfirmacion = false;
     }
 
+    private void AgregarCriterio() => Criterios.Add(new CriterioDto { Nombre = "", Peso = 0 });
+    private void QuitarCriterio(CriterioDto criterio)
+    {
+        if (Criterios.Count > 1)
+        {
+            Criterios.Remove(criterio);
+        }
+    }
+
     async Task PausarVotacion()
     {
-        operacionesEnProgreso = true;
+        cambiandoEstado = true;
         Mensaje = null;
         try
         {
             await VotacionesService.PausarVotacion(Id);
             Estado = 1;
-            Mensaje = "Votación pausada correctamente.";
+            EstadoActual = 1;
+            Mensaje = "✅ Votación pausada correctamente.";
         }
         catch (Exception ex)
         {
-            Mensaje = $"Error al pausar: {ex.Message}";
+            Mensaje = $"❌ Error al pausar: {ex.Message}";
         }
         finally
         {
-            operacionesEnProgreso = false;
+            cambiandoEstado = false;
         }
     }
 
     async Task DetenerVotacion()
     {
-        operacionesEnProgreso = true;
+        cambiandoEstado = true;
         Mensaje = null;
         try
         {
             await VotacionesService.DetenerVotacion(Id);
             Estado = 2;
-            Mensaje = "Votación detenida correctamente.";
+            EstadoActual = 2;
+            Mensaje = "✅ Votación finalizada correctamente.";
         }
         catch (Exception ex)
         {
-            Mensaje = $"Error al detener: {ex.Message}";
+            Mensaje = $"❌ Error al finalizar: {ex.Message}";
         }
         finally
         {
-            operacionesEnProgreso = false;
+            cambiandoEstado = false;
         }
     }
 
     async Task AbrirVotacion()
     {
-        operacionesEnProgreso = true;
+        cambiandoEstado = true;
         Mensaje = null;
         try
         {
             await VotacionesService.AbrirVotacion(Id);
             Estado = 0;
-            Mensaje = "Votación abierta correctamente.";
+            EstadoActual = 0;
+            Mensaje = "✅ Votación reabierta correctamente.";
         }
         catch (Exception ex)
         {
-            Mensaje = $"Error al abrir: {ex.Message}";
+            Mensaje = $"❌ Error al reabrir: {ex.Message}";
         }
         finally
         {
-            operacionesEnProgreso = false;
+            cambiandoEstado = false;
         }
     }
 
-    void HandleVolver() => Nav.NavigateTo("/votaciones");
+    void HandleVolver() => Nav.NavigateTo($"/votaciones?eventoId={EventoId}");
 }

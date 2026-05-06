@@ -6,6 +6,8 @@ namespace Votify.Application.Interfaces
     public interface IVotoService
     {
         Task VotarAsync(VotarDto dto);
+        Task VotarMulticriterioAsync(VotoMulticriterioDto dto);
+        Task<bool> HaVotadoMulticriterioAsync(string proyectoId, string votanteId);
         Task<bool> PuedeVotarAsync(string votacionId, string votanteId);
     }
 }

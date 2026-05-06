@@ -74,6 +74,31 @@ article {
     align-items: center;
 }
 
+.user-header-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.user-header-info {
+    display: flex;
+    flex-direction: column;
+    text-align: right;
+}
+
+.header-user-name {
+    font-size: 14px;
+    font-weight: 800;
+    color: white;
+    line-height: 1.2;
+}
+
+.header-user-email {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.75);
+    line-height: 1.2;
+}
+
 .user-menu-container {
     position: relative;
     cursor: pointer;

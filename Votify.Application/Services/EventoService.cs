@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Votify.Application.DTOs;
 using Votify.Application.Interfaces;
 using Votify.Domain.Entities;
@@ -70,12 +73,93 @@ namespace Votify.Application.Services
         {
             if (Guid.TryParse(eventoId, out var eId) && Guid.TryParse(participanteId, out var pId))
             {
-                // Verificar si ya está participando
                 var misEventos = await _repo.ObtenerPorParticipanteAsync(pId);
                 if (!misEventos.Any(x => x.Id == eId))
                 {
-                    var pe = new ParticipanteEvento(pId, eId, "VOTANTE");
+                    var pe = new ParticipanteEvento(pId, eId, "PÚBLICO");
                     await _participanteEventoRepo.GuardarAsync(pe);
+                }
+            }
+        }
+
+        public async Task<List<ParticipanteRolDto>> ObtenerParticipantesPorEventoAsync(string eventoId, string solicitanteId, string? search = null)
+        {
+            if (!Guid.TryParse(eventoId, out var eId) || !Guid.TryParse(solicitanteId, out var solicitanteGuid))
+            {
+                return new List<ParticipanteRolDto>();
+            }
+
+            await ValidarOrganizadorAsync(eId, solicitanteGuid);
+
+            var participantes = await _participanteEventoRepo.ObtenerParticipantesPorEventoAsync(eId, search);
+            return participantes.Select(p => new ParticipanteRolDto
+            {
+                Id = p.ParticipanteId.ToString(),
+                Nombre = p.Nombre,
+                Email = p.Email,
+                Rol = NormalizarRol(p.Rol)
+            }).ToList();
+        }
+
+        public async Task<RoleStatisticsDto> ObtenerEstadisticasRolesAsync(string eventoId, string solicitanteId)
+        {
+            if (!Guid.TryParse(eventoId, out var eId) || !Guid.TryParse(solicitanteId, out var solicitanteGuid))
+            {
+                return new RoleStatisticsDto();
+            }
+
+            await ValidarOrganizadorAsync(eId, solicitanteGuid);
+
+            var stats = await _participanteEventoRepo.ContarRolesPorEventoAsync(eId);
+            return new RoleStatisticsDto
+            {
+                Organizadores = stats.Organizadores,
+                Jurados = stats.Jurados,
+                Competidores = stats.Competidores,
+                Publicos = stats.Publicos
+            };
+        }
+
+        public async Task CambiarRolParticipanteAsync(string eventoId, string participanteId, string solicitanteId, string rol)
+        {
+            if (Guid.TryParse(eventoId, out var eId) && Guid.TryParse(participanteId, out var pId) && Guid.TryParse(solicitanteId, out var solicitanteGuid))
+            {
+                await ValidarOrganizadorAsync(eId, solicitanteGuid);
+
+                if (pId == solicitanteGuid)
+                {
+                    throw new InvalidOperationException("No puedes cambiar tu propio rol");
+                }
+
+                var actualizado = await _participanteEventoRepo.ActualizarRolAsync(eId, pId, NormalizarRol(rol));
+                if (!actualizado)
+                {
+                    throw new InvalidOperationException("No se pudo actualizar el rol del participante.");
+                }
+            }
+        }
+
+        public async Task EliminarParticipacionAsync(string eventoId, string participanteId, string solicitanteId)
+        {
+            if (Guid.TryParse(eventoId, out var eId) && Guid.TryParse(participanteId, out var pId) && Guid.TryParse(solicitanteId, out var solicitanteGuid))
+            {
+                await ValidarOrganizadorAsync(eId, solicitanteGuid);
+
+                var totalConRol = await _participanteEventoRepo.ContarParticipantesConRolAsync(eId);
+                if (totalConRol <= 1)
+                {
+                    throw new InvalidOperationException("Debe haber al menos un participante con rol");
+                }
+
+                if (pId == solicitanteGuid)
+                {
+                    throw new InvalidOperationException("No puedes cambiar tu propio rol");
+                }
+
+                var eliminado = await _participanteEventoRepo.EliminarAsync(eId, pId);
+                if (!eliminado)
+                {
+                    throw new InvalidOperationException("No se pudo quitar al participante del evento.");
                 }
             }
         }
@@ -98,5 +182,32 @@ namespace Votify.Application.Services
             FechaFin    = e.FechaFin,
             ImagenUrl   = e.ImagenUrl
         };
+        private async Task ValidarOrganizadorAsync(Guid eventoId, Guid participanteId)
+        {
+            var rol = await _participanteEventoRepo.ObtenerRolAsync(eventoId, participanteId);
+            if (!EsOrganizador(rol))
+            {
+                throw new UnauthorizedAccessException("No tienes permisos");
+            }
+        }
+
+        private static bool EsOrganizador(string? rol)
+        {
+            return string.Equals(rol?.Trim(), "ORGANIZADOR", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(rol?.Trim(), "Organizador", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static string NormalizarRol(string rol)
+        {
+            return rol.Trim().ToUpperInvariant() switch
+            {
+                "ORGANIZADOR" => "ORGANIZADOR",
+                "JURADO" => "JURADO",
+                "COMPETIDOR" => "COMPETIDOR",
+                "PUBLICO" => "PÚBLICO",
+                "PÚBLICO" => "PÚBLICO",
+                _ => rol.Trim().ToUpperInvariant()
+            };
+        }
     }
 }

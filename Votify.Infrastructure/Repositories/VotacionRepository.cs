@@ -88,12 +88,21 @@ namespace Votify.Infrastructure.Repositories
             var entity = await _db.Votaciones.FindAsync(guid);
             if (entity is null) return false;
 
+            // Eliminar votos asociados a la votación
             var votos = await _db.Votos.Where(v => v.VotacionId == guid).ToListAsync();
             if (votos.Any())
             {
                 _db.Votos.RemoveRange(votos);
             }
 
+            // Eliminar proyectos asociados a la votación
+            var proyectos = await _db.Proyectos.Where(p => p.VotacionId == guid).ToListAsync();
+            if (proyectos.Any())
+            {
+                _db.Proyectos.RemoveRange(proyectos);
+            }
+
+            // Finalmente, eliminar la votación
             _db.Votaciones.Remove(entity);
             await _db.SaveChangesAsync();
             return true;
@@ -104,6 +113,8 @@ namespace Votify.Infrastructure.Repositories
             VotacionFactory factory = entity.Tipo.ToUpper() switch
             {
                 "ESTANDAR" => new VotacionEstandarFactory(),
+                "RECUENTO DE VOTOS" => new VotacionRecuentoVotosFactory(),
+                "MULTICRITERIO" => new VotacionMulticriterioFactory(),
                 _ => throw new Exception("Tipo desconocido")
             };
 
@@ -121,6 +132,20 @@ namespace Votify.Infrastructure.Repositories
             domain.Estado = (Domain.Entities.EstadoVotacion)entity.Estado;
             return domain;
         }
+
+        public async Task ActualizarEstadoAsync(string id, Domain.Entities.EstadoVotacion estado)
+        {
+            if (!Guid.TryParse(id, out var guid)) 
+                throw new ArgumentException("El ID no es válido.");
+
+            var entity = await _db.Votaciones.FindAsync(guid);
+            if (entity is null)
+                throw new KeyNotFoundException($"No se encontró la votación con id {id}.");
+
+            entity.Estado = (int)estado;
+            await _db.SaveChangesAsync();
+        }
+
         public async Task<string?> ObtenerEventoIdAsync(string votacionId)
         {
             if (!Guid.TryParse(votacionId, out var guid)) return null;

@@ -19,7 +19,7 @@
     <div class="content-wrapper">
         <div class="results-header">
             <h1 class="results-title">Clasificación de proyectos</h1>
-            <p class="results-subtitle">Conteo de votos final para los proyectos del evento: <strong>@(nombreVotacion ?? "...")</strong></p>
+            <p class="results-subtitle">@(EsMulticriterio ? "Ranking por media ponderada multicriterio" : "Conteo de votos final") para los proyectos del evento: <strong>@(nombreVotacion ?? "...")</strong></p>
         </div>
 
         @if (listaResultados == null)
@@ -54,8 +54,8 @@
                         <h3 class="podium-title">@resultado.Nombre</h3>
                         <p class="podium-team">Equipo:  @resultado.Equipo</p>
                         <div class="podium-votes">
-                            <span class="votes-label">VOTOS TOTALES</span>
-                            <span class="votes-count">@resultado.TotalVotos.ToString("N0")</span>
+                            <span class="votes-label">@(EsMulticriterio ? "PUNTUACIÓN FINAL" : "VOTOS TOTALES")</span>
+                            <span class="votes-count">@(EsMulticriterio ? (resultado.PuntajeFinal?.ToString("0.00") ?? "0.00") : resultado.TotalVotos.ToString("N0"))</span>
                         </div>
                     </div>
                 }
@@ -70,7 +70,7 @@
                             <tr>
                                 <th class="col-position">POSICIÓN</th>
                                 <th class="col-project">PROYECTO Y EQUIPO</th>
-                                <th class="col-votes">VOTOS TOTALES</th>
+                                <th class="col-votes">@(EsMulticriterio ? "PUNTUACIÓN" : "VOTOS TOTALES")</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -87,7 +87,7 @@
                                         </div>
                                     </td>
                                     <td class="col-votes">
-                                        <span class="votes-count-table">@resultado.TotalVotos.ToString("N0") votos</span>
+                                        <span class="votes-count-table">@(EsMulticriterio ? $"{resultado.PuntajeFinal:0.00} pts" : $"{resultado.TotalVotos:N0} votos")</span>
                                     </td>
                                 </tr>
                             }
@@ -414,6 +414,8 @@
     
     private List<ResultadoProyectoDto>? listaResultados;
     private string? nombreVotacion;
+    private string? eventoId;
+    private bool EsMulticriterio;
 
     protected override async Task OnInitializedAsync()
     {
@@ -421,6 +423,8 @@
         {
             var votacion = await VotacionesService.ObtenerVotacion(VotacionId);
             nombreVotacion = votacion?.Nombre;
+            eventoId = votacion?.EventoId;
+            EsMulticriterio = votacion?.Tipo?.Equals("Multicriterio", StringComparison.OrdinalIgnoreCase) ?? false;
             await CargarResultados();
         }
     }
@@ -438,7 +442,7 @@
         }
     }
 
-    private void HandleVolver() => Nav.NavigateTo("/votaciones");
+    private void HandleVolver() => Nav.NavigateTo($"/votaciones?eventoId={eventoId}");
 
     private string GetOrdinalSuffix(int number)
     {
