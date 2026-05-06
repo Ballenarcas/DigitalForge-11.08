@@ -4,6 +4,8 @@
 @inject ProyectosService ProyectosService
 @inject VotacionesService VotacionesService
 @inject NavigationManager Nav
+@inject AuthenticationStateProvider AuthStateProvider
+@inject EventosService EventosService
 
 <div class="detalles-wrapper">
     @if (cargando)
@@ -104,6 +106,79 @@
             <!-- COLUMNA DERECHA: Feedback + Votación -->
             <aside class="col-sidebar">
 
+                @if (EsMulticriterio)
+                {
+                    <div class="sidebar-card feedback-card" id="evaluacion">
+                        <h3 class="sidebar-title">Envía tu voto</h3>
+                        <p class="sidebar-subtitle">Evalúa el proyecto según los criterios</p>
+
+                        @if (!EsJurado)
+                        {
+                            <div class="alert-err">Solo el rol Jurado puede evaluar esta votación multicriterio.</div>
+                        }
+                        else if (YaEvaluoMulticriterio)
+                        {
+                            <div class="alert-ok">El voto ya ha sido emitido.</div>
+                        }
+
+                        @foreach (var criterio in criterios)
+                        {
+                            <div class="criterion-vote-row">
+                                <div class="criterion-vote-header">
+                                    <div>
+                                        <div class="criterion-title">@criterio.Nombre</div>
+                                        <div class="criterion-subtitle">Peso @criterio.Peso.ToString("0.##")%</div>
+                                    </div>
+                                    <strong>@GetValoracion(criterio)/5</strong>
+                                </div>
+                                <div class="stars-row">
+                                    @for (var star = 1; star <= 5; star++)
+                                    {
+                                        var currentStar = star;
+                                        <button type="button"
+                                                class="star-btn @(GetValoracion(criterio) >= currentStar ? "star-active" : "")"
+                                                disabled="@(!EsJurado || YaEvaluoMulticriterio || enviandoComentario)"
+                                                @onclick="() => SetValoracion(criterio, currentStar)">★</button>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        <div class="feedback-section-label">COMENTARIOS DE FEEDBACK</div>
+                        <textarea class="feedback-textarea"
+                                  placeholder="Escribe aquí tus comentarios sobre el proyecto..."
+                                  @bind="comentarioTexto"
+                                  @bind:event="oninput"
+                                  rows="6"
+                                  disabled="@(!EsJurado || YaEvaluoMulticriterio || enviandoComentario)">
+                        </textarea>
+
+                        @if (!string.IsNullOrEmpty(mensajeComentario))
+                        {
+                            <div class="alert-comentario @(comentarioOk ? "alert-ok" : "alert-err")">
+                                @mensajeComentario
+                            </div>
+                        }
+
+                        <button class="btn-enviar-feedback"
+                                @onclick="EnviarVotoMulticriterio"
+                                disabled="@(!PuedeEnviarMulticriterio)">
+                            @if (enviandoComentario)
+                            {
+                                <span class="spinner-sm"></span>
+                                <span>Enviando...</span>
+                            }
+                            else
+                            {
+                                <span>Enviar Voto</span>
+                            }
+                        </button>
+                        <p class="votar-nota">Tu voto es definitivo una vez enviado</p>
+                    </div>
+                }
+                else
+                {
+
                 <!-- Panel de feedback -->
                 <div class="sidebar-card feedback-card" id="comentarios">
                     <h3 class="sidebar-title">Envía tu Feedback</h3>
@@ -187,6 +262,11 @@
                     {
                         <div class="alert-voto @(votoOk ? "alert-ok" : "alert-err")">@mensajeVoto</div>
                     }
+                    <div class="numeric-vote-box">
+                        <label>Puntuación global</label>
+                        <input type="number" min="1" max="10" class="numeric-vote-input" @bind="PuntuacionGlobal" disabled="@(votando || votoOk || limiteAlcanzado || (votacion?.Estado != 0))" />
+                        <span>/10</span>
+                    </div>
                     <button class="btn-votar-proyecto" @onclick="Votar" disabled="@(votando || votoOk || limiteAlcanzado || (votacion?.Estado != 0))">
                         @if (votando)
                         {
@@ -236,6 +316,7 @@
                         }
                     </p>
                 </div>
+                }
 
             </aside>
         </div>
@@ -662,6 +743,81 @@
     }
     .alert-comentario { margin-top: 0.6rem; }
     .alert-voto { }
+    .numeric-vote-box {
+        align-items: center;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        display: grid;
+        gap: 0.6rem;
+        grid-template-columns: 1fr 80px auto;
+        margin-bottom: 1rem;
+        padding: 0.75rem;
+    }
+    .numeric-vote-box label {
+        color: #334155;
+        font-size: 0.85rem;
+        font-weight: 800;
+    }
+    .numeric-vote-input {
+        border: 1px solid #ddd6fe;
+        border-radius: 10px;
+        color: #581c87;
+        font-size: 1rem;
+        font-weight: 800;
+        padding: 0.5rem;
+        text-align: center;
+        width: 100%;
+    }
+    .criterion-vote-row {
+        border-bottom: 1px solid #f1f5f9;
+        margin-bottom: 1.35rem;
+        padding-bottom: 1.25rem;
+    }
+    .criterion-vote-header {
+        align-items: flex-start;
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 0.75rem;
+    }
+    .criterion-title {
+        color: #0f172a;
+        font-weight: 900;
+    }
+    .criterion-subtitle {
+        color: #94a3b8;
+        font-size: 0.82rem;
+        margin-top: 0.25rem;
+    }
+    .criterion-vote-header strong {
+        color: #9333ea;
+        font-size: 1.2rem;
+    }
+    .stars-row {
+        display: flex;
+        gap: 0.4rem;
+    }
+    .star-btn {
+        background: transparent;
+        border: none;
+        color: #cbd5e1;
+        cursor: pointer;
+        font-size: 2rem;
+        line-height: 1;
+        padding: 0;
+        transition: color 0.15s, transform 0.15s;
+    }
+    .star-btn:hover:not(:disabled) {
+        color: #a855f7;
+        transform: translateY(-1px);
+    }
+    .star-btn.star-active {
+        color: #a855f7;
+    }
+    .star-btn:disabled {
+        cursor: not-allowed;
+    }
     .alert-limite { 
         background: #fff7ed; 
         color: #9a3412; 
@@ -785,9 +941,25 @@
     private string? mensajeVoto;
     private VotacionDto? votacion;
     private readonly string usuarioTesterId = "ce932822-2615-46fd-ab8c-7f5164ca2414";
+    private string? usuarioIdActual;
+    private string? rolEnEvento;
+    private int PuntuacionGlobal = 10;
+    private List<CriterioDto> criterios = new();
+    private Dictionary<string, int> valoraciones = new();
+    private bool YaEvaluoMulticriterio = false;
 
     private bool EsVotacionAnonima => votacion?.Tipo?.Equals("ANONIMA", StringComparison.OrdinalIgnoreCase) ?? false;
-    private bool YaTieneComentario => !EsVotacionAnonima && comentarios.Any(c => c.AutorId == Guid.Parse(usuarioTesterId));
+    private bool EsMulticriterio => votacion?.Tipo?.Equals("Multicriterio", StringComparison.OrdinalIgnoreCase) ?? false;
+    private bool EsJurado => string.Equals(rolEnEvento?.Trim(), "Jurado", StringComparison.OrdinalIgnoreCase);
+    private bool YaTieneComentario => !EsVotacionAnonima && comentarios.Any(c => c.AutorId == Guid.Parse(UsuarioVotanteId));
+    private string UsuarioVotanteId => usuarioIdActual ?? usuarioTesterId;
+    private bool PuedeEnviarMulticriterio => EsJurado
+        && !YaEvaluoMulticriterio
+        && !enviandoComentario
+        && votacion?.Estado == 0
+        && criterios.Count > 0
+        && criterios.All(c => GetValoracion(c) > 0)
+        && !string.IsNullOrWhiteSpace(comentarioTexto);
 
     private string GetAutorEtiqueta(ComentarioDto comentario, int indice)
     {
@@ -814,9 +986,24 @@
     {
         try
         {
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            usuarioIdActual = authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+                              ?? authState.User.FindFirst("sub")?.Value
+                              ?? authState.User.FindFirst("nameid")?.Value;
+
             if (!string.IsNullOrEmpty(VotacionId))
             {
                 votacion = await VotacionesService.ObtenerVotacion(VotacionId);
+                criterios = votacion?.Criterios ?? new List<CriterioDto>();
+                foreach (var criterio in criterios.Where(c => !string.IsNullOrWhiteSpace(c.Id)))
+                {
+                    valoraciones.TryAdd(criterio.Id!, 0);
+                }
+
+                if (!string.IsNullOrWhiteSpace(votacion?.EventoId))
+                {
+                    rolEnEvento = await EventosService.ObtenerRolEnEvento(votacion.EventoId);
+                }
             }
 
             if (!string.IsNullOrEmpty(ProyectoId))
@@ -827,8 +1014,13 @@
 
             if (!string.IsNullOrEmpty(VotacionId))
             {
-                bool puedeVotar = await VotacionesService.VerificarLimiteVotos(VotacionId, usuarioTesterId);
+                bool puedeVotar = await VotacionesService.VerificarLimiteVotos(VotacionId, UsuarioVotanteId);
                 limiteAlcanzado = !puedeVotar;
+            }
+
+            if (EsMulticriterio && !string.IsNullOrEmpty(ProyectoId))
+            {
+                YaEvaluoMulticriterio = await VotacionesService.HaVotadoMulticriterio(ProyectoId, UsuarioVotanteId);
             }
         }
         catch (Exception ex)
@@ -850,12 +1042,12 @@
 
         try
         {
-            var autorId = EsVotacionAnonima ? null : usuarioTesterId;
+            var autorId = EsVotacionAnonima ? null : UsuarioVotanteId;
             await ProyectosService.AgregarComentarioAsync(ProyectoId, comentarioTexto, autorId);
             comentarios.Insert(0, new ComentarioDto
             {
                 Texto = comentarioTexto,
-                AutorId = EsVotacionAnonima ? null : Guid.Parse(usuarioTesterId),
+                AutorId = EsVotacionAnonima ? null : Guid.Parse(UsuarioVotanteId),
                 EsAnonimo = EsVotacionAnonima,
                 FechaCreacion = DateTime.UtcNow
             });
@@ -878,6 +1070,13 @@
     {
         if (string.IsNullOrEmpty(VotacionId) || string.IsNullOrEmpty(ProyectoId)) return;
 
+        if (PuntuacionGlobal < 1 || PuntuacionGlobal > 10)
+        {
+            mensajeVoto = "La puntuación debe estar entre 1 y 10.";
+            votoOk = false;
+            return;
+        }
+
         if (votacion?.Estado != 0)
         {
             mensajeVoto = votacion?.Estado == 1 
@@ -896,7 +1095,8 @@
             {
                 VotacionId = VotacionId,
                 ProyectoId = ProyectoId,
-                VotanteId = usuarioTesterId
+                VotanteId = UsuarioVotanteId,
+                Puntuacion = PuntuacionGlobal
             };
             await VotacionesService.EmitirVotoAsync(VotacionId, dto);
             mensajeVoto = "¡Tu voto ha sido registrado con éxito!";
@@ -913,6 +1113,73 @@
         finally
         {
             votando = false;
+        }
+    }
+
+    private async Task EnviarVotoMulticriterio()
+    {
+        if (string.IsNullOrEmpty(VotacionId) || string.IsNullOrEmpty(ProyectoId)) return;
+
+        enviandoComentario = true;
+        mensajeComentario = null;
+
+        try
+        {
+            var dto = new VotoMulticriterioDto
+            {
+                VotacionId = VotacionId,
+                ProyectoId = ProyectoId,
+                VotanteId = UsuarioVotanteId,
+                Comentario = comentarioTexto,
+                Valoraciones = criterios
+                    .Where(c => !string.IsNullOrWhiteSpace(c.Id))
+                    .Select(c => new ValoracionCriterioDto
+                    {
+                        CriterioId = c.Id!,
+                        Valoracion = GetValoracion(c)
+                    })
+                    .ToList()
+            };
+
+            await VotacionesService.EmitirVotoMulticriterioAsync(dto);
+            comentarios.Insert(0, new ComentarioDto
+            {
+                Texto = comentarioTexto,
+                AutorId = EsVotacionAnonima ? null : Guid.Parse(UsuarioVotanteId),
+                EsAnonimo = EsVotacionAnonima,
+                FechaCreacion = DateTime.UtcNow
+            });
+            comentarioTexto = string.Empty;
+            YaEvaluoMulticriterio = true;
+            comentarioOk = true;
+            mensajeComentario = "¡Voto registrado con éxito!";
+        }
+        catch (Exception ex)
+        {
+            var msg = ex.Message;
+            if (msg.Contains("\"Error\""))
+                msg = System.Text.RegularExpressions.Regex.Match(msg, "\"Error\":\"(.*?)\"").Groups[1].Value;
+            mensajeComentario = string.IsNullOrEmpty(msg) ? ex.Message : msg;
+            comentarioOk = false;
+        }
+        finally
+        {
+            enviandoComentario = false;
+        }
+    }
+
+    private int GetValoracion(CriterioDto criterio)
+    {
+        return !string.IsNullOrWhiteSpace(criterio.Id) && valoraciones.TryGetValue(criterio.Id, out var valor)
+            ? valor
+            : 0;
+    }
+
+    private void SetValoracion(CriterioDto criterio, int valor)
+    {
+        if (!string.IsNullOrWhiteSpace(criterio.Id))
+        {
+            valoraciones[criterio.Id] = valor;
         }
     }
 

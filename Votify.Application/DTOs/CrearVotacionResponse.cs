@@ -13,5 +13,6 @@ namespace Votify.Application.DTOs
         public bool EsAnonima { get; set; }
         public string EventoId { get; set; } = default!;
         public int Estado { get; set; }
+        public List<CriterioDto> Criterios { get; set; } = new();
     }
 }

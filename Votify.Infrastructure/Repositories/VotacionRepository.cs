@@ -113,6 +113,8 @@ namespace Votify.Infrastructure.Repositories
             VotacionFactory factory = entity.Tipo.ToUpper() switch
             {
                 "ESTANDAR" => new VotacionEstandarFactory(),
+                "RECUENTO DE VOTOS" => new VotacionRecuentoVotosFactory(),
+                "MULTICRITERIO" => new VotacionMulticriterioFactory(),
                 _ => throw new Exception("Tipo desconocido")
             };
 

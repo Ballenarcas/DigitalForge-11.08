@@ -15,10 +15,19 @@ public class VotifyDbContext : DbContext
     public DbSet<ParticipanteEntity> Participantes { get; set; }
     public DbSet<EventoEntity> Eventos { get; set; }
     public DbSet<ParticipanteEventoEntity> ParticipantesEventos { get; set; }
+    public DbSet<CriterioEntity> Criterios { get; set; }
+    public DbSet<ValoracionCriterioEntity> ValoracionesCriterio { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<CriterioEntity>()
+            .HasIndex(c => c.VotacionId);
+
+        modelBuilder.Entity<ValoracionCriterioEntity>()
+            .HasIndex(v => new { v.ProyectoId, v.VotanteId, v.CriterioId })
+            .IsUnique();
 
         // Seed data for events
         modelBuilder.Entity<EventoEntity>().HasData(

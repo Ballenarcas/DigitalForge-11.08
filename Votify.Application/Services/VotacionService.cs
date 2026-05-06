@@ -12,31 +12,47 @@ namespace Votify.Application.Services
         private readonly IVotoRepository _votoRepo;
         private readonly IProyectoRepository _proyectoRepo;
         private readonly IEventoRepository _eventoRepo;
+        private readonly ICriterioRepository? _criterioRepo;
+        private readonly IValoracionCriterioRepository? _valoracionCriterioRepo;
 
         public VotacionService(
             IVotacionRepository repo,
             IVotoRepository votoRepo,
             IProyectoRepository proyectoRepo,
-            IEventoRepository eventoRepo)
+            IEventoRepository eventoRepo,
+            ICriterioRepository? criterioRepo = null,
+            IValoracionCriterioRepository? valoracionCriterioRepo = null)
         {
             _repo = repo;
             _votoRepo = votoRepo;
             _proyectoRepo = proyectoRepo;
             _eventoRepo = eventoRepo;
+            _criterioRepo = criterioRepo;
+            _valoracionCriterioRepo = valoracionCriterioRepo;
         }
 
         public async Task CrearVotacionAsync(CrearVotacionDto dto)
         {
             await ValidarFechasContraEventoAsync(dto);
+            ValidarCriterios(dto);
             var votacion = CreateEntityFromDto(dto);
             await _repo.GuardarAsync(votacion);
+            if (EsMulticriterio(dto.Tipo) && _criterioRepo is not null)
+            {
+                await _criterioRepo.ReemplazarPorVotacionAsync(votacion.Id.ToString(), MapCriterios(dto.Criterios));
+            }
         }
         public async Task<List<CrearVotacionResponse>> ObtenerTodasAsync()
         {
             var entidades = await _repo.ObtenerTodasAsync();
             // Actualizar estados automáticamente según fechas
             await ActualizarEstadosAutomaticosAsync(entidades);
-            return entidades.Select(MapToResponse).ToList();
+            var responses = new List<CrearVotacionResponse>();
+            foreach (var entidad in entidades)
+            {
+                responses.Add(await MapToResponseAsync(entidad));
+            }
+            return responses;
         }
         public async Task<List<CrearVotacionResponse>> ObtenerPorEventoAsync(string eventoId)
         {
@@ -45,7 +61,12 @@ namespace Votify.Application.Services
             var entidades = await _repo.ObtenerPorEventoAsync(guid);
             // Actualizar estados automáticamente según fechas
             await ActualizarEstadosAutomaticosAsync(entidades);
-            return entidades.Select(MapToResponse).ToList();
+            var responses = new List<CrearVotacionResponse>();
+            foreach (var entidad in entidades)
+            {
+                responses.Add(await MapToResponseAsync(entidad));
+            }
+            return responses;
         }
 
         public async Task<CrearVotacionResponse?> ObtenerPorIdAsync(string id)
@@ -57,11 +78,12 @@ namespace Votify.Application.Services
             ActualizarEstadoAutomatico(e);
             await _repo.ActualizarAsync(id, e);
             
-            return MapToResponse(e);
+            return await MapToResponseAsync(e);
         }
         public async Task ActualizarVotacionAsync(string id, CrearVotacionDto dto)
         {
             await ValidarFechasContraEventoAsync(dto);
+            ValidarCriterios(dto);
             var votacion = CreateEntityFromDto(dto);
             votacion.Id = Guid.Parse(id);
 
@@ -74,11 +96,31 @@ namespace Votify.Application.Services
             var actualizado = await _repo.ActualizarAsync(id, votacion);
             if (!actualizado)
                 throw new KeyNotFoundException($"No se encontró la votación con id {id}.");
+
+            if (_criterioRepo is not null)
+            {
+                if (EsMulticriterio(dto.Tipo))
+                {
+                    await _criterioRepo.ReemplazarPorVotacionAsync(id, MapCriterios(dto.Criterios));
+                }
+                else
+                {
+                    await _criterioRepo.EliminarPorVotacionAsync(id);
+                }
+            }
         }
 
         public async Task EliminarVotacionAsync(string id)
         {
 
+            if (_valoracionCriterioRepo is not null)
+            {
+                await _valoracionCriterioRepo.EliminarPorVotacionAsync(id);
+            }
+            if (_criterioRepo is not null)
+            {
+                await _criterioRepo.EliminarPorVotacionAsync(id);
+            }
             var votosEliminados = await _votoRepo.EliminarPorVotacionAsync(id);
             
 
@@ -89,6 +131,25 @@ namespace Votify.Application.Services
 
         public async Task<List<ResultadoProyectoDto>> ObtenerResultadosAsync(string votacionId)
         {
+            var votacion = await _repo.ObtenerAsync(votacionId);
+            if (votacion is not null && EsMulticriterio(votacion.Tipo) && _valoracionCriterioRepo is not null)
+            {
+                var ponderados = await _valoracionCriterioRepo.ObtenerResultadosPonderadosAsync(votacionId);
+                var proyectosMulti = await _proyectoRepo.ObtenerPorVotacionAsync(votacionId);
+                var proyectoMultiDict = proyectosMulti.ToDictionary(p => p.Id);
+
+                return ponderados.Select((resultado, index) => new ResultadoProyectoDto
+                {
+                    Id = resultado.ProyectoId,
+                    Nombre = proyectoMultiDict.ContainsKey(resultado.ProyectoId) ? proyectoMultiDict[resultado.ProyectoId].Nombre : "Proyecto desconocido",
+                    Equipo = proyectoMultiDict.ContainsKey(resultado.ProyectoId) ? (proyectoMultiDict[resultado.ProyectoId].Equipo_Id ?? "Sin equipo") : "Sin equipo",
+                    TotalVotos = resultado.Evaluaciones,
+                    PuntajeFinal = Math.Round(resultado.Puntaje, 2),
+                    Evaluaciones = resultado.Evaluaciones,
+                    Posicion = index + 1
+                }).ToList();
+            }
+
             var votosporProyecto = await _votoRepo.ObtenerVotosPorVotacionAsync(votacionId);
 
             if (votosporProyecto.Count == 0)
@@ -126,7 +187,7 @@ namespace Votify.Application.Services
             await _repo.ActualizarEstadoAsync(id, EstadoVotacion.Abierta);
         }
 
-        private CrearVotacionResponse MapToResponse(Votacion e)
+        private CrearVotacionResponse MapToResponse(Votacion e, List<CriterioDto>? criterios = null)
         {
             return new CrearVotacionResponse
             {
@@ -140,8 +201,18 @@ namespace Votify.Application.Services
                 ComentariosObligatorios = e.ComentariosObligatorios,
                 EsAnonima = e.EsAnonima,
                 EventoId = e.EventoId.ToString(),
-                Estado = (int)e.Estado
+                Estado = (int)e.Estado,
+                Criterios = criterios ?? new List<CriterioDto>()
             };
+        }
+
+        private async Task<CrearVotacionResponse> MapToResponseAsync(Votacion e)
+        {
+            var criterios = _criterioRepo is null
+                ? new List<CriterioDto>()
+                : (await _criterioRepo.ObtenerPorVotacionAsync(e.Id.ToString())).Select(MapCriterioDto).ToList();
+
+            return MapToResponse(e, criterios);
         }
 
         /// <summary>
@@ -194,6 +265,8 @@ namespace Votify.Application.Services
             VotacionFactory factory = dto.Tipo.ToUpper() switch
             {
                 "ESTANDAR" => new VotacionEstandarFactory(),
+                "RECUENTO DE VOTOS" => new VotacionRecuentoVotosFactory(),
+                "MULTICRITERIO" => new VotacionMulticriterioFactory(),
                 _ => throw new ArgumentException("Tipo de votación no válido.")
             };
 
@@ -226,6 +299,57 @@ namespace Votify.Application.Services
                     $"Las fechas de la votación deben estar dentro del evento " +
                     $"({evento.FechaInicio:dd/MM/yyyy HH:mm} – {evento.FechaFin:dd/MM/yyyy HH:mm}).");
             }
+        }
+
+        private void ValidarCriterios(CrearVotacionDto dto)
+        {
+            if (!EsMulticriterio(dto.Tipo))
+            {
+                return;
+            }
+
+            if (dto.Criterios.Count == 0)
+            {
+                throw new ArgumentException("La votación multicriterio debe tener al menos un criterio.");
+            }
+
+            if (dto.Criterios.Any(c => string.IsNullOrWhiteSpace(c.Nombre) || c.Peso <= 0))
+            {
+                throw new ArgumentException("Todos los criterios deben tener nombre y peso mayor que cero.");
+            }
+
+            var total = dto.Criterios.Sum(c => c.Peso);
+            if (Math.Abs(total - 100m) > 0.01m)
+            {
+                throw new ArgumentException("Los pesos de los criterios deben sumar 100%.");
+            }
+        }
+
+        private static bool EsMulticriterio(string? tipo)
+        {
+            return string.Equals(tipo?.Trim(), "Multicriterio", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static List<Criterio> MapCriterios(List<CriterioDto> criterios)
+        {
+            return criterios.Select(c => new Criterio
+            {
+                Id = Guid.TryParse(c.Id, out var id) ? id : Guid.NewGuid(),
+                Nombre = c.Nombre.Trim(),
+                Tipo = string.IsNullOrWhiteSpace(c.Tipo) ? "Estrellas" : c.Tipo,
+                Peso = c.Peso
+            }).ToList();
+        }
+
+        private static CriterioDto MapCriterioDto(Criterio criterio)
+        {
+            return new CriterioDto
+            {
+                Id = criterio.Id.ToString(),
+                Nombre = criterio.Nombre,
+                Tipo = criterio.Tipo,
+                Peso = criterio.Peso
+            };
         }
     }
 }

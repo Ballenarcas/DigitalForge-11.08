@@ -144,12 +144,44 @@
                     <label for="select-tipo">Tipo de votación</label>
                     <div class="select-wrapper">
                         <select id="select-tipo" class="form-control select-custom" @bind="Tipo" disabled="@YaInicio">
-                            <option value="ESTANDAR">Recuento de votos</option>
-                            <option value="ANONIMA">Votación anónima</option>
+                            <option value="Recuento de votos">Recuento de votos</option>
+                            <option value="ESTANDAR">Recuento de votos (compatibilidad)</option>
+                            <option value="Multicriterio">Multicriterio</option>
                         </select>
                         <span class="select-arrow">▾</span>
                     </div>
                 </div>
+
+                @if (EsMulticriterio)
+                {
+                    <div class="criteria-panel">
+                        <div class="criteria-header">
+                            <div>
+                                <h4>Criterios de evaluación</h4>
+                                <p>Define los criterios y pesos. La suma debe ser 100%.</p>
+                            </div>
+                            <div class="criteria-total @(PesosValidos ? "criteria-total-ok" : "criteria-total-error")">
+                                @PesoTotal.ToString("0.##")%
+                            </div>
+                        </div>
+
+                        @foreach (var criterio in Criterios)
+                        {
+                            <div class="criteria-row">
+                                <input class="form-control" @bind="criterio.Nombre" placeholder="Innovación" disabled="@YaInicio" />
+                                <input class="limit-input criteria-weight" type="number" @bind="criterio.Peso" min="1" max="100" disabled="@YaInicio" />
+                                <button type="button" class="btn-remove-criterion" disabled="@YaInicio" @onclick="() => QuitarCriterio(criterio)">Quitar</button>
+                            </div>
+                        }
+
+                        <button type="button" class="btn-add-criterion" disabled="@YaInicio" @onclick="AgregarCriterio">+ Añadir criterio</button>
+
+                        @if (!PesosValidos)
+                        {
+                            <div class="criteria-warning">Los pesos deben sumar exactamente 100% para guardar.</div>
+                        }
+                    </div>
+                }
 
                 <div class="grid-dates">
                     <div class="form-group">
@@ -229,7 +261,7 @@
                     <button class="btn-cancel" @onclick="HandleVolver" id="btn-cancelar">
                         Cancelar
                     </button>
-                    <button class="btn-submit" @onclick="HandleGuardar" id="btn-guardar" disabled="@guardando">
+                    <button class="btn-submit" @onclick="HandleGuardar" id="btn-guardar" disabled="@(guardando || (EsMulticriterio && !PesosValidos))">
                         @if (guardando)
                         {
                             <span class="btn-spinner"></span>
@@ -578,6 +610,89 @@ input:checked + .slider:before {
     outline: none;
     border-color: #a855f7;
     box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.12);
+}
+
+.criteria-panel {
+    background: #faf5ff;
+    border: 1px solid #e9d5ff;
+    border-radius: 20px;
+    margin: 1rem 0 1.5rem;
+    padding: 1.25rem;
+}
+
+.criteria-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.criteria-header h4 {
+    color: #581c87;
+    margin: 0 0 0.25rem;
+}
+
+.criteria-header p {
+    color: #64748b;
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+.criteria-total {
+    align-items: center;
+    border-radius: 12px;
+    display: flex;
+    font-weight: 800;
+    justify-content: center;
+    min-width: 80px;
+    padding: 0.6rem 0.8rem;
+}
+
+.criteria-total-ok {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.criteria-total-error {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.criteria-row {
+    display: grid;
+    grid-template-columns: 1fr 90px auto;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.criteria-weight {
+    width: 90px;
+}
+
+.btn-add-criterion,
+.btn-remove-criterion {
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 700;
+    padding: 0.65rem 0.9rem;
+}
+
+.btn-add-criterion {
+    background: #9333ea;
+    color: white;
+}
+
+.btn-remove-criterion {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.criteria-warning {
+    color: #b91c1c;
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-top: 0.8rem;
 }
 
 /* ── Action row ── */
@@ -1154,7 +1269,7 @@ input:checked + .slider:before {
     public string Id { get; set; } = default!;
 
     string Nombre = "";
-    string Tipo = "ESTANDAR";
+    string Tipo = "Recuento de votos";
     DateTime FechaInicio = DateTime.Now;
     DateTime FechaFin = DateTime.Now.AddDays(1);
     int LimiteProy = 1;
@@ -1164,6 +1279,7 @@ input:checked + .slider:before {
     int Estado = 0;
     string EventoId = "";
     string? Mensaje;
+    List<CriterioDto> Criterios = new();
 
     bool cargando = true;
     bool errorCarga = false;
@@ -1178,6 +1294,11 @@ input:checked + .slider:before {
     
     bool YaInicio    => DateTime.Now >= FechaInicioOriginal;
     bool YaFinalizo  => DateTime.Now >= FechaFinOriginal;
+    bool EsMulticriterio => Tipo == "Multicriterio";
+    decimal PesoTotal => Criterios.Sum(c => c.Peso);
+    bool PesosValidos => Criterios.Count > 0
+        && Criterios.All(c => !string.IsNullOrWhiteSpace(c.Nombre) && c.Peso > 0)
+        && Math.Abs(PesoTotal - 100m) <= 0.01m;
 
     protected override async Task OnInitializedAsync()
     {
@@ -1209,6 +1330,13 @@ input:checked + .slider:before {
             EventoId = votacion.EventoId;
             Estado = votacion.Estado;
             EstadoActual = votacion.Estado;
+            Criterios = votacion.Criterios?.Any() == true
+                ? votacion.Criterios
+                : new List<CriterioDto>
+                {
+                    new CriterioDto { Nombre = "Innovación", Peso = 40 },
+                    new CriterioDto { Nombre = "Diseño", Peso = 60 }
+                };
         }
         catch
         {
@@ -1232,6 +1360,11 @@ input:checked + .slider:before {
             Mensaje = "Error: La fecha de fin debe ser posterior a la de inicio.";
             return;
         }
+        if (EsMulticriterio && !PesosValidos)
+        {
+            Mensaje = "Error: Los pesos de los criterios deben sumar 100%.";
+            return;
+        }
 
         guardando = true;
         Mensaje   = null;
@@ -1249,7 +1382,8 @@ input:checked + .slider:before {
                 ComentariosObligatorios = ComentariosObligatorios,
                 EsAnonima         = EsAnonima,
                 EventoId          = EventoId,
-                Estado            = EstadoActual
+                Estado            = EstadoActual,
+                Criterios         = EsMulticriterio ? Criterios : new List<CriterioDto>()
             };
             await VotacionesService.ActualizarVotacion(Id, request);
             Mensaje = "Votación actualizada correctamente.";
@@ -1298,6 +1432,15 @@ input:checked + .slider:before {
     void CerrarModal()
     {
         mostrarModalConfirmacion = false;
+    }
+
+    private void AgregarCriterio() => Criterios.Add(new CriterioDto { Nombre = "", Peso = 0 });
+    private void QuitarCriterio(CriterioDto criterio)
+    {
+        if (Criterios.Count > 1)
+        {
+            Criterios.Remove(criterio);
+        }
     }
 
     async Task PausarVotacion()

@@ -28,10 +28,43 @@
                 <label>Tipo de votación <span class="required-asterisk">*</span></label>
                 <div class="select-wrapper">
                     <select class="form-control select-custom" @bind="Tipo">
-                        <option value="ESTANDAR">Recuento de votos</option>
+                        <option value="Recuento de votos">Recuento de votos</option>
+                        <option value="ESTANDAR">Recuento de votos (compatibilidad)</option>
+                        <option value="Multicriterio">Multicriterio</option>
                     </select>
                 </div>
             </div>
+
+            @if (EsMulticriterio)
+            {
+                <div class="criteria-panel">
+                    <div class="criteria-header">
+                        <div>
+                            <h4>Criterios de evaluación</h4>
+                            <p>Define los criterios y pesos. La suma debe ser 100%.</p>
+                        </div>
+                        <div class="criteria-total @(PesosValidos ? "criteria-total-ok" : "criteria-total-error")">
+                            @PesoTotal.ToString("0.##")%
+                        </div>
+                    </div>
+
+                    @foreach (var criterio in Criterios)
+                    {
+                        <div class="criteria-row">
+                            <input class="form-control" @bind="criterio.Nombre" placeholder="Innovación" />
+                            <input class="limit-input criteria-weight" type="number" @bind="criterio.Peso" min="1" max="100" />
+                            <button type="button" class="btn-remove-criterion" @onclick="() => QuitarCriterio(criterio)">Quitar</button>
+                        </div>
+                    }
+
+                    <button type="button" class="btn-add-criterion" @onclick="AgregarCriterio">+ Añadir criterio</button>
+
+                    @if (!PesosValidos)
+                    {
+                        <div class="criteria-warning">Los pesos deben sumar exactamente 100% para guardar.</div>
+                    }
+                </div>
+            }
 
 
             <div class="grid-dates">
@@ -109,7 +142,7 @@
             </div>
 
 
-            <button class="btn-submit" @onclick="HandleCrearVotacion">Crear Votación</button>
+            <button class="btn-submit" @onclick="HandleCrearVotacion" disabled="@(EsMulticriterio && !PesosValidos)">Crear Votación</button>
 
             @if (!string.IsNullOrEmpty(Mensaje))
             {
@@ -379,6 +412,89 @@ input:checked + .slider:before {
     color: #1e293b;
 }
 
+.criteria-panel {
+    background: #faf5ff;
+    border: 1px solid #e9d5ff;
+    border-radius: 20px;
+    margin: 1rem 0 1.5rem;
+    padding: 1.25rem;
+}
+
+.criteria-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.criteria-header h4 {
+    color: #581c87;
+    margin: 0 0 0.25rem;
+}
+
+.criteria-header p {
+    color: #64748b;
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+.criteria-total {
+    align-items: center;
+    border-radius: 12px;
+    display: flex;
+    font-weight: 800;
+    justify-content: center;
+    min-width: 80px;
+    padding: 0.6rem 0.8rem;
+}
+
+.criteria-total-ok {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.criteria-total-error {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.criteria-row {
+    display: grid;
+    grid-template-columns: 1fr 90px auto;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.criteria-weight {
+    width: 90px;
+}
+
+.btn-add-criterion,
+.btn-remove-criterion {
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 700;
+    padding: 0.65rem 0.9rem;
+}
+
+.btn-add-criterion {
+    background: #9333ea;
+    color: white;
+}
+
+.btn-remove-criterion {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.criteria-warning {
+    color: #b91c1c;
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-top: 0.8rem;
+}
+
 
 .btn-submit {
     width: 100%;
@@ -440,7 +556,7 @@ input:checked + .slider:before {
 
 @code {
     string Nombre = "";
-    string Tipo = "ESTANDAR";
+    string Tipo = "Recuento de votos";
     bool EsAnonima = false;
 
     [SupplyParameterFromQuery]
@@ -452,6 +568,17 @@ input:checked + .slider:before {
     bool Comentarios = true;
     bool ComentariosObligatorios = false;
     string? Mensaje;
+    List<CriterioDto> Criterios = new()
+    {
+        new CriterioDto { Nombre = "Innovación", Peso = 40 },
+        new CriterioDto { Nombre = "Diseño", Peso = 60 }
+    };
+
+    bool EsMulticriterio => Tipo == "Multicriterio";
+    decimal PesoTotal => Criterios.Sum(c => c.Peso);
+    bool PesosValidos => Criterios.Count > 0
+        && Criterios.All(c => !string.IsNullOrWhiteSpace(c.Nombre) && c.Peso > 0)
+        && Math.Abs(PesoTotal - 100m) <= 0.01m;
 
     // Helpers para los atributos min/max del input (formato yyyy-MM-ddTHH:mm)
     private string? EventoMinStr => AppState.EventoFechaInicio.HasValue
@@ -508,6 +635,11 @@ input:checked + .slider:before {
             Mensaje = "Error: El límite de proyectos debe ser al menos 1.";
             return;
         }
+        if (EsMulticriterio && !PesosValidos)
+        {
+            Mensaje = "Error: Los pesos de los criterios deben sumar 100%.";
+            return;
+        }
         if (string.IsNullOrWhiteSpace(AppState.EventoId) && string.IsNullOrWhiteSpace(EventoId))
         {
             Mensaje = "Error: No se puede crear una votación sin un evento asociado.";
@@ -522,7 +654,8 @@ input:checked + .slider:before {
                 LimiteProy = LimiteProy, Comentarios = Comentarios, 
                 ComentariosObligatorios = ComentariosObligatorios,
                 EsAnonima = EsAnonima,
-                EventoId = AppState.EventoId ?? ""
+                EventoId = AppState.EventoId ?? "",
+                Criterios = EsMulticriterio ? Criterios : new List<CriterioDto>()
             };
             await VotacionesService.CrearVotacion(request);
             Mensaje = "Votación creada correctamente.";
@@ -535,6 +668,14 @@ input:checked + .slider:before {
         catch (Exception ex) 
         { 
             Mensaje = $"Error al crear la votación: {ex.Message}"; 
+        }
+    }
+    private void AgregarCriterio() => Criterios.Add(new CriterioDto { Nombre = "", Peso = 0 });
+    private void QuitarCriterio(CriterioDto criterio)
+    {
+        if (Criterios.Count > 1)
+        {
+            Criterios.Remove(criterio);
         }
     }
     private void HandleVolver() => Nav.NavigateTo($"/votaciones?eventoId={AppState.EventoId}");

@@ -80,6 +80,21 @@ namespace Votify.Client.Services
             }
         }
 
+        public async Task EmitirVotoMulticriterioAsync(VotoMulticriterioDto dto)
+        {
+            var response = await _http.PostAsJsonAsync("api/votos/multicriterio", dto);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                if (error.Contains("Error"))
+                {
+                    throw new Exception(error);
+                }
+                throw new Exception($"Error HTTP: {response.StatusCode} - {error}");
+            }
+        }
+
         public async Task<List<ResultadoProyectoDto>?> ObtenerResultados(string votacionId)
         {
             return await _http.GetFromJsonAsync<List<ResultadoProyectoDto>>($"api/votaciones/{votacionId}/resultados");
@@ -98,6 +113,23 @@ namespace Votify.Client.Services
             catch
             {
                 return true;
+            }
+        }
+
+        public async Task<bool> HaVotadoMulticriterio(string proyectoId, string votanteId)
+        {
+            try
+            {
+                var response = await _http.GetAsync($"api/votos/multicriterio/emitido/{proyectoId}/{votanteId}");
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadFromJsonAsync<bool>();
+                }
+                return false;
+            }
+            catch
+            {
+                return false;
             }
         }
 
