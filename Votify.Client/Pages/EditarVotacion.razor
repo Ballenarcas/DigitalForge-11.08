@@ -36,6 +36,37 @@
             </div>
         </div>
     }
+    @if (mostrarModalConfirmacionFinalizar)
+    {
+        <div class="modal-overlay" @onclick="CerrarModalFinalizar">
+            <div class="modal-content" @onclick:stopPropagation="true">
+                <div class="modal-header">
+                    <h3>⚠️ Confirmar finalización</h3>
+                </div>
+                <div class="modal-body">
+                    <p>¿Estás seguro de que deseas <strong>finalizar</strong> la votación?</p>
+                    <p class="votacion-nombre"><strong>@Nombre</strong></p>
+                    <p class="warning-text">Una vez finalizada, <strong>no se podrá reabrir ni recibir más votos</strong>.</p>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-modal-cancel" @onclick="CerrarModalFinalizar" disabled="@cambiandoEstado">
+                        Cancelar
+                    </button>
+                    <button class="btn-modal-end" @onclick="ConfirmarDetenerVotacion" disabled="@cambiandoEstado">
+                        @if (cambiandoEstado)
+                        {
+                            <span class="btn-spinner"></span>
+                            <span>Finalizando...</span>
+                        }
+                        else
+                        {
+                            <span>Sí, finalizar</span>
+                        }
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
     <div class="header-principal">
         <button class="btn-volver" @onclick="HandleVolver">
             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="16" height="16">
@@ -105,7 +136,7 @@
                             <button class="btn-state btn-pause" @onclick="PausarVotacion" disabled="@(cambiandoEstado)">
                                 Pausar votación
                             </button>
-                            <button class="btn-state btn-end" @onclick="DetenerVotacion" disabled="@(cambiandoEstado)">
+                            <button class="btn-state btn-end" @onclick="MostrarConfirmacionFinalizar" disabled="@(cambiandoEstado)">
                                 Finalizar votación
                             </button>
                         </div>
@@ -119,7 +150,7 @@
                             <button class="btn-state btn-resume" @onclick="AbrirVotacion" disabled="@(cambiandoEstado)">
                                 Reanudar votación
                             </button>
-                            <button class="btn-state btn-end" @onclick="DetenerVotacion" disabled="@(cambiandoEstado)">
+                            <button class="btn-state btn-end" @onclick="MostrarConfirmacionFinalizar" disabled="@(cambiandoEstado)">
                                 Finalizar votación
                             </button>
                         </div>
@@ -1053,6 +1084,39 @@ input:checked + .slider:before {
     cursor: not-allowed;
 }
 
+.btn-modal-end {
+    flex: 1;
+    background: #ff0000;
+    border: none;
+    color: white;
+    padding: 0.9rem;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+    font-family: inherit;
+}
+
+.btn-modal-end:hover:not(:disabled) {
+    background: #c2410c;
+    box-shadow: 0 4px 14px rgba(234, 88, 12, 0.3);
+    transform: translateY(-1px);
+}
+
+.btn-modal-end:active:not(:disabled) {
+    transform: scale(0.99);
+}
+
+.btn-modal-end:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
 /* ── Error state ── */
 .error-state {
     text-align: center;
@@ -1286,6 +1350,7 @@ input:checked + .slider:before {
     bool guardando = false;
     bool eliminando = false;
     bool mostrarModalConfirmacion = false;
+    bool mostrarModalConfirmacionFinalizar = false;
     bool cambiandoEstado = false;
     int EstadoActual = 0;
     
@@ -1464,7 +1529,17 @@ input:checked + .slider:before {
         }
     }
 
-    async Task DetenerVotacion()
+    void MostrarConfirmacionFinalizar()
+    {
+        mostrarModalConfirmacionFinalizar = true;
+    }
+
+    void CerrarModalFinalizar()
+    {
+        mostrarModalConfirmacionFinalizar = false;
+    }
+
+    async Task ConfirmarDetenerVotacion()
     {
         cambiandoEstado = true;
         Mensaje = null;
@@ -1474,6 +1549,7 @@ input:checked + .slider:before {
             Estado = 2;
             EstadoActual = 2;
             Mensaje = "✅ Votación finalizada correctamente.";
+            mostrarModalConfirmacionFinalizar = false;
         }
         catch (Exception ex)
         {

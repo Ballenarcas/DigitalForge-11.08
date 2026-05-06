@@ -215,24 +215,30 @@ namespace Votify.Application.Services
             return MapToResponse(e, criterios);
         }
 
-        /// <summary>
-        /// Actualiza automáticamente el estado de una votación según las fechas actuales.
-        /// - Si FechaFin ha pasado y no está detenida: la detiene
-        /// </summary>
         private void ActualizarEstadoAutomatico(Votacion votacion)
         {
             var ahora = DateTime.UtcNow;
             
+            // Si aún no ha llegado la fecha de inicio, la votación debería estar pausada
+            if (ahora < votacion.FechaInicio && votacion.Estado == EstadoVotacion.Abierta)
+            {
+                votacion.Pausar();
+            }
+            // Si ya pasó la fecha de inicio pero no la de fin, y la votación está pausada, abrirla
+            else if (ahora >= votacion.FechaInicio && ahora < votacion.FechaFin && votacion.Estado == EstadoVotacion.Pausada)
+            {
+                votacion.Estado = EstadoVotacion.Abierta; // Forzamos abrir, ya que no hay método Abrir() nativo en dominio, o usamos un método equivalente
+            }
             // Si ya pasó la fecha final, detener la votación (a menos que ya esté detenida)
-            if (ahora >= votacion.FechaFin && votacion.Estado != EstadoVotacion.Detenida)
+            else if (ahora >= votacion.FechaFin && votacion.Estado != EstadoVotacion.Detenida)
             {
                 votacion.Detener();
             }
         }
 
-        /// <summary>
-        /// Actualiza automáticamente el estado de múltiples votaciones según las fechas actuales.
-        /// </summary>
+
+
+
         private async Task ActualizarEstadosAutomaticosAsync(List<Votacion> votaciones)
         {
             var votacionesActualizadas = new List<(Votacion votacion, bool cambio)>();
@@ -275,7 +281,7 @@ namespace Votify.Application.Services
                 throw new ArgumentException("El ID del evento no es válido o no se ha proporcionado.");
             }
 
-            return factory.Crear(
+            var votacion = factory.Crear(
                 dto.Nombre,
                 dto.FechaInicio,
                 dto.FechaFin,
@@ -285,6 +291,14 @@ namespace Votify.Application.Services
                 eventoGuid,
                 dto.EsAnonima
             );
+
+            // Inicializar pausada si la fecha de inicio es en el futuro
+            if (dto.FechaInicio > DateTime.UtcNow)
+            {
+                votacion.Pausar();
+            }
+
+            return votacion;
         }
         private async Task ValidarFechasContraEventoAsync(CrearVotacionDto dto)
         {

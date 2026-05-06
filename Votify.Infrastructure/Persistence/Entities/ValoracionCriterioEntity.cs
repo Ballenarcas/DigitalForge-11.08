@@ -7,6 +7,7 @@ namespace Votify.Infrastructure.Persistence.Entities
     public class ValoracionCriterioEntity
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("id")]
         public int Id { get; set; }
 

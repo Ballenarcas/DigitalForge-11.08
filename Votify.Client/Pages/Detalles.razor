@@ -262,11 +262,6 @@
                     {
                         <div class="alert-voto @(votoOk ? "alert-ok" : "alert-err")">@mensajeVoto</div>
                     }
-                    <div class="numeric-vote-box">
-                        <label>Puntuación global</label>
-                        <input type="number" min="1" max="10" class="numeric-vote-input" @bind="PuntuacionGlobal" disabled="@(votando || votoOk || limiteAlcanzado || (votacion?.Estado != 0))" />
-                        <span>/10</span>
-                    </div>
                     <button class="btn-votar-proyecto" @onclick="Votar" disabled="@(votando || votoOk || limiteAlcanzado || (votacion?.Estado != 0))">
                         @if (votando)
                         {

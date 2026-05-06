@@ -99,7 +99,11 @@
                         <div class="card-top-row">
                             <div class="card-badge">@v.Tipo</div>
                             <div class="status-pill @pillClass">
-                                @if (v.Estado == 0)
+                                @if (v.FechaInicio > ahora && v.Estado == 1)
+                                {
+                                    <span> Votación programada</span>
+                                }
+                                else if (v.Estado == 0)
                                 {
                                     <span> Votación activa</span>
                                 }
@@ -115,7 +119,14 @@
                         </div>
                         <h3>@v.Nombre</h3>
                         
-                        @if (v.Estado == 0)
+                        @if (v.FechaInicio > ahora)
+                        {
+                            <p class="fecha-info">
+                                <strong>Inicia:</strong> @v.FechaInicio.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                            </p>
+                            <p class="tiempo-restante">Comienza en @GetTiempoRestante((v.FechaInicio - ahora).TotalMinutes)</p>
+                        }
+                        else if (v.Estado == 0)
                         {
                             <p class="fecha-info">
                                 <strong>Finaliza:</strong> @v.FechaFin.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
@@ -137,7 +148,13 @@
                             <p class="tiempo-restante">Votación cerrada</p>
                         }
 
-                        @if (v.Estado == 0)
+                        @if (v.FechaInicio > ahora)
+                        {
+                            <button class="btn-votar btn-disabled" disabled title="La votación aún no ha comenzado">
+                                No iniciada
+                            </button>
+                        }
+                        else if (v.Estado == 0)
                         {
                             <button class="btn-votar btn-active" @onclick="() => Votar(v.Id)" title="¡Haz tu voto ahora!">
                                 Votar ahora
