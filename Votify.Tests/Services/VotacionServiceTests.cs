@@ -96,13 +96,70 @@ namespace Votify.Tests.Services
 
             _mockVotacionRepository
                 .Setup(x => x.ObtenerAsync(votacionId))
-                .ReturnsAsync((Votacion)null);
+                .ReturnsAsync((Votacion?)null);
 
             // Act
             var result = await _votacionService.ObtenerPorIdAsync(votacionId);
 
             // Assert
             Assert.Null(result);
+        }
+
+        [Fact]
+        public async Task ObtenerPorIdAsync_WithPausedAndExpiredVotacion_ShouldKeepPaused()
+        {
+            // Arrange
+            var votacionId = Guid.NewGuid().ToString();
+            var votacion = new VotacionEstandar(
+                "Votación Pausada",
+                DateTime.UtcNow.AddHours(-2),
+                DateTime.UtcNow.AddHours(-1),
+                3,
+                false,
+                false,
+                Guid.NewGuid(),
+                false);
+            votacion.Estado = EstadoVotacion.Pausada;
+
+            _mockVotacionRepository
+                .Setup(x => x.ObtenerAsync(votacionId))
+                .ReturnsAsync(votacion);
+
+            // Act
+            var result = await _votacionService.ObtenerPorIdAsync(votacionId);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal((int)EstadoVotacion.Pausada, result!.Estado);
+            _mockVotacionRepository.Verify(x => x.ActualizarAsync(votacionId, It.IsAny<Votacion>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task AbrirVotacionAsync_WithFinalizedVotacion_ShouldThrowException()
+        {
+            // Arrange
+            var votacionId = Guid.NewGuid().ToString();
+            var votacion = new VotacionEstandar(
+                "Votación Finalizada",
+                DateTime.UtcNow.AddHours(-3),
+                DateTime.UtcNow.AddHours(-2),
+                3,
+                false,
+                false,
+                Guid.NewGuid(),
+                false);
+            votacion.Estado = EstadoVotacion.Detenida;
+
+            _mockVotacionRepository
+                .Setup(x => x.ObtenerAsync(votacionId))
+                .ReturnsAsync(votacion);
+
+            // Act & Assert
+            await Assert.ThrowsAsync<InvalidOperationException>(
+                () => _votacionService.AbrirVotacionAsync(votacionId)
+            );
+
+            _mockVotacionRepository.Verify(x => x.ActualizarAsync(votacionId, It.IsAny<Votacion>()), Times.Never);
         }
 
         [Fact]

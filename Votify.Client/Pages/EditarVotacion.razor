@@ -106,10 +106,23 @@
             <div class="card-header">
                 <h2 class="title">Editar votación de @Nombre</h2>
 
-                @if (YaFinalizo)
+                @if (EstadoActual == 2 || YaFinalizo)
                 {
                     <div class="status-banner banner-ended">
-                        Esta votación ya ha <strong>finalizado</strong>. No se pueden modificar las fechas.
+                        @if (EstadoActual == 2)
+                        {
+                            <span>Esta votación ha sido <strong>finalizada manualmente</strong>.</span>
+                        }
+                        else
+                        {
+                            <span>Esta votación ha <strong>finalizado por tiempo</strong>.</span>
+                        }
+                    </div>
+                }
+                else if (EstadoActual == 1)
+                {
+                    <div class="status-banner banner-pending" style="background: #fef3c7; color: #92400e; border-color: #fbbf24;">
+                        La votación está actualmente <strong>PAUSADA</strong> manualmente.
                     </div>
                 }
                 else if (YaInicio)
@@ -127,19 +140,19 @@
 
                 <h4 class="section-divider">Cambiar estado manualmente</h4>
                 <div class="state-controls">
-                    @if (EstadoActual == 0)
+                    @if (EstadoActual == 2 || (YaFinalizo && EstadoActual != 2))
                     {
-                        <div class="state-badge active-state">
-                            <span class="state-text">Votación Activa</span>
+                        <div class="state-badge ended-state">
+                            <span class="state-text">@(EstadoActual == 2 ? "Finalizada Manualmente" : "Finalizada por Tiempo")</span>
                         </div>
-                        <div class="state-buttons">
-                            <button class="btn-state btn-pause" @onclick="PausarVotacion" disabled="@(cambiandoEstado)">
-                                Pausar votación
-                            </button>
-                            <button class="btn-state btn-end" @onclick="MostrarConfirmacionFinalizar" disabled="@(cambiandoEstado)">
-                                Finalizar votación
-                            </button>
-                        </div>
+                        @if (EstadoActual == 2)
+                        {
+                            <p class="state-info">Esta votación ha sido cerrada y no se puede reabrir.</p>
+                        }
+                        else
+                        {
+                            <p class="state-info">El tiempo de votación ha terminado. Puedes extender la fecha de fin abajo si necesitas más tiempo.</p>
+                        }
                     }
                     else if (EstadoActual == 1)
                     {
@@ -155,12 +168,19 @@
                             </button>
                         </div>
                     }
-                    else if (EstadoActual == 2)
+                    else if (EstadoActual == 0)
                     {
-                        <div class="state-badge ended-state">
-                            <span class="state-text">Votación Finalizada</span>
+                        <div class="state-badge active-state">
+                            <span class="state-text">Votación Activa</span>
                         </div>
-                        <p class="state-info">Esta votación ha finalizado y no se puede cambiar a otro estado.</p>
+                        <div class="state-buttons">
+                            <button class="btn-state btn-pause" @onclick="PausarVotacion" disabled="@(cambiandoEstado)">
+                                Pausar votación
+                            </button>
+                            <button class="btn-state btn-end" @onclick="MostrarConfirmacionFinalizar" disabled="@(cambiandoEstado)">
+                                Finalizar votación
+                            </button>
+                        </div>
                     }
                 </div>
             </div>
@@ -225,9 +245,9 @@
                     <div class="form-group">
                         <label for="input-fin">Fin del periodo</label>
                         <input id="input-fin" type="datetime-local"
-                               class="form-control @(YaFinalizo ? "input-locked" : "")"
+                               class="form-control @(EstadoActual == 2 ? "input-locked" : "")"
                                @bind="FechaFin"
-                               disabled="@YaFinalizo" />
+                               disabled="@(EstadoActual == 2)" />
                     </div>
                 </div>
 
@@ -1358,7 +1378,7 @@ input:checked + .slider:before {
     DateTime FechaFinOriginal = DateTime.Now.AddDays(1);
     
     bool YaInicio    => DateTime.Now >= FechaInicioOriginal;
-    bool YaFinalizo  => DateTime.Now >= FechaFinOriginal;
+    bool YaFinalizo  => EstadoActual == 0 && DateTime.UtcNow >= FechaFinOriginal;
     bool EsMulticriterio => Tipo == "Multicriterio";
     decimal PesoTotal => Criterios.Sum(c => c.Peso);
     bool PesosValidos => Criterios.Count > 0
@@ -1514,17 +1534,20 @@ input:checked + .slider:before {
         Mensaje = null;
         try
         {
+            Console.WriteLine($"[DEBUG] Intentando pausar votación {Id}. Estado actual: {EstadoActual}");
             await VotacionesService.PausarVotacion(Id);
+            Console.WriteLine($"[DEBUG] Pausa exitosa. Actualizando UI a estado 1 (Pausada)");
             Estado = 1;
             EstadoActual = 1;
             Mensaje = "✅ Votación pausada correctamente.";
         }
         catch (Exception ex)
         {
+            Console.WriteLine($"[ERROR] Exception al pausar: {ex.Message}");
             var msg = ex.Message;
-            if (msg.Contains("\"Error\""))
-                msg = System.Text.RegularExpressions.Regex.Match(msg, "\"Error\":\"(.*?)\"").Groups[1].Value;
-            Mensaje = $"❌ Error al pausar: {(string.IsNullOrEmpty(msg) ? ex.Message : msg)}";
+            if (msg.Contains("\"error\":"))
+                msg = System.Text.RegularExpressions.Regex.Match(msg, "\"error\":\"(.*?)\"", System.Text.RegularExpressions.RegexOptions.IgnoreCase).Groups[1].Value;
+            Mensaje = $"❌ Error al pausar: {msg}";
         }
         finally
         {
@@ -1573,17 +1596,20 @@ input:checked + .slider:before {
         Mensaje = null;
         try
         {
+            Console.WriteLine($"[DEBUG] Intentando abrir/reanudar votación {Id}. Estado actual: {EstadoActual}");
             await VotacionesService.AbrirVotacion(Id);
+            Console.WriteLine($"[DEBUG] Reactivación exitosa. Actualizando UI a estado 0 (Activa)");
             Estado = 0;
             EstadoActual = 0;
             Mensaje = "✅ Votación reabierta correctamente.";
         }
         catch (Exception ex)
         {
+            Console.WriteLine($"[ERROR] Exception al reabrir: {ex.Message}");
             var msg = ex.Message;
-            if (msg.Contains("\"Error\""))
-                msg = System.Text.RegularExpressions.Regex.Match(msg, "\"Error\":\"(.*?)\"").Groups[1].Value;
-            Mensaje = $"❌ Error al reabrir: {(string.IsNullOrEmpty(msg) ? ex.Message : msg)}";
+            if (msg.Contains("\"error\":"))
+                msg = System.Text.RegularExpressions.Regex.Match(msg, "\"error\":\"(.*?)\"", System.Text.RegularExpressions.RegexOptions.IgnoreCase).Groups[1].Value;
+            Mensaje = $"❌ Error al reabrir: {msg}";
         }
         finally
         {

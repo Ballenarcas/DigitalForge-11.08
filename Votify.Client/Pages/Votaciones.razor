@@ -92,22 +92,29 @@
                     var ahora = DateTime.UtcNow;
                     var diasFaltantes = (v.FechaInicio - ahora).TotalDays;
                     var minutosRestantes = Math.Max(0, (v.FechaFin - ahora).TotalMinutes);
-                    var cardClass = v.Estado == 0 ? "card-active" : v.Estado == 1 ? "card-paused" : "card-ended";
-                    var pillClass = v.Estado == 0 ? "pill-active" : v.Estado == 1 ? "pill-paused" : "pill-ended";
+
+                    bool noIniciada = v.FechaInicio > ahora;
+                    bool finalizadaPorTiempo = v.Estado == 0 && v.FechaFin <= ahora;
+                    bool estaActiva = !noIniciada && !finalizadaPorTiempo && v.Estado == 0;
+                    bool estaPausada = !noIniciada && !finalizadaPorTiempo && v.Estado == 1;
+                    bool estaFinalizada = finalizadaPorTiempo || v.Estado == 2;
+
+                    var cardClass = noIniciada ? "card-pending" : estaActiva ? "card-active" : estaPausada ? "card-paused" : "card-ended";
+                    var pillClass = noIniciada ? "pill-pending" : estaActiva ? "pill-active" : estaPausada ? "pill-paused" : "pill-ended";
 
                     <div class="votacion-card @cardClass">
                         <div class="card-top-row">
                             <div class="card-badge">@v.Tipo</div>
                             <div class="status-pill @pillClass">
-                                @if (v.FechaInicio > ahora && v.Estado == 1)
+                                @if (noIniciada)
                                 {
                                     <span> Votación programada</span>
                                 }
-                                else if (v.Estado == 0)
+                                else if (estaActiva)
                                 {
                                     <span> Votación activa</span>
                                 }
-                                else if (v.Estado == 1)
+                                else if (estaPausada)
                                 {
                                     <span> Votación pausada</span>
                                 }
@@ -119,21 +126,21 @@
                         </div>
                         <h3>@v.Nombre</h3>
                         
-                        @if (v.FechaInicio > ahora)
+                        @if (noIniciada)
                         {
                             <p class="fecha-info">
                                 <strong>Inicia:</strong> @v.FechaInicio.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
                             </p>
                             <p class="tiempo-restante">Comienza en @GetTiempoRestante((v.FechaInicio - ahora).TotalMinutes)</p>
                         }
-                        else if (v.Estado == 0)
+                        else if (estaActiva)
                         {
                             <p class="fecha-info">
                                 <strong>Finaliza:</strong> @v.FechaFin.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
                             </p>
                             <p class="tiempo-restante">@GetTiempoRestante(minutosRestantes)</p>
                         }
-                        else if (v.Estado == 1)
+                        else if (estaPausada)
                         {
                             <p class="fecha-info">
                                 <strong>Pausa hasta:</strong> @v.FechaFin.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
@@ -148,19 +155,19 @@
                             <p class="tiempo-restante">Votación cerrada</p>
                         }
 
-                        @if (v.FechaInicio > ahora)
+                        @if (noIniciada)
                         {
                             <button class="btn-votar btn-disabled" disabled title="La votación aún no ha comenzado">
                                 No iniciada
                             </button>
                         }
-                        else if (v.Estado == 0)
+                        else if (estaActiva)
                         {
                             <button class="btn-votar btn-active" @onclick="() => Votar(v.Id)" title="¡Haz tu voto ahora!">
                                 Votar ahora
                             </button>
                         }
-                        else if (v.Estado == 1)
+                        else if (estaPausada)
                         {
                             <button class="btn-votar btn-disabled" disabled title="La votación está en pausa">
                                 Votación pausada
@@ -176,13 +183,13 @@
                         <div class="card-footer">
                             <span class="stats">@v.LimiteProy Proyectos disponibles</span>
                             <div class="footer-actions">
-                                @if (v.Estado == 0 || v.Estado == 1)
+                                @if (estaActiva || estaPausada)
                                 {
                                     <button class="btn-resultados" @onclick="() => VerResultados(v.Id)" title="Ver resultados en tiempo real">
                                         Resultados
                                     </button>
                                 }
-                                @if (v.Estado == 2)
+                                @if (estaFinalizada)
                                 {
                                     <button class="btn-resultados" @onclick="() => VerResultados(v.Id)" title="Ver resultados finales">
                                         Resultados
@@ -190,13 +197,13 @@
                                 }
                                 @if (Rol == "ORGANIZADOR")
                                 {
-                                    @if (v.Estado != 2)
+                                    @if (!estaFinalizada)
                                     {
                                         <button class="btn-ver" @onclick="() => Gestionar(v.Id)" title="Editar configuración">
                                             Editar
                                         </button>
                                     }
-                                    @if (v.Estado == 2)
+                                    @if (estaFinalizada)
                                     {
                                         <button class="btn-eliminar" @onclick="() => EliminarVotacion(v.Id)" title="Eliminar esta votación">
                                             Eliminar

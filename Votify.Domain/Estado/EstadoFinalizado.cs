@@ -5,7 +5,7 @@ public class EstadoFinalizada : IEstadoVotacion
     
     public void IniciarVotacion(Votacion votacion)
     {
-        votacion.Estado = EstadoVotacion.Abierta;
+        throw new InvalidOperationException("No se puede reanudar una votación finalizada.");
     }
 
     public void FinalizarVotacion(Votacion votacion)

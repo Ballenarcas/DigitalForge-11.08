@@ -14,8 +14,8 @@ namespace Votify.Tests.Domain
             // Arrange
             var votacion = new VotacionEstandar(
                 "Votación Test",
-                DateTime.Now.AddHours(-1),
-                DateTime.Now.AddHours(1),
+                DateTime.UtcNow.AddHours(-1),
+                DateTime.UtcNow.AddHours(1),
                 3,
                 false,
                 false,
@@ -32,8 +32,8 @@ namespace Votify.Tests.Domain
             // Arrange
             var votacion = new VotacionEstandar(
                 "Votación Test",
-                DateTime.Now.AddHours(1),
-                DateTime.Now.AddHours(2),
+                DateTime.UtcNow.AddHours(1),
+                DateTime.UtcNow.AddHours(2),
                 3,
                 false,
                 false,
@@ -51,8 +51,8 @@ namespace Votify.Tests.Domain
             // Arrange
             var votacion = new VotacionEstandar(
                 "Votación Test",
-                DateTime.Now.AddHours(-2),
-                DateTime.Now.AddHours(-1),
+                DateTime.UtcNow.AddHours(-2),
+                DateTime.UtcNow.AddHours(-1),
                 3,
                 false,
                 false,
@@ -73,8 +73,8 @@ namespace Votify.Tests.Domain
         {
             // Arrange
             var nombre = "Votación Test";
-            var inicio = DateTime.Now;
-            var fin = DateTime.Now.AddHours(1);
+            var inicio = DateTime.UtcNow;
+            var fin = DateTime.UtcNow.AddHours(1);
             var limite = 3;
             var comentarios = true;
             var comentariosObligatorios = true;
@@ -109,8 +109,8 @@ namespace Votify.Tests.Domain
             // Arrange & Act
             var votacion = new VotacionEstandar(
                 "Votación Test",
-                DateTime.Now,
-                DateTime.Now.AddHours(1),
+                DateTime.UtcNow,
+                DateTime.UtcNow.AddHours(1),
                 3,
                 false,
                 false,

@@ -40,7 +40,7 @@
                 </div>
             </div>
         }
-        @if (estadoVotacion() == 1)
+        @if (estaPausada)
         {
             <div class="alert-state alert-estado-pausada">
                 <div class="alert-content">
@@ -49,12 +49,21 @@
                 </div>
             </div>
         }
-        @if (estadoVotacion() == 2)
+        @if (estaFinalizada)
         {
             <div class="alert-state alert-estado-finalizada">
                 <div class="alert-content">
                     <span class="alert-title">Votación finalizada</span>
                     <span class="alert-message">El período de votación ha cerrado, no se aceptan más votos</span>
+                </div>
+            </div>
+        }
+        @if (noIniciada)
+        {
+            <div class="alert-state alert-estado-limite">
+                <div class="alert-content">
+                    <span class="alert-title">Votación no iniciada</span>
+                    <span class="alert-message">Aún no puedes emitir votos para esta votación</span>
                 </div>
             </div>
         }
@@ -108,7 +117,7 @@
                             
 
 
-                            <button class="btn-votar" @onclick="() => Votar(p.Id)" disabled="@(isVoting || limiteAlcanzado)">
+                            <button class="btn-votar" @onclick="() => Votar(p.Id)" disabled="@(isVoting || limiteAlcanzado || estaFinalizada || estaPausada || noIniciada)">
                                 Votar Proyecto
                             </button>
 
@@ -399,9 +408,7 @@
         var index = Math.Abs(id.GetHashCode()) % colors.Length;
         return colors[index];
     }
-    private int estadoVotacion()
-    {
-        if (string.IsNullOrEmpty(VotacionId)) return -1;
-        return votacion?.Estado ?? -1;
-    }
+    private bool estaFinalizada => votacion != null && (votacion.Estado == 2 || (votacion.Estado == 0 && DateTime.UtcNow >= votacion.FechaFin));
+    private bool estaPausada => votacion != null && votacion.Estado == 1 && DateTime.UtcNow >= votacion.FechaInicio && DateTime.UtcNow < votacion.FechaFin;
+    private bool noIniciada => votacion != null && DateTime.UtcNow < votacion.FechaInicio;
 }

@@ -74,9 +74,17 @@ namespace Votify.Application.Services
             var e = await _repo.ObtenerAsync(id);
             if (e is null) return null;
 
-            // Actualizar estado automáticamente según fechas
-            ActualizarEstadoAutomatico(e);
-            await _repo.ActualizarAsync(id, e);
+            // Actualizar estado automáticamente según fechas SOLO si nunca fue pausada manualmente
+            // Si está pausada, respetamos la decisión del usuario
+            if (e.Estado != EstadoVotacion.Pausada)
+            {
+                var estadoAnterior = e.Estado;
+                ActualizarEstadoAutomatico(e);
+                if (e.Estado != estadoAnterior)
+                {
+                    await _repo.ActualizarAsync(id, e);
+                }
+            }
             
             return await MapToResponseAsync(e);
         }
@@ -174,17 +182,50 @@ namespace Votify.Application.Services
 
         public async Task PausarVotacionAsync(string id)
         {
-            await _repo.ActualizarEstadoAsync(id, EstadoVotacion.Pausada);
+            var votacion = await _repo.ObtenerAsync(id);
+            if (votacion is null)
+            {
+                throw new KeyNotFoundException($"No se encontró la votación con id {id}.");
+            }
+
+            votacion.Pausar();
+            var actualizado = await _repo.ActualizarAsync(id, votacion);
+            if (!actualizado)
+            {
+                throw new KeyNotFoundException($"No se encontró la votación con id {id}.");
+            }
         }
 
         public async Task DetenerVotacionAsync(string id)
         {
-            await _repo.ActualizarEstadoAsync(id, EstadoVotacion.Detenida);
+            var votacion = await _repo.ObtenerAsync(id);
+            if (votacion is null)
+            {
+                throw new KeyNotFoundException($"No se encontró la votación con id {id}.");
+            }
+
+            votacion.Detener();
+            var actualizado = await _repo.ActualizarAsync(id, votacion);
+            if (!actualizado)
+            {
+                throw new KeyNotFoundException($"No se encontró la votación con id {id}.");
+            }
         }
 
         public async Task AbrirVotacionAsync(string id)
         {
-            await _repo.ActualizarEstadoAsync(id, EstadoVotacion.Abierta);
+            var votacion = await _repo.ObtenerAsync(id);
+            if (votacion is null)
+            {
+                throw new KeyNotFoundException($"No se encontró la votación con id {id}.");
+            }
+
+            votacion.Abrir();
+            var actualizado = await _repo.ActualizarAsync(id, votacion);
+            if (!actualizado)
+            {
+                throw new KeyNotFoundException($"No se encontró la votación con id {id}.");
+            }
         }
 
         private CrearVotacionResponse MapToResponse(Votacion e, List<CriterioDto>? criterios = null)
@@ -224,13 +265,11 @@ namespace Votify.Application.Services
             {
                 votacion.Pausar();
             }
-            // Si ya pasó la fecha de inicio pero no la de fin, y la votación está pausada, abrirla
-            else if (ahora >= votacion.FechaInicio && ahora < votacion.FechaFin && votacion.Estado == EstadoVotacion.Pausada)
-            {
-                votacion.Estado = EstadoVotacion.Abierta; // Forzamos abrir, ya que no hay método Abrir() nativo en dominio, o usamos un método equivalente
-            }
-            // Si ya pasó la fecha final, detener la votación (a menos que ya esté detenida)
-            else if (ahora >= votacion.FechaFin && votacion.Estado != EstadoVotacion.Detenida)
+            // NO reabrimos automáticamente votaciones pausadas manualmente
+            // La pausa es una acción deliberada del usuario que debe respetarse
+            // Si ya pasó la fecha final, solo detener la votación si seguía activa
+            // IMPORTANTE: No finalizamos votaciones pausadas - respetamos el estado manual
+            else if (ahora >= votacion.FechaFin && votacion.Estado == EstadoVotacion.Abierta)
             {
                 votacion.Detener();
             }
@@ -245,6 +284,10 @@ namespace Votify.Application.Services
             
             foreach (var votacion in votaciones)
             {
+                // Respetar las pausas manuales - no auto-actualizar votaciones pausadas
+                if (votacion.Estado == EstadoVotacion.Pausada)
+                    continue;
+                    
                 var estadoAnterior = votacion.Estado;
                 ActualizarEstadoAutomatico(votacion);
                 

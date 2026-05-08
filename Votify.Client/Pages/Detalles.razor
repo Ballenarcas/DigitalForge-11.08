@@ -51,7 +51,15 @@
                 </div>
             }
 
-            @if (votacion != null && votacion.Estado == 1)
+            @if (noIniciada)
+            {
+                <div class="alert-pausada alert-top" style="background: #eef2ff; border-color: #6366f1; color: #3730a3;">
+                    <svg viewBox="0 0 24 24" fill="none" width="20" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M12 6v6l4 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    <span>Esta votación aún <strong>NO HA COMENZADO</strong>. Podrás votar a partir del @votacion?.FechaInicio.ToLocalTime().ToString("dd/MM/yyyy HH:mm").</span>
+                </div>
+            }
+
+            @if (estaPausada)
             {
                 <div class="alert-pausada alert-top">
                     <svg viewBox="0 0 24 24" fill="none" width="20" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M9 9h2v6H9zM13 9h2v6h-2z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
@@ -59,7 +67,7 @@
                 </div>
             }
 
-            @if (votacion != null && votacion.Estado == 2)
+            @if (estaFinalizada)
             {
                 <div class="alert-finalizada alert-top">
                     <svg viewBox="0 0 24 24" fill="none" width="20" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M8 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
@@ -141,7 +149,7 @@
                                         var currentStar = star;
                                         <button type="button"
                                                 class="star-btn @(GetValoracion(criterio) >= currentStar ? "star-active" : "")"
-                                                disabled="@(!EsJurado || YaEvaluoMulticriterio || enviandoComentario)"
+                                                disabled="@(!EsJurado || YaEvaluoMulticriterio || enviandoComentario || estaFinalizada || estaPausada || noIniciada)"
                                                 @onclick="() => SetValoracion(criterio, currentStar)">★</button>
                                     }
                                 </div>
@@ -247,15 +255,19 @@
                     @if (votacion != null)
                     {
                         <div class="estado-badge" style="margin-bottom: 1rem;">
-                            @if (votacion.Estado == 0)
+                            @if (noIniciada)
+                            {
+                                <span class="badge" style="background-color:#eef2ff; color:#6366f1; border:1px solid #818cf8;">Programada</span>
+                            }
+                            else if (estaActiva)
                             {
                                 <span class="badge badge-abierta">Votación Abierta</span>
                             }
-                            else if (votacion.Estado == 1)
+                            else if (estaPausada)
                             {
                                 <span class="badge badge-pausada">Votación Pausada</span>
                             }
-                            else if (votacion.Estado == 2)
+                            else if (estaFinalizada)
                             {
                                 <span class="badge badge-finalizada">Votación Finalizada</span>
                             }
@@ -266,7 +278,7 @@
                     {
                         <div class="alert-voto @(votoOk ? "alert-ok" : "alert-err")">@mensajeVoto</div>
                     }
-                    <button class="btn-votar-proyecto" @onclick="Votar" disabled="@(votando || votoOk || limiteAlcanzado || (votacion?.Estado != 0))">
+                    <button class="btn-votar-proyecto" @onclick="Votar" disabled="@(votando || votoOk || limiteAlcanzado || estaFinalizada || estaPausada || noIniciada)">
                         @if (votando)
                         {
                             <span class="spinner-sm"></span>
@@ -297,7 +309,7 @@
                         }
                     </button>
                     <p class="votar-nota">
-                        @if (!votoOk && votacion?.Estado == 0 && !limiteAlcanzado)
+                        @if (!votoOk && estaActiva && !limiteAlcanzado)
                         {
                             <span>Tu voto es único y final para este evento</span>
                         }
@@ -305,9 +317,17 @@
                         {
                             <span>Ya no puedes votar por más proyectos</span>
                         }
-                        else if (votacion?.Estado != 0)
+                        else if (noIniciada)
                         {
-                            <span>Esta votación no está disponible en este momento</span>
+                            <span>La votación aún no ha comenzado</span>
+                        }
+                        else if (estaPausada)
+                        {
+                            <span>La votación está pausada temporalmente</span>
+                        }
+                        else if (estaFinalizada)
+                        {
+                            <span>Esta votación ha finalizado</span>
                         }
                         else if (votoOk)
                         {
@@ -947,15 +967,21 @@
     private Dictionary<string, int> valoraciones = new();
     private bool YaEvaluoMulticriterio = false;
 
+    private bool estaFinalizada => votacion != null && (votacion.Estado == 2 || (votacion.Estado == 0 && DateTime.UtcNow >= votacion.FechaFin));
+    private bool estaPausada => votacion != null && votacion.Estado == 1 && DateTime.UtcNow >= votacion.FechaInicio && DateTime.UtcNow < votacion.FechaFin;
+    private bool noIniciada => votacion != null && DateTime.UtcNow < votacion.FechaInicio;
+    private bool estaActiva => votacion != null && votacion.Estado == 0 && DateTime.UtcNow >= votacion.FechaInicio && DateTime.UtcNow < votacion.FechaFin;
+
     private bool EsVotacionAnonima => votacion?.Tipo?.Equals("ANONIMA", StringComparison.OrdinalIgnoreCase) ?? false;
     private bool EsMulticriterio => votacion?.Tipo?.Equals("Multicriterio", StringComparison.OrdinalIgnoreCase) ?? false;
     private bool EsJurado => string.Equals(rolEnEvento?.Trim(), "Jurado", StringComparison.OrdinalIgnoreCase);
-    private bool YaTieneComentario => !EsVotacionAnonima && comentarios.Any(c => c.AutorId == Guid.Parse(UsuarioVotanteId));
+    private bool YaTieneComentario => !EsVotacionAnonima && comentarios.Any(c => c.AutorId.ToString() == UsuarioVotanteId);
     private string UsuarioVotanteId => usuarioIdActual ?? usuarioTesterId;
+
     private bool PuedeEnviarMulticriterio => EsJurado
         && !YaEvaluoMulticriterio
         && !enviandoComentario
-        && votacion?.Estado == 0
+        && estaActiva
         && criterios.Count > 0
         && criterios.All(c => GetValoracion(c) > 0)
         && !string.IsNullOrWhiteSpace(comentarioTexto);

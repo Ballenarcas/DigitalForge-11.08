@@ -58,7 +58,7 @@ namespace Votify.Domain.Entities
 
         public void ValidarVoto()
         {
-            if (DateTime.Now < FechaInicio || DateTime.Now > FechaFin)
+            if (DateTime.UtcNow < FechaInicio || DateTime.UtcNow > FechaFin)
             {
                 throw new InvalidOperationException("La votación no está dentro del período permitido.");
             }
