@@ -95,7 +95,11 @@
                     </div>
                     <p class="descripcion-texto">@(proyecto?.Descripcion ?? "")</p>
                     <div class="descripcion-acciones">
-                        <button class="btn-ver-comentarios" @onclick="VerComentarios">Ver comentarios</button>
+                        @if (string.Equals(rolEnEvento?.Trim(), "COMPETIDOR", StringComparison.OrdinalIgnoreCase) || 
+                             string.Equals(rolEnEvento?.Trim(), "ORGANIZADOR", StringComparison.OrdinalIgnoreCase))
+                        {
+                            <button class="btn-ver-comentarios" @onclick="VerComentarios">Ver comentarios</button>
+                        }
                     </div>
 
 
@@ -1065,6 +1069,13 @@
     {
         if (string.IsNullOrEmpty(VotacionId) || string.IsNullOrEmpty(ProyectoId)) return;
 
+        if (EsMulticriterio)
+        {
+            mensajeVoto = "No se puede emitir un voto estándar en una votación multicriterio.";
+            votoOk = false;
+            return;
+        }
+
         if (PuntuacionGlobal < 1 || PuntuacionGlobal > 10)
         {
             mensajeVoto = "La puntuación debe estar entre 1 y 10.";
@@ -1114,6 +1125,12 @@
     private async Task EnviarVotoMulticriterio()
     {
         if (string.IsNullOrEmpty(VotacionId) || string.IsNullOrEmpty(ProyectoId)) return;
+
+        if (!EsMulticriterio)
+        {
+            mensajeComentario = "Esta votación no permite evaluación multicriterio.";
+            return;
+        }
 
         enviandoComentario = true;
         mensajeComentario = null;

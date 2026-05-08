@@ -667,7 +667,10 @@ input:checked + .slider:before {
         } 
         catch (Exception ex) 
         { 
-            Mensaje = $"Error al crear la votación: {ex.Message}"; 
+            var msg = ex.Message;
+            if (msg.Contains("\"Error\""))
+                msg = System.Text.RegularExpressions.Regex.Match(msg, "\"Error\":\"(.*?)\"").Groups[1].Value;
+            Mensaje = $"Error al crear la votación: {(string.IsNullOrEmpty(msg) ? ex.Message : msg)}"; 
         }
     }
     private void AgregarCriterio() => Criterios.Add(new CriterioDto { Nombre = "", Peso = 0 });

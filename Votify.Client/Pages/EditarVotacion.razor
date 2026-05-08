@@ -1521,7 +1521,10 @@ input:checked + .slider:before {
         }
         catch (Exception ex)
         {
-            Mensaje = $"❌ Error al pausar: {ex.Message}";
+            var msg = ex.Message;
+            if (msg.Contains("\"Error\""))
+                msg = System.Text.RegularExpressions.Regex.Match(msg, "\"Error\":\"(.*?)\"").Groups[1].Value;
+            Mensaje = $"❌ Error al pausar: {(string.IsNullOrEmpty(msg) ? ex.Message : msg)}";
         }
         finally
         {
@@ -1553,7 +1556,10 @@ input:checked + .slider:before {
         }
         catch (Exception ex)
         {
-            Mensaje = $"❌ Error al finalizar: {ex.Message}";
+            var msg = ex.Message;
+            if (msg.Contains("\"Error\""))
+                msg = System.Text.RegularExpressions.Regex.Match(msg, "\"Error\":\"(.*?)\"").Groups[1].Value;
+            Mensaje = $"❌ Error al finalizar: {(string.IsNullOrEmpty(msg) ? ex.Message : msg)}";
         }
         finally
         {
@@ -1574,7 +1580,10 @@ input:checked + .slider:before {
         }
         catch (Exception ex)
         {
-            Mensaje = $"❌ Error al reabrir: {ex.Message}";
+            var msg = ex.Message;
+            if (msg.Contains("\"Error\""))
+                msg = System.Text.RegularExpressions.Regex.Match(msg, "\"Error\":\"(.*?)\"").Groups[1].Value;
+            Mensaje = $"❌ Error al reabrir: {(string.IsNullOrEmpty(msg) ? ex.Message : msg)}";
         }
         finally
         {

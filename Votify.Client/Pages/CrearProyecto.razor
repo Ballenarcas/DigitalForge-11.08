@@ -288,7 +288,10 @@
         }
         catch (Exception ex)
         {
-            Mensaje = "Error al subir la imagen: " + ex.Message;
+            var msg = ex.Message;
+            if (msg.Contains("\"Error\""))
+                msg = System.Text.RegularExpressions.Regex.Match(msg, "\"Error\":\"(.*?)\"").Groups[1].Value;
+            Mensaje = "Error al subir la imagen: " + (string.IsNullOrEmpty(msg) ? ex.Message : msg);
         }
         finally
         {
@@ -330,7 +333,10 @@
         }
         catch (Exception ex)
         {
-            Mensaje = "Error al subir el proyecto: " + ex.Message;
+            var msg = ex.Message;
+            if (msg.Contains("\"Error\""))
+                msg = System.Text.RegularExpressions.Regex.Match(msg, "\"Error\":\"(.*?)\"").Groups[1].Value;
+            Mensaje = "Error al subir el proyecto: " + (string.IsNullOrEmpty(msg) ? ex.Message : msg);
         }
         finally
         {
