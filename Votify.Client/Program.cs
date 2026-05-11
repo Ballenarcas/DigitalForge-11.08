@@ -11,6 +11,8 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 builder.Services.AddScoped<VotacionesService>();
 builder.Services.AddScoped<ProyectosService>();
 builder.Services.AddScoped<EventosService>();
+builder.Services.AddScoped<EquiposService>();
+builder.Services.AddScoped<ParticipantesService>();
 builder.Services.AddScoped<AppState>();
 
 // Servicios de Autenticación

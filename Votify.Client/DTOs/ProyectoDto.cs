@@ -10,5 +10,6 @@ namespace Votify.Client.DTOs
         public string? Equipo_Id { get; set; }
         public Guid VotacionId { get; set; }
         public string? ImagenUrl { get; set; }
+        public Guid? ParticipanteId { get; set; }
     }
 }

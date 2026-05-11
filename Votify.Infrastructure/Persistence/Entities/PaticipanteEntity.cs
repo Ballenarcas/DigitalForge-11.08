@@ -19,5 +19,8 @@ namespace Votify.Infrastructure.Persistence.Entities
         
         [Column("PasswordHash")]
         public string PasswordHash { get; set; } = string.Empty;
+
+        [Column("equipo")]
+        public Guid? EquipoId { get; set; }
     }
 }

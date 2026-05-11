@@ -49,7 +49,9 @@ builder.Services.AddDbContext<VotifyDbContext>(options =>
 });
 
 builder.Services.AddScoped<IVotacionRepository, VotacionRepository>();
+builder.Services.AddScoped<IEquipoRepository, EquipoRepository>();
 builder.Services.AddScoped<IVotacionService, VotacionService>();
+builder.Services.AddScoped<EquipoService>();
 builder.Services.AddScoped<IProyectoRepository, ProyectoRepository>();
 builder.Services.AddScoped<IParticipanteRepository, ParticipanteRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();

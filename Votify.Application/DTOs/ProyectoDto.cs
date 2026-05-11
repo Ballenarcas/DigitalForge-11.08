@@ -10,4 +10,5 @@ public class ProyectoDto
     public string? Equipo_Id { get; set; }
     public Guid VotacionId { get; set; }
     public string? ImagenUrl { get; set; }
+    public Guid? ParticipanteId { get; set; }
 }
