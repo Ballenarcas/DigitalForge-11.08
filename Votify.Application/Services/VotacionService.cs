@@ -320,9 +320,8 @@ namespace Votify.Application.Services
             VotacionFactory factory = dto.Tipo.ToUpper() switch
             {
                 "ESTANDAR" => new VotacionEstandarFactory(),
-                "RECUENTO DE VOTOS" => new VotacionRecuentoVotosFactory(),
                 "MULTICRITERIO" => new VotacionMulticriterioFactory(),
-                _ => throw new ArgumentException("Tipo de votación no válido.")
+                _ => throw new ArgumentException($"Tipo de votación no válido: {dto.Tipo}")
             };
 
             if (!Guid.TryParse(dto.EventoId, out var eventoGuid))

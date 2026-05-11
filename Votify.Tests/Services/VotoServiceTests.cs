@@ -41,8 +41,8 @@ namespace Votify.Tests.Services
 
             var votacion = new VotacionEstandar(
                 "Votación Test",
-                DateTime.Now.AddHours(-1),
-                DateTime.Now.AddHours(1),
+                DateTime.UtcNow.AddHours(-1),
+                DateTime.UtcNow.AddHours(1),
                 3,
                 false,
                 false,
@@ -100,8 +100,8 @@ namespace Votify.Tests.Services
 
             var votacion = new VotacionEstandar(
                 "Votación Test",
-                DateTime.Now.AddHours(-1),
-                DateTime.Now.AddHours(1),
+                DateTime.UtcNow.AddHours(-1),
+                DateTime.UtcNow.AddHours(1),
                 limiteProy,
                 false,
                 false,
@@ -136,8 +136,8 @@ namespace Votify.Tests.Services
 
             var votacion = new VotacionEstandar(
                 "Votación Test",
-                DateTime.Now.AddHours(-1),
-                DateTime.Now.AddHours(1),
+                DateTime.UtcNow.AddHours(-1),
+                DateTime.UtcNow.AddHours(1),
                 3,
                 false,
                 false,
@@ -173,8 +173,8 @@ namespace Votify.Tests.Services
 
             var votacion = new VotacionEstandar(
                 "Votación Test",
-                DateTime.Now.AddHours(-1),
-                DateTime.Now.AddHours(1),
+                DateTime.UtcNow.AddHours(-1),
+                DateTime.UtcNow.AddHours(1),
                 3,
                 false,
                 false,
@@ -210,8 +210,8 @@ namespace Votify.Tests.Services
 
             var votacion = new VotacionEstandar(
                 "Votación Test",
-                DateTime.Now.AddHours(-1),
-                DateTime.Now.AddHours(1),
+                DateTime.UtcNow.AddHours(-1),
+                DateTime.UtcNow.AddHours(1),
                 3,
                 false,
                 false,
@@ -247,8 +247,8 @@ namespace Votify.Tests.Services
 
             var votacion = new VotacionEstandar(
                 "Votación Test",
-                DateTime.Now.AddHours(-1),
-                DateTime.Now.AddHours(1),
+                DateTime.UtcNow.AddHours(-1),
+                DateTime.UtcNow.AddHours(1),
                 3,
                 false,
                 false,
@@ -275,8 +275,8 @@ namespace Votify.Tests.Services
 
             var votacion = new VotacionEstandar(
                 "Votación Test",
-                DateTime.Now.AddHours(-1),
-                DateTime.Now.AddHours(1),
+                DateTime.UtcNow.AddHours(-1),
+                DateTime.UtcNow.AddHours(1),
                 2,
                 false,
                 false,

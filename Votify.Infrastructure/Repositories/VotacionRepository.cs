@@ -110,12 +110,19 @@ namespace Votify.Infrastructure.Repositories
 
         private Votacion MapToDomain(VotacionEntity entity)
         {
-            VotacionFactory factory = entity.Tipo.ToUpper() switch
+            var tipoNormalized = entity.Tipo?.ToUpper() ?? "ESTANDAR";
+            
+            // Retrocompatibilidad: tratar datos antiguos de base de datos como ESTANDAR
+            if (tipoNormalized == "RECUENTO DE VOTOS")
+            {
+                tipoNormalized = "ESTANDAR";
+            }
+
+            VotacionFactory factory = tipoNormalized switch
             {
                 "ESTANDAR" => new VotacionEstandarFactory(),
-                "RECUENTO DE VOTOS" => new VotacionRecuentoVotosFactory(),
                 "MULTICRITERIO" => new VotacionMulticriterioFactory(),
-                _ => throw new Exception("Tipo desconocido")
+                _ => throw new Exception($"Tipo de votación desconocido en la base de datos: {entity.Tipo}")
             };
 
             var domain = factory.Crear(

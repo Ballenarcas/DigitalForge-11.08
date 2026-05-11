@@ -195,9 +195,8 @@
                     <label for="select-tipo">Tipo de votación</label>
                     <div class="select-wrapper">
                         <select id="select-tipo" class="form-control select-custom" @bind="Tipo" disabled="@YaInicio">
-                            <option value="Recuento de votos">Recuento de votos</option>
-                            <option value="ESTANDAR">Recuento de votos (compatibilidad)</option>
-                            <option value="Multicriterio">Multicriterio</option>
+                            <option value="ESTANDAR">Estándar</option>
+                            <option value="MULTICRITERIO">Multicriterio</option>
                         </select>
                         <span class="select-arrow">▾</span>
                     </div>
@@ -1353,7 +1352,7 @@ input:checked + .slider:before {
     public string Id { get; set; } = default!;
 
     string Nombre = "";
-    string Tipo = "Recuento de votos";
+    string Tipo = "ESTANDAR";
     DateTime FechaInicio = DateTime.Now;
     DateTime FechaFin = DateTime.Now.AddDays(1);
     int LimiteProy = 1;
@@ -1378,8 +1377,8 @@ input:checked + .slider:before {
     DateTime FechaFinOriginal = DateTime.Now.AddDays(1);
     
     bool YaInicio    => DateTime.Now >= FechaInicioOriginal;
-    bool YaFinalizo  => EstadoActual == 0 && DateTime.UtcNow >= FechaFinOriginal;
-    bool EsMulticriterio => Tipo == "Multicriterio";
+    bool YaFinalizo  => DateTime.Now >= FechaFinOriginal;
+    bool EsMulticriterio => Tipo == "MULTICRITERIO";
     decimal PesoTotal => Criterios.Sum(c => c.Peso);
     bool PesosValidos => Criterios.Count > 0
         && Criterios.All(c => !string.IsNullOrWhiteSpace(c.Nombre) && c.Peso > 0)
@@ -1403,7 +1402,7 @@ input:checked + .slider:before {
                 return;
             }
             Nombre             = votacion.Nombre;
-            Tipo               = votacion.Tipo;
+            Tipo               = votacion.Tipo?.ToUpper() == "RECUENTO DE VOTOS" ? "ESTANDAR" : (votacion.Tipo?.ToUpper() ?? "ESTANDAR");
             FechaInicio        = votacion.FechaInicio.ToLocalTime();
             FechaFin           = votacion.FechaFin.ToLocalTime();
             FechaInicioOriginal = votacion.FechaInicio.ToLocalTime();
