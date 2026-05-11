@@ -220,6 +220,12 @@ namespace Votify.Application.Services
                 throw new KeyNotFoundException($"No se encontró la votación con id {id}.");
             }
 
+            // Validar que el período de votación siga siendo válido
+            if (DateTime.UtcNow > votacion.FechaFin)
+            {
+                throw new InvalidOperationException("No se puede reanudar una votación cuyo período ha finalizado.");
+            }
+
             votacion.Abrir();
             var actualizado = await _repo.ActualizarAsync(id, votacion);
             if (!actualizado)

@@ -1127,8 +1127,7 @@
             {
                 VotacionId = VotacionId,
                 ProyectoId = ProyectoId,
-                VotanteId = UsuarioVotanteId,
-                Puntuacion = PuntuacionGlobal
+                VotanteId = UsuarioVotanteId
             };
             await VotacionesService.EmitirVotoAsync(VotacionId, dto);
             mensajeVoto = "¡Tu voto ha sido registrado con éxito!";
@@ -1192,6 +1191,7 @@
             comentarioOk = true;
             mensajeComentario = "¡Voto registrado con éxito!";
         }
+        
         catch (Exception ex)
         {
             var msg = ex.Message;

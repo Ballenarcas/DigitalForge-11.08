@@ -16,12 +16,7 @@ namespace Votify.Infrastructure.Repositories
             _db = db;
         }
 
-        public Task GuardarAsync(Voto voto)
-        {
-            return GuardarAsync(voto, null);
-        }
-
-        public async Task GuardarAsync(Voto voto, int? puntuacion)
+        public async Task GuardarAsync(Voto voto)
         {
             var entity = new VotoEntity
             {
@@ -29,8 +24,7 @@ namespace Votify.Infrastructure.Repositories
                 ProyectoId = Guid.Parse(voto.ProyectoId),
                 VotacionId = Guid.Parse(voto.VotacionId),
                 VotanteId = string.IsNullOrEmpty(voto.VotanteId) ? (Guid?)null : Guid.Parse(voto.VotanteId),
-                Fecha = DateTime.UtcNow,
-                Puntuacion = puntuacion
+                Fecha = DateTime.UtcNow
             };
 
             await _db.Votos.AddAsync(entity);

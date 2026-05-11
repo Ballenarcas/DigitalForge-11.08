@@ -19,8 +19,5 @@ namespace Votify.Infrastructure.Persistence.Entities
       public Guid VotacionId { get; set; }
         [Column("fecha")]
         public DateTime Fecha { get; set; }
-
-        [Column("puntuacion")]
-        public int? Puntuacion { get; set; }
     }
 }

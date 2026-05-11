@@ -77,19 +77,7 @@ namespace Votify.Application.Services
 
             var nuevoVoto = factory.Crear(dto.ProyectoId, dto.VotacionId, dto.VotanteId);
 
-            if (dto.Puntuacion.HasValue && (dto.Puntuacion.Value < 1 || dto.Puntuacion.Value > 10))
-            {
-                throw new InvalidOperationException("La puntuación debe estar entre 1 y 10.");
-            }
-
-            if (dto.Puntuacion.HasValue)
-            {
-                await _votoRepository.GuardarAsync(nuevoVoto, dto.Puntuacion);
-            }
-            else
-            {
-                await _votoRepository.GuardarAsync(nuevoVoto);
-            }
+            await _votoRepository.GuardarAsync(nuevoVoto);
         }
 
         public async Task VotarMulticriterioAsync(VotoMulticriterioDto dto)
