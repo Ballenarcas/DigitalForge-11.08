@@ -116,10 +116,19 @@
                             <p class="descripcion-breve">@p.Descripcion</p>
                             
 
+                            @if (EsMulti)
+                            {
+                                <button class="btn-votar" @onclick="() => VerDetalles(p.Id)">
+                                    Ver Detalles
+                                </button>
+                            }
+                            else
+                            {
+                                <button class="btn-votar" @onclick="() => Votar(p.Id)" disabled="@(isVoting || limiteAlcanzado || estaFinalizada || estaPausada || noIniciada)">
+                                    Votar Proyecto
+                                </button>
+                            }
 
-                            <button class="btn-votar" @onclick="() => Votar(p.Id)" disabled="@(isVoting || limiteAlcanzado || estaFinalizada || estaPausada || noIniciada)">
-                                Votar Proyecto
-                            </button>
 
                             <div class="card-footer">
                                 <span class="stats">Equipo: @(p.Equipo_Id ?? "N/A")</span>
@@ -313,6 +322,7 @@
     private bool limiteAlcanzado = false;
     private string? usuarioId;
      private VotacionDto? votacion;
+    private bool EsMulti = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -330,7 +340,8 @@
                 votacion = vot;
                 nombreVotacion = vot?.Nombre;
                 proyectosVotables = vot?.LimiteProy.ToString() ?? "0";
-                
+                EsMulti = vot?.Tipo == "Multicriterio";
+
                 if (!string.IsNullOrEmpty(usuarioId))
                 {
                     bool puedeSeguirVotando = await VotacionesService.VerificarLimiteVotos(VotacionId, usuarioId);

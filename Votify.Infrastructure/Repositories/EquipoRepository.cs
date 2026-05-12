@@ -23,13 +23,14 @@ namespace Votify.Infrastructure.Repositories
         {
             var entity = new EquipoEntity
             {
-                Id = equipo.Id,
                 Nombre = equipo.Nombre,
                 CreatedAt = equipo.CreatedAt
             };
 
             await _context.Equipos.AddAsync(entity);
             await _context.SaveChangesAsync();
+
+            equipo.Id = entity.Id;
         }
 
         public async Task<Equipo?> ObtenerPorIdAsync(Guid id)

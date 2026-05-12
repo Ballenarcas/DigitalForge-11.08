@@ -8,6 +8,7 @@ namespace Votify.Infrastructure.Persistence.Entities
     public class EquipoEntity
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("id")]
         public Guid Id { get; set; }
 

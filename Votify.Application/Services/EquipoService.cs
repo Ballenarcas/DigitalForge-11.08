@@ -26,28 +26,56 @@ namespace Votify.Application.Services
             return equipo;
         }
 
-        public async Task AsignarParticipanteAEquipoAsync(Guid participanteId, Guid equipoId, Guid eventoId)
+        public async Task AsignarParticipanteAEquipoAsync(Guid solicitanteId, Guid participanteId, Guid equipoId, Guid eventoId)
         {
-            var participante = await _participanteRepository.ObtenerPorIdAsync(participanteId);
-            if (participante == null)
-            {
-                throw new ArgumentException("El participante no existe.");
-            }
-
             var equipo = await _equipoRepository.ObtenerPorIdAsync(equipoId);
             if (equipo == null)
             {
                 throw new ArgumentException("El equipo no existe.");
             }
 
-            var rol = await _participanteEventoRepository.ObtenerRolAsync(eventoId, participanteId);
-            if (rol != null && (rol.Equals("ORGANIZADOR", StringComparison.OrdinalIgnoreCase) || rol.Equals("Organizador", StringComparison.OrdinalIgnoreCase)))
+            var participante = await _participanteRepository.ObtenerPorIdAsync(participanteId);
+            if (participante == null)
             {
-                throw new InvalidOperationException("Los organizadores de un evento no pueden estar en un equipo para ese mismo evento.");
+                throw new ArgumentException("El participante no existe.");
+            }
+
+            if (!await PuedeGestionarEquipoAsync(solicitanteId, equipoId, eventoId))
+            {
+                throw new UnauthorizedAccessException("No tienes permisos para agregar participantes a este equipo.");
             }
 
             participante.EquipoId = equipoId;
             await _participanteRepository.ActualizarAsync(participante);
+
+            var rol = await _participanteEventoRepository.ObtenerRolAsync(eventoId, participanteId);
+
+            if (rol == null)
+            {
+                await _participanteEventoRepository.GuardarAsync(new ParticipanteEvento(participanteId, eventoId, "COMPETIDOR"));
+            }
+            else if (!string.Equals(rol, "COMPETIDOR", StringComparison.OrdinalIgnoreCase))
+            {
+                await _participanteEventoRepository.ActualizarRolAsync(eventoId, participanteId, "COMPETIDOR");
+            }
+        }
+
+        private async Task<bool> PuedeGestionarEquipoAsync(Guid solicitanteId, Guid equipoId, Guid eventoId)
+        {
+            var rolSolicitante = await _participanteEventoRepository.ObtenerRolAsync(eventoId, solicitanteId);
+            if (EsOrganizador(rolSolicitante))
+            {
+                return true;
+            }
+
+            var solicitante = await _participanteRepository.ObtenerPorIdAsync(solicitanteId);
+            return solicitante?.EquipoId == equipoId;
+        }
+
+        private static bool EsOrganizador(string? rol)
+        {
+            return string.Equals(rol?.Trim(), "ORGANIZADOR", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(rol?.Trim(), "Organizador", StringComparison.OrdinalIgnoreCase);
         }
 
         public async Task<IEnumerable<Equipo>> ObtenerTodosLosEquiposAsync()

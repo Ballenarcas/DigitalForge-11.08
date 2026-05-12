@@ -18,12 +18,17 @@ namespace Votify.Infrastructure.Repositories
 
         public async Task GuardarAsync(Proyecto proyecto)
         {
+            if (!Guid.TryParse(proyecto.Equipo_Id, out var equipoId))
+            {
+                throw new ArgumentException("El equipo del proyecto no es válido.");
+            }
+
             var entity = new ProyectoEntity
             {
                 Id = Guid.Parse(proyecto.Id),
                 Nombre = proyecto.Nombre,
                 Descripcion = proyecto.Descripcion,
-                Equipo_Id = string.IsNullOrEmpty(proyecto.Equipo_Id) ? null : proyecto.Equipo_Id,
+                Equipo_Id = equipoId,
                 VotacionId = proyecto.VotacionId,
                 ImagenUrl = proyecto.ImagenUrl
             };
@@ -43,7 +48,7 @@ namespace Votify.Infrastructure.Repositories
             return new Proyecto(
                 entity.Nombre, 
                 entity.Descripcion, 
-                entity.Equipo_Id, 
+                entity.Equipo_Id.ToString(), 
                 entity.VotacionId,
                 entity.ImagenUrl,
                 entity.Id.ToString());
@@ -55,7 +60,7 @@ namespace Votify.Infrastructure.Repositories
             return entities.Select(p => new Proyecto(
                 p.Nombre, 
                 p.Descripcion, 
-                p.Equipo_Id, 
+                p.Equipo_Id.ToString(), 
                 p.VotacionId,
                 p.ImagenUrl,
                 p.Id.ToString())).ToList();
@@ -73,7 +78,7 @@ namespace Votify.Infrastructure.Repositories
             return entities.Select(p => new Proyecto(
                 p.Nombre, 
                 p.Descripcion, 
-                p.Equipo_Id, 
+                p.Equipo_Id.ToString(), 
                 p.VotacionId,
                 p.ImagenUrl,
                 p.Id.ToString())).ToList();

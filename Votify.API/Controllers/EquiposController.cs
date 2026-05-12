@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -19,6 +20,7 @@ namespace Votify.API.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<ActionResult<Equipo>> CrearEquipo([FromBody] CrearEquipoRequest request)
         {
             try
@@ -33,11 +35,18 @@ namespace Votify.API.Controllers
         }
 
         [HttpPost("{equipoId}/miembros")]
+        [Authorize]
         public async Task<ActionResult> AsignarParticipante(Guid equipoId, [FromBody] AsignarMiembroRequest request)
         {
             try
             {
-                await _equipoService.AsignarParticipanteAEquipoAsync(request.ParticipanteId, equipoId, request.EventoId);
+                var solicitanteId = ObtenerUsuarioId();
+                if (string.IsNullOrWhiteSpace(solicitanteId) || !Guid.TryParse(solicitanteId, out var solicitanteGuid))
+                {
+                    return Unauthorized(new { Message = "Usuario no autenticado." });
+                }
+
+                await _equipoService.AsignarParticipanteAEquipoAsync(solicitanteGuid, request.ParticipanteId, equipoId, request.EventoId);
                 return Ok();
             }
             catch (ArgumentException ex)
@@ -47,6 +56,10 @@ namespace Votify.API.Controllers
             catch (InvalidOperationException ex)
             {
                 return BadRequest(ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new { Message = ex.Message });
             }
             catch (Exception ex)
             {
@@ -70,6 +83,13 @@ namespace Votify.API.Controllers
                 return NotFound("El participante no tiene un equipo asignado.");
             }
             return Ok(equipo);
+        }
+
+        private string? ObtenerUsuarioId()
+        {
+            return User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+                   ?? User.FindFirst("sub")?.Value
+                   ?? User.FindFirst("nameid")?.Value;
         }
     }
 

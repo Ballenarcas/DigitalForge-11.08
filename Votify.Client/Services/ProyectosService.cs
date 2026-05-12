@@ -67,8 +67,15 @@ namespace Votify.Client.Services
                 url += $"?votacionId={Uri.EscapeDataString(votacionId)}";
             }
 
-            var response = await _httpClient.GetFromJsonAsync<List<ComentarioDto>>(url);
-            return response ?? new List<ComentarioDto>();
+            var response = await _httpClient.GetAsync(url);
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorMsg = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Error al obtener comentarios: {errorMsg}");
+            }
+
+            var comentarios = await response.Content.ReadFromJsonAsync<List<ComentarioDto>>();
+            return comentarios ?? new List<ComentarioDto>();
         }
     }
 }

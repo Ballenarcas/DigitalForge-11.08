@@ -25,7 +25,14 @@
         </div>
 
         <div class="comments-card">
-            @if (comentarios.Count == 0)
+            @if (!string.IsNullOrWhiteSpace(errorCarga))
+            {
+                <div class="access-error-state">
+                    <strong>No se pudieron cargar los comentarios.</strong>
+                    <p>@errorCarga</p>
+                </div>
+            }
+            else if (comentarios.Count == 0)
             {
                 <div class="empty-state">
                     <p>No hay comentarios para este proyecto aún.</p>
@@ -187,6 +194,21 @@
         border: 1px dashed #e5e7eb;
         border-radius: 20px;
     }
+    .access-error-state {
+        padding: 1.25rem 1.5rem;
+        border-radius: 18px;
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #991b1b;
+    }
+    .access-error-state strong {
+        display: block;
+        margin-bottom: 0.35rem;
+    }
+    .access-error-state p {
+        margin: 0;
+        line-height: 1.6;
+    }
     @@keyframes spin { to { transform: rotate(360deg); } }
     @@media (max-width: 900px) {
         .comments-wrapper { padding: 1rem; }
@@ -200,6 +222,7 @@
     [Parameter] public string? ProyectoId { get; set; }
 
     private bool cargando = true;
+    private string? errorCarga;
     private ProyectoDto? proyecto;
     private VotacionDto? votacion;
     private List<ComentarioDto> comentarios = new();
@@ -208,6 +231,7 @@
     {
         try
         {
+            errorCarga = null;
                 if (!string.IsNullOrEmpty(VotacionId))
             {
                 votacion = await VotacionesService.ObtenerVotacion(VotacionId);
@@ -221,6 +245,7 @@
         }
         catch (Exception ex)
         {
+            errorCarga = ex.Message;
             Console.WriteLine($"Error cargando comentarios: {ex.Message}");
         }
         finally

@@ -51,6 +51,9 @@
                 <button class="btn-crear" @onclick="IrACrearVotacion">
                     <span>+</span> Nueva Votación
                 </button>
+                <button class="btn-crear" style="background-color:#4f46e5; border-color:#4f46e5;" @onclick="IrACrearEquipo">
+                    Equipos
+                </button>
                 <button class="btn-crear" @onclick="IrAGestionRoles" style="background-color:#6f42c1; border-color:#6f42c1;">
                     Gestionar Roles
                 </button>
@@ -92,6 +95,7 @@
                     var ahora = DateTime.UtcNow;
                     var diasFaltantes = (v.FechaInicio - ahora).TotalDays;
                     var minutosRestantes = Math.Max(0, (v.FechaFin - ahora).TotalMinutes);
+
 
                     bool noIniciada = v.FechaInicio > ahora;
                     bool finalizadaPorTiempo = v.Estado == 0 && v.FechaFin <= ahora;
@@ -300,6 +304,7 @@
     }
 
     private void IrACrearVotacion() => Nav.NavigateTo($"/nueva-votacion?eventoId={AppState.EventoId}");
+    private void IrACrearEquipo() => Nav.NavigateTo($"/nuevo-equipo?eventoId={AppState.EventoId}");
     private void IrAGestionRoles() => Nav.NavigateTo($"/evento/{AppState.EventoId}/roles");
     private void Gestionar(string id) => Nav.NavigateTo($"/votacion/{id}");
     private void VerResultados(string id) => Nav.NavigateTo($"/{id}/resultados/");

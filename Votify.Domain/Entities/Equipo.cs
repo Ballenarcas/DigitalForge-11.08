@@ -10,7 +10,7 @@ namespace Votify.Domain.Entities
 
         public Equipo(string nombre, Guid? id = null, DateTime? createdAt = null)
         {
-            Id = id ?? Guid.NewGuid();
+            Id = id ?? Guid.Empty;
             Nombre = nombre;
             CreatedAt = createdAt ?? DateTime.UtcNow;
         }

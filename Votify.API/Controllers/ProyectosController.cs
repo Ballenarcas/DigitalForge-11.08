@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Votify.API.DTOs;
 using Votify.Application.DTOs;
 using Votify.Application.Interfaces;
@@ -17,12 +18,32 @@ namespace Votify.API.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<ActionResult<string>> CrearProyecto([FromBody] ProyectoDto dto)
         {
             try
             {
+                var usuarioId = ObtenerUsuarioId();
+                if (string.IsNullOrWhiteSpace(usuarioId) || !Guid.TryParse(usuarioId, out var participanteId))
+                {
+                    return Unauthorized(new { Message = "Usuario no autenticado." });
+                }
+
+                dto.ParticipanteId = participanteId;
                 var id = await _proyectoService.CrearProyectoAsync(dto);
                 return Ok(id);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new { Message = ex.Message });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { Message = ex.Message });
             }
             catch (Exception ex)
             {
@@ -52,6 +73,13 @@ namespace Votify.API.Controllers
         {
             var proyectos = await _proyectoService.ObtenerProyectosPorVotacionAsync(votacionId);
             return Ok(proyectos);
+        }
+
+        private string? ObtenerUsuarioId()
+        {
+            return User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+                   ?? User.FindFirst("sub")?.Value
+                   ?? User.FindFirst("nameid")?.Value;
         }
     }
 }

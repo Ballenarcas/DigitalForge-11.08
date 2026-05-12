@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Votify.API.DTOs;
 using Votify.Application.DTOs;
@@ -35,10 +36,31 @@ namespace Votify.API.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult<List<ComentarioDto>>> ObtenerComentarios(string proyectoId, [FromQuery] string? votacionId = null)
         {
-            var comentarios = await _comentarioService.ObtenerComentariosAsync(proyectoId, votacionId);
-            return Ok(comentarios);
+            var usuarioId = ObtenerUsuarioId();
+            if (string.IsNullOrWhiteSpace(usuarioId) || !Guid.TryParse(usuarioId, out var participanteId))
+            {
+                return Unauthorized(new { Message = "Usuario no autenticado." });
+            }
+
+            try
+            {
+                var comentarios = await _comentarioService.ObtenerComentariosAsync(proyectoId, participanteId, votacionId);
+                return Ok(comentarios);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new { Message = ex.Message });
+            }
+        }
+
+        private string? ObtenerUsuarioId()
+        {
+            return User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+                   ?? User.FindFirst("sub")?.Value
+                   ?? User.FindFirst("nameid")?.Value;
         }
     }
 }

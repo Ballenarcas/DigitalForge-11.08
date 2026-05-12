@@ -1,0 +1,650 @@
+@page "/nuevo-equipo"
+@using System.Linq
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@using Votify.Client.DTOs
+@using Votify.Client.Services
+@inject EquiposService EquiposService
+@inject EventosService EventosService
+@inject ParticipantesService ParticipantesService
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Nav
+
+<div class="main-container">
+    <div class="top-nav">
+        <button class="btn-back" @onclick="HandleVolver">
+            <span class="icon-arrow">←</span> Volver
+        </button>
+        <div class="breadcrumbs">
+            <span class="breadcrumb-link" @onclick="HandleVolver" style="cursor:pointer;">Votaciones</span> <span class="separator">></span> <span class="current-page">Equipos</span>
+        </div>
+    </div>
+
+    @if (cargando)
+    {
+        <div class="loading-shell">
+            <div class="spinner"></div>
+            <p>Cargando equipos...</p>
+        </div>
+    }
+    else
+    {
+        <div class="content-stack">
+            <div class="card">
+                <h2 class="title">Crear Nuevo Equipo</h2>
+                <p class="subtitle">Registra un nuevo equipo para el evento y luego añade los participantes que correspondan.</p>
+
+                <div class="form-body">
+                    <div class="form-group">
+                        <label>Nombre del Equipo <span class="required-asterisk">*</span></label>
+                        <input type="text" class="form-control" @bind="NombreEquipo" placeholder="Ej: Los Innovadores" />
+                    </div>
+
+                    <button class="btn-submit" @onclick="HandleCrearEquipo" disabled="@creandoEquipo">
+                        @if (creandoEquipo)
+                        {
+                            <span class="spinner-small"></span>
+                        }
+                        Crear Equipo
+                    </button>
+
+                    @if (!string.IsNullOrEmpty(Mensaje))
+                    {
+                        <div class="alert @(Mensaje.Contains("Error") ? "alert-error" : "alert-success")">
+                            <span>@(Mensaje.Contains("Error") ? "❌" : "✅")</span>
+                            <span>@Mensaje</span>
+                        </div>
+                    }
+                </div>
+
+                <em>
+                    <span>*</span> Campos obligatorios
+                </em>
+            </div>
+
+            <div class="card team-manager-card">
+                <div class="section-header">
+                    <div>
+                        <h2 class="title">Añadir participantes</h2>
+                        <p class="subtitle">Los organizadores pueden gestionar cualquier equipo; los miembros solo el suyo.</p>
+                    </div>
+                </div>
+
+                @if (!PuedeGestionarEquipos)
+                {
+                    <div class="empty-state">
+                        <strong>No hay equipo disponible para gestionar.</strong>
+                        <p>Debes pertenecer a un equipo o ser organizador del evento para añadir participantes.</p>
+                    </div>
+                }
+                else
+                {
+                    @if (EsOrganizador && EquiposDisponibles.Any())
+                    {
+                        <div class="form-group">
+                            <label>Equipo a gestionar</label>
+                            <select class="form-control" @bind="EquipoSeleccionadoId">
+                                @foreach (var equipo in EquiposDisponibles)
+                                {
+                                    <option value="@equipo.Id.ToString()">@equipo.Nombre</option>
+                                }
+                            </select>
+                        </div>
+                    }
+                    else if (EquipoSeleccionado != null)
+                    {
+                        <div class="team-chip-row">
+                            <span class="team-chip">@EquipoSeleccionado.Nombre</span>
+                            <span class="team-chip-muted">Tu equipo actual</span>
+                        </div>
+                    }
+
+                    @if (EquipoSeleccionado == null)
+                    {
+                        <div class="empty-state compact">
+                            <strong>Selecciona o crea un equipo.</strong>
+                            <p>Cuando haya un equipo activo podrás agregar participantes aquí mismo.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="team-summary">
+                            <div>
+                                <span class="summary-label">Equipo activo</span>
+                                <h3>@EquipoSeleccionado.Nombre</h3>
+                            </div>
+                            <div class="summary-badge">@ParticipantesDisponibles.Count() participante(s) disponible(s)</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Participante a agregar <span class="required-asterisk">*</span></label>
+                            <select class="form-control" @bind="ParticipanteSeleccionadoId">
+                                <option value="">Selecciona un participante</option>
+                                @foreach (var participante in ParticipantesDisponibles)
+                                {
+                                    <option value="@participante.Id.ToString()">@participante.Nombre (@participante.Email)</option>
+                                }
+                            </select>
+                        </div>
+
+                        <button class="btn-submit team-action-btn" @onclick="HandleAgregarParticipante" disabled="@(agregandoParticipante || string.IsNullOrWhiteSpace(ParticipanteSeleccionadoId))">
+                            @if (agregandoParticipante)
+                            {
+                                <span class="spinner-small"></span>
+                            }
+                            Agregar participante
+                        </button>
+                    }
+                }
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+.main-container {
+    background-color: #f8f9fc;
+    min-height: 100vh;
+    padding: 2rem;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+
+.top-nav {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    max-width: 1100px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.btn-back {
+    background: white;
+    border: 1px solid #e2e8f0;
+    padding: 0.6rem 1.2rem;
+    border-radius: 12px;
+    color: #6b21a8;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+}
+
+.btn-back:hover { background: #f1f5f9; }
+
+.breadcrumbs { color: #94a3b8; font-size: 0.9rem; }
+.current-page { color: #6b21a8; font-weight: 700; }
+
+.content-stack {
+    display: grid;
+    gap: 1.5rem;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.card {
+    background: white;
+    border-radius: 45px;
+    padding: 3rem;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.025em;
+}
+
+.subtitle { color: #64748b; margin-bottom: 2.25rem; font-size: 1.05rem; }
+.required-asterisk { color: #dc2626; font-weight: 800; font-size: 1.2rem; }
+
+.form-group { margin-bottom: 1.5rem; }
+.form-group label {
+    display: flex;
+    font-weight: 700;
+    color: #334155;
+    margin-bottom: 0.6rem;
+    font-size: 0.95rem;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.9rem 1.2rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    font-size: 1rem;
+    color: #1e293b;
+    background-color: #ffffff;
+    transition: all 0.2s;
+    box-sizing: border-box;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #a855f7;
+    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
+}
+
+.btn-submit {
+    width: 100%;
+    background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+    color: white;
+    padding: 1.2rem;
+    border: none;
+    border-radius: 16px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+    transition: all 0.3s;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.btn-submit:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(124, 58, 237, 0.4);
+}
+
+.btn-submit:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.team-action-btn {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+}
+
+.alert {
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+}
+
+.alert-error {
+    background-color: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+
+.alert-success {
+    background-color: #f0fdf4;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
+}
+
+.team-manager-card {
+    border: 1px solid #eef2ff;
+}
+
+.team-chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+}
+
+.team-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.55rem 0.95rem;
+    border-radius: 999px;
+    background: #ede9fe;
+    color: #5b21b6;
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.team-chip-muted {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.55rem 0.95rem;
+    border-radius: 999px;
+    background: #f1f5f9;
+    color: #64748b;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.team-summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.1rem 1.25rem;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #faf5ff 0%, #eef2ff 100%);
+    margin-bottom: 1.25rem;
+}
+
+.summary-label {
+    display: block;
+    color: #7c3aed;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.25rem;
+}
+
+.team-summary h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: #0f172a;
+}
+
+.summary-badge {
+    padding: 0.55rem 0.9rem;
+    border-radius: 999px;
+    background: white;
+    color: #475569;
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.empty-state {
+    padding: 1.2rem 1.25rem;
+    border-radius: 18px;
+    border: 1px dashed #cbd5e1;
+    background: #f8fafc;
+    color: #475569;
+}
+
+.empty-state strong {
+    display: block;
+    color: #0f172a;
+    margin-bottom: 0.35rem;
+}
+
+.empty-state p {
+    margin: 0;
+    line-height: 1.5;
+}
+
+.empty-state.compact {
+    margin-top: 0.75rem;
+}
+
+.loading-shell {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 5rem 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+}
+
+.spinner {
+    width: 36px;
+    height: 36px;
+    border: 4px solid #f3e8ff;
+    border-top: 4px solid #9333ea;
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+    margin-bottom: 1rem;
+}
+
+.spinner-small {
+    width: 18px;
+    height: 18px;
+    border: 3px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+em {
+    display: block;
+    margin-top: 1rem;
+    color: #64748b;
+    font-size: 0.85rem;
+}
+
+em span {
+    color: #dc2626;
+}
+
+@@media (max-width: 768px) {
+    .main-container { padding: 1rem; }
+    .card { padding: 1.5rem; border-radius: 28px; }
+    .top-nav { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+    .team-summary { flex-direction: column; align-items: flex-start; }
+}
+</style>
+
+@code {
+    [SupplyParameterFromQuery(Name = "eventoId")]
+    public string? EventoId { get; set; }
+
+    private string NombreEquipo { get; set; } = string.Empty;
+    private string Mensaje { get; set; } = string.Empty;
+    private string? MiParticipanteId { get; set; }
+    private string? MiRolEvento { get; set; }
+    private string? EquipoSeleccionadoId { get; set; }
+    private string? ParticipanteSeleccionadoId { get; set; }
+    private EquipoDto? MiEquipoActual { get; set; }
+    private bool cargando = true;
+    private bool creandoEquipo = false;
+    private bool agregandoParticipante = false;
+
+    private List<EquipoDto> EquiposDisponibles { get; set; } = new();
+    private List<ParticipanteDto> ParticipantesRegistrados { get; set; } = new();
+
+    private bool EsOrganizador => string.Equals(MiRolEvento?.Trim(), "ORGANIZADOR", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(MiRolEvento?.Trim(), "Organizador", StringComparison.OrdinalIgnoreCase);
+
+    private EquipoDto? EquipoSeleccionado
+    {
+        get
+        {
+            if (Guid.TryParse(EquipoSeleccionadoId, out var equipoId))
+            {
+                return EquiposDisponibles.FirstOrDefault(e => e.Id == equipoId);
+            }
+
+            return MiEquipoActual;
+        }
+    }
+
+    private IEnumerable<ParticipanteDto> ParticipantesDisponibles
+    {
+        get
+        {
+            var equipoId = EquipoSeleccionado?.Id;
+
+            return ParticipantesRegistrados
+                .Where(p => p.Id.ToString() != MiParticipanteId)
+                .Where(p => equipoId == null || p.EquipoId != equipoId)
+                .OrderBy(p => p.Nombre)
+                .ToList();
+        }
+    }
+
+    private bool PuedeGestionarEquipos => EsOrganizador || MiEquipoActual != null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarEstadoAsync();
+    }
+
+    private async Task CargarEstadoAsync()
+    {
+        cargando = true;
+        try
+        {
+            MiParticipanteId = await ObtenerMiParticipanteIdAsync();
+
+            if (!string.IsNullOrWhiteSpace(EventoId))
+            {
+                MiRolEvento = await EventosService.ObtenerRolEnEvento(EventoId);
+            }
+
+            EquiposDisponibles = await EquiposService.ObtenerEquiposAsync();
+            ParticipantesRegistrados = await ParticipantesService.ObtenerParticipantesAsync();
+
+            if (Guid.TryParse(MiParticipanteId, out var participanteId))
+            {
+                MiEquipoActual = await EquiposService.ObtenerEquipoDeParticipanteAsync(participanteId);
+            }
+
+            InicializarEquipoSeleccionado();
+        }
+        catch (Exception ex)
+        {
+            Mensaje = $"Error al cargar la pantalla: {ex.Message}";
+        }
+        finally
+        {
+            cargando = false;
+        }
+    }
+
+    private void InicializarEquipoSeleccionado()
+    {
+        if (MiEquipoActual != null)
+        {
+            EquipoSeleccionadoId = MiEquipoActual.Id.ToString();
+            return;
+        }
+
+        if (EsOrganizador && EquiposDisponibles.Any())
+        {
+            EquipoSeleccionadoId = EquiposDisponibles.First().Id.ToString();
+        }
+    }
+
+    private async Task<string?> ObtenerMiParticipanteIdAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+         return user.FindFirst(ClaimTypes.NameIdentifier)?.Value
+             ?? user.FindFirst("sub")?.Value
+             ?? user.FindFirst("nameid")?.Value;
+    }
+
+    private void HandleVolver()
+    {
+        if (!string.IsNullOrEmpty(EventoId))
+        {
+            Nav.NavigateTo($"/votaciones?eventoId={EventoId}");
+        }
+        else
+        {
+            Nav.NavigateTo("/");
+        }
+    }
+
+    private async Task HandleCrearEquipo()
+    {
+        if (string.IsNullOrWhiteSpace(NombreEquipo))
+        {
+            Mensaje = "Error: El nombre del equipo es obligatorio.";
+            return;
+        }
+
+        creandoEquipo = true;
+        Mensaje = string.Empty;
+
+        try
+        {
+            var equipo = await EquiposService.CrearEquipoAsync(NombreEquipo.Trim());
+            if (equipo == null)
+            {
+                Mensaje = "Error al crear el equipo. Inténtelo de nuevo.";
+                return;
+            }
+
+            if (!EquiposDisponibles.Any(e => e.Id == equipo.Id))
+            {
+                EquiposDisponibles.Add(equipo);
+            }
+
+            NombreEquipo = string.Empty;
+            EquipoSeleccionadoId = equipo.Id.ToString();
+            MiEquipoActual = MiEquipoActual ?? equipo;
+            Mensaje = "Equipo creado correctamente.";
+        }
+        catch (Exception ex)
+        {
+            Mensaje = $"Error inesperado: {ex.Message}";
+        }
+        finally
+        {
+            creandoEquipo = false;
+        }
+    }
+
+    private async Task HandleAgregarParticipante()
+    {
+        if (!Guid.TryParse(EventoId, out var eventoGuid))
+        {
+            Mensaje = "Error: No se encontró el evento asociado al equipo.";
+            return;
+        }
+
+        if (!Guid.TryParse(EquipoSeleccionadoId, out var equipoGuid))
+        {
+            Mensaje = "Error: Debes seleccionar un equipo válido.";
+            return;
+        }
+
+        if (!Guid.TryParse(ParticipanteSeleccionadoId, out var participanteGuid))
+        {
+            Mensaje = "Error: Debes seleccionar un participante válido.";
+            return;
+        }
+
+        agregandoParticipante = true;
+        Mensaje = string.Empty;
+
+        try
+        {
+            var agregado = await EquiposService.AsignarParticipanteAsync(equipoGuid, participanteGuid, eventoGuid);
+            if (!agregado)
+            {
+                Mensaje = "Error al agregar el participante al equipo.";
+                return;
+            }
+
+            ParticipanteSeleccionadoId = string.Empty;
+            ParticipantesRegistrados = await ParticipantesService.ObtenerParticipantesAsync();
+            if (Guid.TryParse(MiParticipanteId, out var miId))
+            {
+                MiEquipoActual = await EquiposService.ObtenerEquipoDeParticipanteAsync(miId);
+            }
+
+            Mensaje = "Participante agregado correctamente y marcado como competidor del evento.";
+        }
+        catch (Exception ex)
+        {
+            Mensaje = ex.Message.Contains("Error") ? ex.Message : $"Error al agregar el participante: {ex.Message}";
+        }
+        finally
+        {
+            agregandoParticipante = false;
+        }
+    }
+}
