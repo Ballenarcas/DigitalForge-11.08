@@ -8,19 +8,19 @@ namespace Votify.API.Controllers
     [Route("api/eventos")]
     public class EventosController : ControllerBase
     {
-        private readonly IEventoService _service;
+        private readonly IEventoFachada _fachada;
         private readonly ILogger<EventosController> _logger;
 
-        public EventosController(IEventoService service, ILogger<EventosController> logger)
+        public EventosController(IEventoFachada fachada, ILogger<EventosController> logger)
         {
-            _service = service;
+            _fachada = fachada;
             _logger = logger;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var eventos = await _service.ObtenerTodosAsync();
+            var eventos = await _fachada.ObtenerTodosAsync();
             return Ok(eventos);
         }
 
@@ -34,14 +34,14 @@ namespace Votify.API.Controllers
                 return Unauthorized(new { Message = "Usuario no autenticado." });
             }
 
-            var eventos = await _service.ObtenerMisEventosAsync(usuarioId);
+            var eventos = await _fachada.ObtenerMisEventosAsync(usuarioId);
             return Ok(eventos);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(string id)
         {
-            var evento = await _service.ObtenerPorIdAsync(id);
+            var evento = await _fachada.ObtenerEventoAsync(id);
             if (evento is null) return NotFound();
             return Ok(evento);
         }
@@ -56,7 +56,7 @@ namespace Votify.API.Controllers
                 return Unauthorized(new { Message = "Usuario no autenticado." });
             }
 
-            var result = await _service.CrearAsync(dto, usuarioId);
+            var result = await _fachada.CrearEventoAsync(dto, usuarioId);
             return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
         }
 
@@ -70,7 +70,7 @@ namespace Votify.API.Controllers
                 return Unauthorized(new { Message = "Usuario no autenticado." });
             }
 
-            await _service.RegistrarParticipanteAsync(id, usuarioId);
+            await _fachada.ParticiparEnEventoAsync(id, usuarioId);
             return Ok();
         }
 
@@ -84,7 +84,7 @@ namespace Votify.API.Controllers
                 return Unauthorized(new { Message = "Usuario no autenticado." });
             }
 
-            var rol = await _service.ObtenerRolEnEventoAsync(id, usuarioId);
+            var rol = await _fachada.ObtenerRolAsync(id, usuarioId);
             if (string.IsNullOrEmpty(rol))
             {
                 return NotFound(new { Message = "El usuario no participa en este evento." });
@@ -105,7 +105,7 @@ namespace Votify.API.Controllers
 
             try
             {
-                var participantes = await _service.ObtenerParticipantesPorEventoAsync(id, usuarioId, search);
+                var participantes = await _fachada.ObtenerParticipantesAsync(id, usuarioId, search);
                 return Ok(participantes);
             }
             catch (UnauthorizedAccessException ex)
@@ -127,7 +127,7 @@ namespace Votify.API.Controllers
 
             try
             {
-                var stats = await _service.ObtenerEstadisticasRolesAsync(id, usuarioId);
+                var stats = await _fachada.ObtenerEstadisticasRolesAsync(id, usuarioId);
                 return Ok(stats);
             }
             catch (UnauthorizedAccessException ex)
@@ -154,7 +154,7 @@ namespace Votify.API.Controllers
 
             try
             {
-                await _service.CambiarRolParticipanteAsync(id, participanteId, usuarioId, dto.Rol);
+                await _fachada.CambiarRolAsync(id, participanteId, usuarioId, dto.Rol);
                 return Ok(new { Message = "Rol cambiado exitosamente" });
             }
             catch (UnauthorizedAccessException ex)
@@ -180,7 +180,7 @@ namespace Votify.API.Controllers
 
             try
             {
-                await _service.EliminarParticipacionAsync(id, participanteId, usuarioId);
+                await _fachada.EliminarParticipacionAsync(id, participanteId, usuarioId);
                 return Ok(new { Message = "Participante quitado correctamente" });
             }
             catch (UnauthorizedAccessException ex)

@@ -14,6 +14,7 @@ namespace Votify.Tests.Services
         private readonly Mock<IVotoRepository> _mockVotoRepository;
         private readonly Mock<IProyectoRepository> _mockProyectoRepository;
         private readonly Mock<IEventoRepository> _mockEventoRepository;
+        private readonly Mock<IEquipoRepository> _mockEquipoRepository;
         private readonly VotacionService _votacionService;
 
         public VotacionServiceTests()
@@ -22,12 +23,14 @@ namespace Votify.Tests.Services
             _mockVotoRepository = new Mock<IVotoRepository>();
             _mockProyectoRepository = new Mock<IProyectoRepository>();
             _mockEventoRepository = new Mock<IEventoRepository>();
+            _mockEquipoRepository = new Mock<IEquipoRepository>();
 
             _votacionService = new VotacionService(
                 _mockVotacionRepository.Object,
                 _mockVotoRepository.Object,
                 _mockProyectoRepository.Object,
-                _mockEventoRepository.Object
+                _mockEventoRepository.Object,
+                _mockEquipoRepository.Object
             );
         }
 

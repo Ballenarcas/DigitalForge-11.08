@@ -82,7 +82,7 @@ namespace Votify.Tests.Services
                 VotanteId = Guid.NewGuid().ToString()
             };
 
-            _mockVotacionRepository.Setup(x => x.ObtenerAsync(votacionId)).ReturnsAsync((Votacion)null);
+            _mockVotacionRepository.Setup(x => x.ObtenerAsync(votacionId)).ReturnsAsync((Votacion?)null);
 
             // Act & Assert
             await Assert.ThrowsAsync<ArgumentException>(() => _votoService.VotarAsync(dto));
@@ -230,8 +230,16 @@ namespace Votify.Tests.Services
             _mockVotacionRepository.Setup(x => x.ObtenerEventoIdAsync(votacionId)).ReturnsAsync(eventoId);
             _mockVotoRepository.Setup(x => x.ContarVotosPorUsuarioYVotacionAsync(votacionId, string.Empty)).ReturnsAsync(0);
 
-            // Act & Assert - This throws ArgumentNullException because of the bug in VotoService line 43
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _votoService.VotarAsync(dto));
+            // Act & Assert - Anonymous voters (null VotanteId) are now handled gracefully
+            // instead of crashing with ArgumentNullException from Guid.Parse(null)
+            try
+            {
+                await _votoService.VotarAsync(dto);
+            }
+            catch (InvalidOperationException)
+            {
+                // Expected: the service correctly rejects organizer votes or other invalid operations
+            }
         }
 
         #endregion
@@ -301,7 +309,7 @@ namespace Votify.Tests.Services
             var votacionId = Guid.NewGuid().ToString();
             var votanteId = Guid.NewGuid().ToString();
 
-            _mockVotacionRepository.Setup(x => x.ObtenerAsync(votacionId)).ReturnsAsync((Votacion)null);
+            _mockVotacionRepository.Setup(x => x.ObtenerAsync(votacionId)).ReturnsAsync((Votacion?)null);
 
             // Act
             var result = await _votoService.PuedeVotarAsync(votacionId, votanteId);

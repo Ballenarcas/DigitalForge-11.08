@@ -1,12 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using Votify.Application.DTOs;
+using Votify.Application.Interfaces;
 using Votify.Domain.Entities;
 using Votify.Domain.Interfaces;
 
 namespace Votify.Application.Services
 {
-    public class EquipoService
+    public class EquipoService : IEquipoService
     {
         private readonly IEquipoRepository _equipoRepository;
         private readonly IParticipanteRepository _participanteRepository;
@@ -19,11 +22,11 @@ namespace Votify.Application.Services
             _participanteEventoRepository = participanteEventoRepository;
         }
 
-        public async Task<Equipo> CrearEquipoAsync(string nombre)
+        public async Task<EquipoDto> CrearEquipoAsync(string nombre)
         {
             var equipo = new Equipo(nombre);
             await _equipoRepository.GuardarAsync(equipo);
-            return equipo;
+            return MapToDto(equipo);
         }
 
         public async Task AsignarParticipanteAEquipoAsync(Guid solicitanteId, Guid participanteId, Guid equipoId, Guid eventoId)
@@ -78,17 +81,26 @@ namespace Votify.Application.Services
                 || string.Equals(rol?.Trim(), "Organizador", StringComparison.OrdinalIgnoreCase);
         }
 
-        public async Task<IEnumerable<Equipo>> ObtenerTodosLosEquiposAsync()
+        public async Task<List<EquipoDto>> ObtenerTodosLosEquiposAsync()
         {
-            return await _equipoRepository.ObtenerTodosAsync();
+            var equipos = await _equipoRepository.ObtenerTodosAsync();
+            return equipos.Select(MapToDto).ToList();
         }
 
-        public async Task<Equipo?> ObtenerEquipoDeParticipanteAsync(Guid participanteId)
+        public async Task<EquipoDto?> ObtenerEquipoDeParticipanteAsync(Guid participanteId)
         {
             var participante = await _participanteRepository.ObtenerPorIdAsync(participanteId);
             if (participante?.EquipoId == null) return null;
 
-            return await _equipoRepository.ObtenerPorIdAsync(participante.EquipoId.Value);
+            var equipo = await _equipoRepository.ObtenerPorIdAsync(participante.EquipoId.Value);
+            return equipo != null ? MapToDto(equipo) : null;
         }
+
+        private static EquipoDto MapToDto(Equipo equipo) => new EquipoDto
+        {
+            Id = equipo.Id,
+            Nombre = equipo.Nombre,
+            CreatedAt = equipo.CreatedAt
+        };
     }
 }

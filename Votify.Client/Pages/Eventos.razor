@@ -70,7 +70,7 @@
                             }
                             else if (yaInicio && !yaFinalizo)
                             {
-                                <button class="btn-votar" @onclick='() => { if(AppState != null && e != null) { AppState.EventoNombre = e.Nombre; AppState.EventoId = e.Id.ToString(); } Nav.NavigateTo($"/votaciones?eventoId={e.Id}&eventoNombre={Uri.EscapeDataString(e.Nombre)}"); }'>
+                                <button class="btn-votar" @onclick='() => IrAVotaciones(e)'>
                                     Ver Votaciones
                                 </button>
                             }
@@ -177,6 +177,14 @@
     private void IrADetalles(string id)
     {
         Nav.NavigateTo($"/detalles-evento/{id}");
+    }
+
+    private void IrAVotaciones(EventoDto? evento)
+    {
+        if (AppState == null || evento == null || evento.Id == null) return;
+        AppState.EventoNombre = evento.Nombre;
+        AppState.EventoId = evento.Id;
+        Nav.NavigateTo($"/votaciones?eventoId={evento.Id}&eventoNombre={Uri.EscapeDataString(evento.Nombre)}");
     }
 }
 

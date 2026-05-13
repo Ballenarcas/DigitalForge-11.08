@@ -5,6 +5,7 @@ using Votify.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Votify.Application.Interfaces;
 using Votify.Application.Services;
+using Votify.Application.Services.Fachadas;
 using Votify.Infrastructure.Repositories;
 using Votify.Domain.Interfaces;
 using System.Text;
@@ -85,6 +86,18 @@ builder.Services.AddScoped<IValoracionCriterioRepository, ValoracionCriterioRepo
 builder.Services.AddScoped<Votify.Domain.Interfaces.IEventoRepository, Votify.Infrastructure.Repositories.EventoRepository>();
 builder.Services.AddScoped<Votify.Domain.Interfaces.IParticipanteEventoRepository, Votify.Infrastructure.Repositories.ParticipanteEventoRepository>();
 builder.Services.AddScoped<Votify.Application.Interfaces.IEventoService, Votify.Application.Services.EventoService>();
+
+// New service interfaces (prerequisites for facades)
+builder.Services.AddScoped<IEquipoService, EquipoService>();
+builder.Services.AddScoped<IParticipanteService, ParticipanteService>();
+
+// Facade registrations
+builder.Services.AddScoped<IEventoFachada, EventoFachada>();
+builder.Services.AddScoped<IVotacionFachada, VotacionFachada>();
+builder.Services.AddScoped<IVotoFachada, VotoFachada>();
+builder.Services.AddScoped<IProyectoFachada, ProyectoFachada>();
+builder.Services.AddScoped<IEquipoFachada, EquipoFachada>();
+builder.Services.AddScoped<IParticipanteFachada, ParticipanteFachada>();
 
 Console.WriteLine($"DB => {host}:{port}/{db} USER => {user}");
 

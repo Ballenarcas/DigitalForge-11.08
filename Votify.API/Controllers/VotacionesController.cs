@@ -8,11 +8,11 @@ namespace Votify.API.Controllers
     [Route("api/votaciones")]
     public class VotacionesController : ControllerBase
     {
-        private readonly IVotacionService _service;
+        private readonly IVotacionFachada _fachada;
 
-        public VotacionesController(IVotacionService service)
+        public VotacionesController(IVotacionFachada fachada)
         {
-            _service = service;
+            _fachada = fachada;
         }
 
         [HttpPost]
@@ -20,7 +20,7 @@ namespace Votify.API.Controllers
         {
             try
             {
-                await _service.CrearVotacionAsync(dto);
+                await _fachada.CrearVotacionAsync(dto);
                 return Ok(new
                 {
                     dto.Nombre,
@@ -39,20 +39,20 @@ namespace Votify.API.Controllers
         [HttpGet]
         public async Task<ActionResult<List<CrearVotacionResponse>>> Get()
         {
-            var votaciones = await _service.ObtenerTodasAsync();
+            var votaciones = await _fachada.ObtenerVotacionesAsync();
             return Ok(votaciones);
         }
         [HttpGet("evento/{eventoId}")]
         public async Task<ActionResult<List<CrearVotacionResponse>>> GetByEvento(string eventoId)
         {
-            var votaciones = await _service.ObtenerPorEventoAsync(eventoId);
+            var votaciones = await _fachada.ObtenerVotacionesPorEventoAsync(eventoId);
             return Ok(votaciones);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<CrearVotacionResponse>> GetById(string id)
         {
-            var votacion = await _service.ObtenerPorIdAsync(id);
+            var votacion = await _fachada.ObtenerVotacionAsync(id);
             if (votacion is null) return NotFound();
             return Ok(votacion);
         }
@@ -62,7 +62,7 @@ namespace Votify.API.Controllers
         {
             try
             {
-                await _service.ActualizarVotacionAsync(id, dto);
+                await _fachada.ActualizarVotacionAsync(id, dto);
                 return NoContent();
             }
             catch (ArgumentException ex)
@@ -80,7 +80,7 @@ namespace Votify.API.Controllers
         {
             try
             {
-                await _service.EliminarVotacionAsync(id);
+                await _fachada.EliminarVotacionAsync(id);
                 return NoContent();
             }
             catch (KeyNotFoundException)
@@ -92,14 +92,14 @@ namespace Votify.API.Controllers
         [HttpGet("{id}/resultados")]
         public async Task<ActionResult<List<ResultadoProyectoDto>>> ObtenerResultados(string id)
         {
-            var resultados = await _service.ObtenerResultadosAsync(id);
+            var resultados = await _fachada.ObtenerResultadosAsync(id);
             return Ok(resultados);
         }
 
         [HttpGet("{id}/resultados-multicriterio")]
         public async Task<ActionResult<List<ResultadoMulticriterioDto>>> ObtenerResultadosMulticriterio(string id)
         {
-            var resultados = await _service.ObtenerResultadosMulticriterioAsync(id);
+            var resultados = await _fachada.ObtenerResultadosMulticriterioAsync(id);
             return Ok(resultados);
         }
 
@@ -108,7 +108,7 @@ namespace Votify.API.Controllers
         {
             try
             {
-                await _service.PausarVotacionAsync(id);
+                await _fachada.PausarVotacionAsync(id);
                 return Ok(new { mensaje = "La votación ha sido pausada exitosamente." });
             }
             catch (KeyNotFoundException)
@@ -126,7 +126,7 @@ namespace Votify.API.Controllers
         {
             try
             {
-                await _service.DetenerVotacionAsync(id);
+                await _fachada.DetenerVotacionAsync(id);
                 return Ok(new { mensaje = "La votación ha sido detenida exitosamente." });
             }
             catch (KeyNotFoundException)
@@ -144,7 +144,7 @@ namespace Votify.API.Controllers
         {
             try
             {
-                await _service.AbrirVotacionAsync(id);
+                await _fachada.AbrirVotacionAsync(id);
                 return Ok(new { mensaje = "La votación ha sido abierta exitosamente." });
             }
             catch (KeyNotFoundException)

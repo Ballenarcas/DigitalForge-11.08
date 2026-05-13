@@ -52,9 +52,13 @@ namespace Votify.Application.Services
             {
                 throw new InvalidOperationException($"No puedes votar. Has alcanzado el límite de {votacion.LimiteProy} votos para esta votación.");
             }
-            if (await _participanteEventoRepository.ObtenerRolAsync(Guid.Parse(EventoId), Guid.Parse(dto.VotanteId)) == "ORGANIZADOR")
+            if (!string.IsNullOrEmpty(EventoId) && !string.IsNullOrEmpty(dto.VotanteId))
             {
-                throw new InvalidOperationException("Los organizadores no pueden votar en sus propios eventos.");
+                var rol = await _participanteEventoRepository.ObtenerRolAsync(Guid.Parse(EventoId), Guid.Parse(dto.VotanteId));
+                if (rol == "ORGANIZADOR")
+                {
+                    throw new InvalidOperationException("Los organizadores no pueden votar en sus propios eventos.");
+                }
             }
             if (!string.IsNullOrEmpty(dto.VotanteId))
             {

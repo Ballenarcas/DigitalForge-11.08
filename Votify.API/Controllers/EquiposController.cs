@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.Authorization;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Votify.Application.Services;
-using Votify.Domain.Entities;
+using Votify.Application.DTOs;
+using Votify.Application.Interfaces;
 
 namespace Votify.API.Controllers
 {
@@ -12,20 +12,20 @@ namespace Votify.API.Controllers
     [Route("api/equipos")]
     public class EquiposController : ControllerBase
     {
-        private readonly EquipoService _equipoService;
+        private readonly IEquipoFachada _fachada;
 
-        public EquiposController(EquipoService equipoService)
+        public EquiposController(IEquipoFachada fachada)
         {
-            _equipoService = equipoService;
+            _fachada = fachada;
         }
 
         [HttpPost]
         [Authorize]
-        public async Task<ActionResult<Equipo>> CrearEquipo([FromBody] CrearEquipoRequest request)
+        public async Task<ActionResult<EquipoDto>> CrearEquipo([FromBody] CrearEquipoRequest request)
         {
             try
             {
-                var equipo = await _equipoService.CrearEquipoAsync(request.Nombre);
+                var equipo = await _fachada.CrearEquipoAsync(request.Nombre);
                 return Ok(equipo);
             }
             catch (Exception ex)
@@ -46,7 +46,7 @@ namespace Votify.API.Controllers
                     return Unauthorized(new { Message = "Usuario no autenticado." });
                 }
 
-                await _equipoService.AsignarParticipanteAEquipoAsync(solicitanteGuid, request.ParticipanteId, equipoId, request.EventoId);
+                await _fachada.AsignarParticipanteAsync(solicitanteGuid, request.ParticipanteId, equipoId, request.EventoId);
                 return Ok();
             }
             catch (ArgumentException ex)
@@ -68,16 +68,16 @@ namespace Votify.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Equipo>>> ObtenerEquipos()
+        public async Task<ActionResult<List<EquipoDto>>> ObtenerEquipos()
         {
-            var equipos = await _equipoService.ObtenerTodosLosEquiposAsync();
+            var equipos = await _fachada.ObtenerTodosAsync();
             return Ok(equipos);
         }
 
         [HttpGet("participante/{participanteId}")]
-        public async Task<ActionResult<Equipo>> ObtenerEquipoDeParticipante(Guid participanteId)
+        public async Task<ActionResult<EquipoDto>> ObtenerEquipoDeParticipante(Guid participanteId)
         {
-            var equipo = await _equipoService.ObtenerEquipoDeParticipanteAsync(participanteId);
+            var equipo = await _fachada.ObtenerEquipoDeParticipanteAsync(participanteId);
             if (equipo == null)
             {
                 return NotFound("El participante no tiene un equipo asignado.");

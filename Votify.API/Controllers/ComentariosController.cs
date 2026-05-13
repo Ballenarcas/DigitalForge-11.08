@@ -10,11 +10,11 @@ namespace Votify.API.Controllers
     [Route("api/proyectos/{proyectoId}/comentarios")]
     public class ComentariosController : ControllerBase
     {
-        private readonly IComentarioService _comentarioService;
+        private readonly IProyectoFachada _fachada;
 
-        public ComentariosController(IComentarioService comentarioService)
+        public ComentariosController(IProyectoFachada fachada)
         {
-            _comentarioService = comentarioService;
+            _fachada = fachada;
         }
 
         [HttpPost]
@@ -22,7 +22,7 @@ namespace Votify.API.Controllers
         {
             try
             {
-                await _comentarioService.AgregarComentarioAsync(proyectoId, request.Texto, request.AutorId);
+                await _fachada.AgregarComentarioAsync(proyectoId, request.Texto, request.AutorId);
                 return Ok();
             }
             catch (ArgumentException ex)
@@ -47,7 +47,7 @@ namespace Votify.API.Controllers
 
             try
             {
-                var comentarios = await _comentarioService.ObtenerComentariosAsync(proyectoId, participanteId, votacionId);
+                var comentarios = await _fachada.ObtenerComentariosAsync(proyectoId, participanteId, votacionId);
                 return Ok(comentarios);
             }
             catch (UnauthorizedAccessException ex)

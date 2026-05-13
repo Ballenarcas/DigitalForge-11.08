@@ -42,7 +42,7 @@ namespace Votify.Tests.Services
 
             _mockParticipanteRepository
                 .Setup(x => x.GetByEmailAsync(request.Email))
-                .ReturnsAsync((Participante)null);
+                .ReturnsAsync((Participante?)null);
 
             // Act
             var result = await _authService.RegisterAsync(request);
@@ -145,7 +145,7 @@ namespace Votify.Tests.Services
 
             _mockParticipanteRepository
                 .Setup(x => x.GetByEmailAsync(request.Email))
-                .ReturnsAsync((Participante)null);
+                .ReturnsAsync((Participante?)null);
 
             // Act
             var result = await _authService.LoginAsync(request);

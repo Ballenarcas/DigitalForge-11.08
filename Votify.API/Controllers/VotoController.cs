@@ -10,11 +10,11 @@ namespace Votify.API.Controllers
     [Route("api/votos")]
     public class VotoController : ControllerBase
     {
-        private readonly IVotoService _votoService;
+        private readonly IVotoFachada _fachada;
 
-        public VotoController(IVotoService votoService)
+        public VotoController(IVotoFachada fachada)
         {
-            _votoService = votoService;
+            _fachada = fachada;
         }
 
         [HttpPost]
@@ -22,7 +22,7 @@ namespace Votify.API.Controllers
         {
             try
             {
-                await _votoService.VotarAsync(request);
+                await _fachada.VotarAsync(request);
                 return Ok(new { Mensaje = "Voto registrado con éxito." });
             }
             catch (InvalidOperationException ex)
@@ -47,7 +47,7 @@ namespace Votify.API.Controllers
         {
             try
             {
-                await _votoService.VotarMulticriterioAsync(request);
+                await _fachada.VotarMulticriterioAsync(request);
                 return Ok(new { Mensaje = "Voto registrado con éxito." });
             }
             catch (InvalidOperationException ex)
@@ -72,7 +72,7 @@ namespace Votify.API.Controllers
         {
             try
             {
-                bool puedeVotar = await _votoService.PuedeVotarAsync(votacionId, votanteId);
+                bool puedeVotar = await _fachada.PuedeVotarAsync(votacionId, votanteId);
                 return Ok(puedeVotar);
             }
             catch (Exception ex)
@@ -86,7 +86,7 @@ namespace Votify.API.Controllers
         {
             try
             {
-                bool emitido = await _votoService.HaVotadoMulticriterioAsync(proyectoId, votanteId);
+                bool emitido = await _fachada.HaVotadoMulticriterioAsync(proyectoId, votanteId);
                 return Ok(emitido);
             }
             catch (Exception ex)

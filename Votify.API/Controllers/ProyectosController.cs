@@ -10,11 +10,11 @@ namespace Votify.API.Controllers
     [Route("api/proyectos")]
     public class ProyectosController : ControllerBase
     {
-        private readonly IProyectoService _proyectoService;
+        private readonly IProyectoFachada _fachada;
 
-        public ProyectosController(IProyectoService proyectoService)
+        public ProyectosController(IProyectoFachada fachada)
         {
-            _proyectoService = proyectoService;
+            _fachada = fachada;
         }
 
         [HttpPost]
@@ -30,7 +30,7 @@ namespace Votify.API.Controllers
                 }
 
                 dto.ParticipanteId = participanteId;
-                var id = await _proyectoService.CrearProyectoAsync(dto);
+                var id = await _fachada.CrearProyectoAsync(dto);
                 return Ok(id);
             }
             catch (UnauthorizedAccessException ex)
@@ -54,7 +54,7 @@ namespace Votify.API.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<ProyectoDto>> ObtenerProyecto(string id)
         {
-            var proyecto = await _proyectoService.ObtenerProyectoAsync(id);
+            var proyecto = await _fachada.ObtenerProyectoAsync(id);
             if (proyecto == null)
             {
                 return NotFound();
@@ -64,14 +64,14 @@ namespace Votify.API.Controllers
 
         public async Task<ActionResult<List<ProyectoDto>>> ObtenerProyectos()
         {
-            var proyectos = await _proyectoService.ObtenerProyectosAsync();
+            var proyectos = await _fachada.ObtenerProyectosAsync();
             return Ok(proyectos);
         }
 
         [HttpGet("votacion/{votacionId}")]
         public async Task<ActionResult<List<ProyectoDto>>> ObtenerProyectosPorVotacion(string votacionId)
         {
-            var proyectos = await _proyectoService.ObtenerProyectosPorVotacionAsync(votacionId);
+            var proyectos = await _fachada.ObtenerProyectosPorVotacionAsync(votacionId);
             return Ok(proyectos);
         }
 

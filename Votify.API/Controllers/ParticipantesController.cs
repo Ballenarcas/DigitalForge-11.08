@@ -1,10 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using Votify.Domain.Entities;
-using Votify.Domain.Interfaces;
+using Votify.Application.DTOs;
+using Votify.Application.Interfaces;
 
 namespace Votify.API.Controllers
 {
@@ -12,25 +10,18 @@ namespace Votify.API.Controllers
     [Route("api/participantes")]
     public class ParticipantesController : ControllerBase
     {
-        private readonly IParticipanteRepository _participanteRepository;
+        private readonly IParticipanteFachada _fachada;
 
-        public ParticipantesController(IParticipanteRepository participanteRepository)
+        public ParticipantesController(IParticipanteFachada fachada)
         {
-            _participanteRepository = participanteRepository;
+            _fachada = fachada;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ParticipanteDto>>> ObtenerParticipantes()
+        public async Task<ActionResult<List<ParticipanteDto>>> ObtenerParticipantes()
         {
-            var participantes = await _participanteRepository.ObtenerTodosAsync();
-            var dtos = participantes.Select(p => new ParticipanteDto
-            {
-                Id = p.Id,
-                Nombre = p.Nombre,
-                Email = p.Email,
-                EquipoId = p.EquipoId
-            });
-            return Ok(dtos);
+            var participantes = await _fachada.ObtenerTodosAsync();
+            return Ok(participantes);
         }
     }
 
