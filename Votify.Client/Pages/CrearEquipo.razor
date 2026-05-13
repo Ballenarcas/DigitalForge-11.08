@@ -513,30 +513,44 @@ em span {
             // 2. Obtener rol en el evento
             if (!string.IsNullOrWhiteSpace(EventoId))
             {
-                MiRolEvento = await EventosService.ObtenerRolEnEvento(EventoId);
+                try { MiRolEvento = await EventosService.ObtenerRolEnEvento(EventoId); }
+                catch { MiRolEvento = null; }
             }
 
-            // 3. Cargar equipos y participantes del evento
-            EquiposDisponibles = await EquiposService.ObtenerEquiposAsync();
+            // 3. Cargar equipos
+            try { EquiposDisponibles = await EquiposService.ObtenerEquiposAsync(); }
+            catch { EquiposDisponibles = new(); }
 
+            // 4. Cargar participantes del evento
             if (!string.IsNullOrWhiteSpace(EventoId))
             {
-                ParticipantesEvento = await EventosService.ObtenerParticipantesPorEvento(EventoId);
+                try { ParticipantesEvento = await EventosService.ObtenerParticipantesPorEvento(EventoId); }
+                catch { ParticipantesEvento = new(); }
             }
 
-            // 4. Obtener MI equipo: usar ObtenerParticipantePorId que tiene EquipoId
+            // 5. Obtener MI equipo
             if (Guid.TryParse(MiParticipanteId, out var participanteId))
             {
-                var miDatos = await ParticipantesService.ObtenerParticipantePorId(participanteId);
-                if (miDatos?.EquipoId != null)
+                // Intentar obtener EquipoId desde los datos del participante
+                try
                 {
-                    MiEquipoActual = EquiposDisponibles.FirstOrDefault(e => e.Id == miDatos.EquipoId);
-                    // Si no está en la lista local, obtenerlo directamente
-                    MiEquipoActual ??= await EquiposService.ObtenerEquipoDeParticipanteAsync(participanteId);
+                    var miDatos = await ParticipantesService.ObtenerParticipantePorId(participanteId);
+                    if (miDatos?.EquipoId != null)
+                    {
+                        MiEquipoActual = EquiposDisponibles.FirstOrDefault(e => e.Id == miDatos.EquipoId);
+                    }
+                }
+                catch { }
+
+                // Si aún no tenemos equipo, buscar directamente por participante
+                if (MiEquipoActual == null)
+                {
+                    try { MiEquipoActual = await EquiposService.ObtenerEquipoDeParticipanteAsync(participanteId); }
+                    catch { }
                 }
             }
 
-            // 5. Seleccionar equipo por defecto
+            // 6. Seleccionar equipo por defecto
             if (MiEquipoActual != null)
             {
                 EquipoSeleccionadoId = MiEquipoActual.Id.ToString();

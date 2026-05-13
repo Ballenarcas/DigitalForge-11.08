@@ -14,5 +14,8 @@ namespace Votify.Application.Services.Fachadas
 
         public Task<List<ParticipanteDto>> ObtenerTodosAsync()
             => _participanteService.ObtenerTodosAsync();
+
+        public Task<ParticipanteDto?> ObtenerPorIdAsync(Guid id)
+            => _participanteService.ObtenerPorIdAsync(id);
     }
 }

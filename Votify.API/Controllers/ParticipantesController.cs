@@ -23,6 +23,15 @@ namespace Votify.API.Controllers
             var participantes = await _fachada.ObtenerTodosAsync();
             return Ok(participantes);
         }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<ParticipanteDto>> ObtenerParticipantePorId(Guid id)
+        {
+            var participante = await _fachada.ObtenerPorIdAsync(id);
+            if (participante == null)
+                return NotFound();
+            return Ok(participante);
+        }
     }
 
 }
