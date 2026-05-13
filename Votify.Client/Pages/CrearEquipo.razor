@@ -10,6 +10,8 @@
 @inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager Nav
 
+
+
 <div class="main-container">
     <div class="top-nav">
         <button class="btn-back" @onclick="HandleVolver">
@@ -30,37 +32,41 @@
     else
     {
         <div class="content-stack">
-            <div class="card">
-                <h2 class="title">Crear Nuevo Equipo</h2>
-                <p class="subtitle">Registra un nuevo equipo para el evento y luego añade los participantes que correspondan.</p>
+            @if (EsOrganizador)
+            {
+                <div class="card">
+                    <h2 class="title">Crear Nuevo Equipo</h2>
+                    <p class="subtitle">Registra un nuevo equipo para el evento y luego añade los participantes que correspondan.</p>
 
-                <div class="form-body">
-                    <div class="form-group">
-                        <label>Nombre del Equipo <span class="required-asterisk">*</span></label>
-                        <input type="text" class="form-control" @bind="NombreEquipo" placeholder="Ej: Los Innovadores" />
+                    <div class="form-body">
+                        <div class="form-group">
+                            <label>Nombre del Equipo <span class="required-asterisk">*</span></label>
+                            <input type="text" class="form-control" @bind="NombreEquipo" placeholder="Ej: Los Innovadores" maxlength="20" />
+                            <small class="helper-text">Máximo 20 caracteres (@(NombreEquipo?.Length ?? 0)/20)</small>
+                        </div>
+
+                        <button class="btn-submit" @onclick="HandleCrearEquipo" disabled="@creandoEquipo">
+                            @if (creandoEquipo)
+                            {
+                                <span class="spinner-small"></span>
+                            }
+                            Crear Equipo
+                        </button>
+
+                        @if (!string.IsNullOrEmpty(Mensaje))
+                        {
+                            <div class="alert @(Mensaje.Contains("Error") ? "alert-error" : "alert-success")">
+                                <span>@(Mensaje.Contains("Error") ? "❌" : "✅")</span>
+                                <span>@Mensaje</span>
+                            </div>
+                        }
                     </div>
 
-                    <button class="btn-submit" @onclick="HandleCrearEquipo" disabled="@creandoEquipo">
-                        @if (creandoEquipo)
-                        {
-                            <span class="spinner-small"></span>
-                        }
-                        Crear Equipo
-                    </button>
-
-                    @if (!string.IsNullOrEmpty(Mensaje))
-                    {
-                        <div class="alert @(Mensaje.Contains("Error") ? "alert-error" : "alert-success")">
-                            <span>@(Mensaje.Contains("Error") ? "❌" : "✅")</span>
-                            <span>@Mensaje</span>
-                        </div>
-                    }
+                    <em>
+                        <span>*</span> Campos obligatorios
+                    </em>
                 </div>
-
-                <em>
-                    <span>*</span> Campos obligatorios
-                </em>
-            </div>
+            }
 
             <div class="card team-manager-card">
                 <div class="section-header">
@@ -70,11 +76,11 @@
                     </div>
                 </div>
 
-                @if (!PuedeGestionarEquipos)
+                @if (!PuedeGestionarEquipos && !EsOrganizador)
                 {
                     <div class="empty-state">
-                        <strong>No hay equipo disponible para gestionar.</strong>
-                        <p>Debes pertenecer a un equipo o ser organizador del evento para añadir participantes.</p>
+                        <strong>No tienes equipo asignado.</strong>
+                        <p>Pide a un organizador que te asigne a un equipo para poder gestionar participantes.</p>
                     </div>
                 }
                 else
@@ -122,7 +128,7 @@
                                 <option value="">Selecciona un participante</option>
                                 @foreach (var participante in ParticipantesDisponibles)
                                 {
-                                    <option value="@participante.Id.ToString()">@participante.Nombre (@participante.Email)</option>
+                                    <option value="@participante.Id">@participante.Nombre (@participante.Email) - @participante.Rol</option>
                                 }
                             </select>
                         </div>
@@ -438,52 +444,55 @@ em span {
     [SupplyParameterFromQuery(Name = "eventoId")]
     public string? EventoId { get; set; }
 
+    // --- Estado del formulario ---
     private string NombreEquipo { get; set; } = string.Empty;
     private string Mensaje { get; set; } = string.Empty;
-    private string? MiParticipanteId { get; set; }
-    private string? MiRolEvento { get; set; }
     private string? EquipoSeleccionadoId { get; set; }
     private string? ParticipanteSeleccionadoId { get; set; }
-    private EquipoDto? MiEquipoActual { get; set; }
     private bool cargando = true;
     private bool creandoEquipo = false;
     private bool agregandoParticipante = false;
 
-    private List<EquipoDto> EquiposDisponibles { get; set; } = new();
-    private List<ParticipanteDto> ParticipantesRegistrados { get; set; } = new();
+    // --- Datos del usuario actual ---
+    private string? MiParticipanteId { get; set; }
+    private string? MiRolEvento { get; set; }
+    private EquipoDto? MiEquipoActual { get; set; }
 
-    private bool EsOrganizador => string.Equals(MiRolEvento?.Trim(), "ORGANIZADOR", StringComparison.OrdinalIgnoreCase)
-        || string.Equals(MiRolEvento?.Trim(), "Organizador", StringComparison.OrdinalIgnoreCase);
+    // --- Listas cargadas ---
+    private List<EquipoDto> EquiposDisponibles { get; set; } = new();
+    private List<ParticipanteRolDto> ParticipantesEvento { get; set; } = new();
+
+    // --- Propiedades calculadas ---
+    private bool EsOrganizador => string.Equals(MiRolEvento?.Trim(), "ORGANIZADOR", StringComparison.OrdinalIgnoreCase);
+
+    private bool PuedeGestionarEquipos => EsOrganizador || MiEquipoActual != null;
 
     private EquipoDto? EquipoSeleccionado
     {
         get
         {
-            if (Guid.TryParse(EquipoSeleccionadoId, out var equipoId))
+            if (!string.IsNullOrEmpty(EquipoSeleccionadoId) && Guid.TryParse(EquipoSeleccionadoId, out var equipoId))
             {
-                return EquiposDisponibles.FirstOrDefault(e => e.Id == equipoId);
+                var found = EquiposDisponibles.FirstOrDefault(e => e.Id == equipoId);
+                if (found != null) return found;
             }
-
             return MiEquipoActual;
         }
     }
 
-    private IEnumerable<ParticipanteDto> ParticipantesDisponibles
+    private IEnumerable<ParticipanteRolDto> ParticipantesDisponibles
     {
         get
         {
-            var equipoId = EquipoSeleccionado?.Id;
-
-            return ParticipantesRegistrados
-                .Where(p => p.Id.ToString() != MiParticipanteId)
-                .Where(p => equipoId == null || p.EquipoId != equipoId)
+            return ParticipantesEvento
+                .Where(p => p.Id != MiParticipanteId)
+                .Where(p => !string.Equals(p.Rol?.Trim(), "JURADO", StringComparison.OrdinalIgnoreCase))
                 .OrderBy(p => p.Nombre)
                 .ToList();
         }
     }
 
-    private bool PuedeGestionarEquipos => EsOrganizador || MiEquipoActual != null;
-
+    // --- Ciclo de vida ---
     protected override async Task OnInitializedAsync()
     {
         await CargarEstadoAsync();
@@ -494,22 +503,48 @@ em span {
         cargando = true;
         try
         {
-            MiParticipanteId = await ObtenerMiParticipanteIdAsync();
+            // 1. Obtener identidad del usuario desde el JWT
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+            MiParticipanteId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                ?? user.FindFirst("sub")?.Value
+                ?? user.FindFirst("nameid")?.Value;
 
+            // 2. Obtener rol en el evento
             if (!string.IsNullOrWhiteSpace(EventoId))
             {
                 MiRolEvento = await EventosService.ObtenerRolEnEvento(EventoId);
             }
 
+            // 3. Cargar equipos y participantes del evento
             EquiposDisponibles = await EquiposService.ObtenerEquiposAsync();
-            ParticipantesRegistrados = await ParticipantesService.ObtenerParticipantesAsync();
 
-            if (Guid.TryParse(MiParticipanteId, out var participanteId))
+            if (!string.IsNullOrWhiteSpace(EventoId))
             {
-                MiEquipoActual = await EquiposService.ObtenerEquipoDeParticipanteAsync(participanteId);
+                ParticipantesEvento = await EventosService.ObtenerParticipantesPorEvento(EventoId);
             }
 
-            InicializarEquipoSeleccionado();
+            // 4. Obtener MI equipo: usar ObtenerParticipantePorId que tiene EquipoId
+            if (Guid.TryParse(MiParticipanteId, out var participanteId))
+            {
+                var miDatos = await ParticipantesService.ObtenerParticipantePorId(participanteId);
+                if (miDatos?.EquipoId != null)
+                {
+                    MiEquipoActual = EquiposDisponibles.FirstOrDefault(e => e.Id == miDatos.EquipoId);
+                    // Si no está en la lista local, obtenerlo directamente
+                    MiEquipoActual ??= await EquiposService.ObtenerEquipoDeParticipanteAsync(participanteId);
+                }
+            }
+
+            // 5. Seleccionar equipo por defecto
+            if (MiEquipoActual != null)
+            {
+                EquipoSeleccionadoId = MiEquipoActual.Id.ToString();
+            }
+            else if (EsOrganizador && EquiposDisponibles.Any())
+            {
+                EquipoSeleccionadoId = EquiposDisponibles.First().Id.ToString();
+            }
         }
         catch (Exception ex)
         {
@@ -521,47 +556,26 @@ em span {
         }
     }
 
-    private void InicializarEquipoSeleccionado()
-    {
-        if (MiEquipoActual != null)
-        {
-            EquipoSeleccionadoId = MiEquipoActual.Id.ToString();
-            return;
-        }
-
-        if (EsOrganizador && EquiposDisponibles.Any())
-        {
-            EquipoSeleccionadoId = EquiposDisponibles.First().Id.ToString();
-        }
-    }
-
-    private async Task<string?> ObtenerMiParticipanteIdAsync()
-    {
-        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-
-         return user.FindFirst(ClaimTypes.NameIdentifier)?.Value
-             ?? user.FindFirst("sub")?.Value
-             ?? user.FindFirst("nameid")?.Value;
-    }
-
+    // --- Navegación ---
     private void HandleVolver()
     {
         if (!string.IsNullOrEmpty(EventoId))
-        {
             Nav.NavigateTo($"/votaciones?eventoId={EventoId}");
-        }
         else
-        {
             Nav.NavigateTo("/");
-        }
     }
 
+    // --- Crear equipo ---
     private async Task HandleCrearEquipo()
     {
         if (string.IsNullOrWhiteSpace(NombreEquipo))
         {
             Mensaje = "Error: El nombre del equipo es obligatorio.";
+            return;
+        }
+        if (NombreEquipo.Length > 20)
+        {
+            Mensaje = "Error: El nombre no puede superar los 20 caracteres.";
             return;
         }
 
@@ -578,13 +592,10 @@ em span {
             }
 
             if (!EquiposDisponibles.Any(e => e.Id == equipo.Id))
-            {
                 EquiposDisponibles.Add(equipo);
-            }
 
-            NombreEquipo = string.Empty;
             EquipoSeleccionadoId = equipo.Id.ToString();
-            MiEquipoActual = MiEquipoActual ?? equipo;
+            NombreEquipo = string.Empty;
             Mensaje = "Equipo creado correctamente.";
         }
         catch (Exception ex)
@@ -597,20 +608,19 @@ em span {
         }
     }
 
+    // --- Agregar participante a equipo ---
     private async Task HandleAgregarParticipante()
     {
         if (!Guid.TryParse(EventoId, out var eventoGuid))
         {
-            Mensaje = "Error: No se encontró el evento asociado al equipo.";
+            Mensaje = "Error: No se encontró el evento asociado.";
             return;
         }
-
         if (!Guid.TryParse(EquipoSeleccionadoId, out var equipoGuid))
         {
             Mensaje = "Error: Debes seleccionar un equipo válido.";
             return;
         }
-
         if (!Guid.TryParse(ParticipanteSeleccionadoId, out var participanteGuid))
         {
             Mensaje = "Error: Debes seleccionar un participante válido.";
@@ -630,17 +640,16 @@ em span {
             }
 
             ParticipanteSeleccionadoId = string.Empty;
-            ParticipantesRegistrados = await ParticipantesService.ObtenerParticipantesAsync();
-            if (Guid.TryParse(MiParticipanteId, out var miId))
-            {
-                MiEquipoActual = await EquiposService.ObtenerEquipoDeParticipanteAsync(miId);
-            }
 
-            Mensaje = "Participante agregado correctamente y marcado como competidor del evento.";
+            // Refrescar lista de participantes
+            if (!string.IsNullOrWhiteSpace(EventoId))
+                ParticipantesEvento = await EventosService.ObtenerParticipantesPorEvento(EventoId);
+
+            Mensaje = "Participante agregado correctamente.";
         }
         catch (Exception ex)
         {
-            Mensaje = ex.Message.Contains("Error") ? ex.Message : $"Error al agregar el participante: {ex.Message}";
+            Mensaje = $"Error al agregar el participante: {ex.Message}";
         }
         finally
         {

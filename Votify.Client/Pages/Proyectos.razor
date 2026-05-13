@@ -4,6 +4,7 @@
 @using Votify.Domain.Entities
 @inject ProyectosService ProyectosService
 @inject VotacionesService VotacionesService
+@inject EquiposService EquiposService
 @inject NavigationManager Nav
 @inject AuthenticationStateProvider AuthStateProvider
 
@@ -131,7 +132,7 @@
 
 
                             <div class="card-footer">
-                                <span class="stats">Equipo: @(p.Equipo_Id ?? "N/A")</span>
+                                <span class="stats">Equipo: @ObtenerNombreEquipo(p.Equipo_Id)</span>
                                 <div class="footer-actions">
                                     <button class="btn-ver" @onclick="() => VerDetalles(p.Id)">Detalles</button>
                                 </div>
@@ -323,6 +324,7 @@
     private string? usuarioId;
      private VotacionDto? votacion;
     private bool EsMulti = false;
+    private Dictionary<string, string> mapaEquipos = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -352,6 +354,17 @@
             else
             {
                 listaProyectos = await ProyectosService.ObtenerProyectosAsync();
+            }
+
+            // Cargar nombres de equipos para el mapeo local
+            try
+            {
+                var todosEquipos = await EquiposService.ObtenerEquiposAsync();
+                mapaEquipos = todosEquipos?.ToDictionary(e => e.Id.ToString(), e => e.Nombre) ?? new();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error cargando nombres de equipos: {ex.Message}");
             }
         }
         catch (Exception ex)
@@ -422,4 +435,10 @@
     private bool estaFinalizada => votacion != null && (votacion.Estado == 2 || (votacion.Estado == 0 && DateTime.UtcNow >= votacion.FechaFin));
     private bool estaPausada => votacion != null && votacion.Estado == 1 && DateTime.UtcNow >= votacion.FechaInicio && DateTime.UtcNow < votacion.FechaFin;
     private bool noIniciada => votacion != null && DateTime.UtcNow < votacion.FechaInicio;
+
+    private string ObtenerNombreEquipo(string? equipoId)
+    {
+        if (string.IsNullOrEmpty(equipoId)) return "Sin equipo";
+        return mapaEquipos.TryGetValue(equipoId, out var nombre) ? nombre : "Cargando...";
+    }
 }

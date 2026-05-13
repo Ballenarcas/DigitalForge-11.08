@@ -20,6 +20,10 @@ namespace Votify.Client.Services
             var response = await _httpClient.GetFromJsonAsync<List<ParticipanteDto>>("api/participantes");
             return response ?? new List<ParticipanteDto>();
         }
+        public async Task<ParticipanteDto?> ObtenerParticipantePorId(Guid id)
+        {
+            return await _httpClient.GetFromJsonAsync<ParticipanteDto>($"api/participantes/{id}");
+        }
     }
 
     public class ParticipanteDto

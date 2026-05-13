@@ -45,20 +45,23 @@
             </svg>
             Eventos
         </button>
-        @if (Rol == "ORGANIZADOR")
-        {
-            <div class="header-actions" style="display:flex; gap:0.75rem; flex-wrap:wrap;">
+        <div class="header-actions" style="display:flex; gap:0.75rem; flex-wrap:wrap;">
+            @if (Rol == "ORGANIZADOR")
+            {
                 <button class="btn-crear" @onclick="IrACrearVotacion">
                     <span>+</span> Nueva Votación
-                </button>
-                <button class="btn-crear" style="background-color:#4f46e5; border-color:#4f46e5;" @onclick="IrACrearEquipo">
-                    Equipos
                 </button>
                 <button class="btn-crear" @onclick="IrAGestionRoles" style="background-color:#6f42c1; border-color:#6f42c1;">
                     Gestionar Roles
                 </button>
-            </div>
-        }
+            }
+            @if (Rol != null)
+            {
+                <button class="btn-crear" style="background-color:#4f46e5; border-color:#4f46e5;" @onclick="IrACrearEquipo">
+                    Equipos
+                </button>
+            }
+        </div>
 
     </div>
 

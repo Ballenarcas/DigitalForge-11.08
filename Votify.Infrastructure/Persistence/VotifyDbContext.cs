@@ -30,6 +30,10 @@ public class VotifyDbContext : DbContext
             .HasIndex(v => new { v.ProyectoId, v.VotanteId, v.CriterioId })
             .IsUnique();
 
+        modelBuilder.Entity<ProyectoEntity>()
+            .HasIndex(p => new { p.VotacionId, p.Equipo_Id })
+            .IsUnique();
+
         // Seed data for events
         modelBuilder.Entity<EventoEntity>().HasData(
             new EventoEntity 

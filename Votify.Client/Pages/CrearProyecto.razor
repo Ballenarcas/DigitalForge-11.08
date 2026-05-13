@@ -106,8 +106,13 @@
 
                 @if (!string.IsNullOrEmpty(Mensaje))
                 {
-                    <div class="alert @(Mensaje.Contains("Error") ? "alert-error" : "alert-success")">
-                        <span>@(Mensaje.Contains("Error") ? "❌" : "✅")</span>
+                    var isInfo = Mensaje.Contains("Nota:");
+                    var isError = Mensaje.Contains("Error");
+                    var alertClass = isError ? "alert-error" : (isInfo ? "alert-info" : "alert-success");
+                    var icon = isError ? "❌" : (isInfo ? "ℹ️" : "✅");
+                    
+                    <div class="alert @alertClass">
+                        <span>@icon</span>
                         <span>@Mensaje</span>
                     </div>
                 }
@@ -289,6 +294,7 @@
 }
 .alert-success { background-color: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
 .alert-error { background-color: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+.alert-info { background-color: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
 
 .spinner-small {
     width: 18px;
@@ -326,13 +332,14 @@
     bool subiendoImagen = false;
     bool creando = false;
     bool cargando = true;
+    bool yaTieneProyecto = false;
 
     List<EquipoDto> EquiposDisponibles = new();
 
     private bool EsOrganizador => string.Equals(RolEvento?.Trim(), "ORGANIZADOR", StringComparison.OrdinalIgnoreCase)
         || string.Equals(RolEvento?.Trim(), "Organizador", StringComparison.OrdinalIgnoreCase);
 
-    private bool PuedeCrearProyecto => EsOrganizador ? !string.IsNullOrWhiteSpace(EquipoSeleccionadoId) : !string.IsNullOrWhiteSpace(EquipoAuto);
+    private bool PuedeCrearProyecto => !yaTieneProyecto && (EsOrganizador ? !string.IsNullOrWhiteSpace(EquipoSeleccionadoId) : !string.IsNullOrWhiteSpace(EquipoAuto));
 
     protected override async Task OnInitializedAsync()
     {
@@ -379,6 +386,14 @@
 
                 EquipoAuto = equipo.Nombre;
                 EquipoSeleccionadoId = equipo.Id.ToString();
+                
+                // Comprobar si el equipo ya tiene un proyecto en esta votación
+                var proyectos = await ProyectosService.ObtenerProyectosAsync(VotacionId);
+                yaTieneProyecto = proyectos.Any(p => p.Equipo_Id == EquipoSeleccionadoId);
+                if (yaTieneProyecto)
+                {
+                    Mensaje = "Nota: Tu equipo ya tiene un proyecto en esta votación.";
+                }
             }
             else
             {

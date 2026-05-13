@@ -45,3 +45,6 @@ ehthumbs.db
 
 *.bootstrap
 .env
+
+.agents
+skills-lock.json

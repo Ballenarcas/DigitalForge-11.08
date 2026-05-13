@@ -67,9 +67,12 @@ public class ProyectoService : IProyectoService
             equipoIdStr = participante.EquipoId.Value.ToString();
         }
 
+        // Validación: Un equipo solo puede tener UN proyecto por votación
         var proyectosVotacion = await _proyectoRepository.ObtenerPorVotacionAsync(dto.VotacionId.ToString());
         if (proyectosVotacion.Any(p => p.Equipo_Id == equipoIdStr))
-            throw new InvalidOperationException("Tu equipo ya ha creado un proyecto en esta votacin.");
+        {
+            throw new InvalidOperationException("Tu equipo ya ha registrado un proyecto en esta votación. No se permiten múltiples proyectos por equipo en la misma votación.");
+        }
 
         var proyecto = new Proyecto(dto.Nombre, dto.Descripcion, equipoIdStr, dto.VotacionId, dto.ImagenUrl);
         await _proyectoRepository.GuardarAsync(proyecto);
