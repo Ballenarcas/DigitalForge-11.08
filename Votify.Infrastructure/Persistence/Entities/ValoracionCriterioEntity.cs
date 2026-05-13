@@ -9,7 +9,7 @@ namespace Votify.Infrastructure.Persistence.Entities
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("id")]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         [Column("votante_id")]
         public Guid VotanteId { get; set; }

@@ -307,7 +307,18 @@
     private void IrACrearEquipo() => Nav.NavigateTo($"/nuevo-equipo?eventoId={AppState.EventoId}");
     private void IrAGestionRoles() => Nav.NavigateTo($"/evento/{AppState.EventoId}/roles");
     private void Gestionar(string id) => Nav.NavigateTo($"/votacion/{id}");
-    private void VerResultados(string id) => Nav.NavigateTo($"/{id}/resultados/");
+    private void VerResultados(string id)
+    {
+        var votacion = listaVotaciones?.FirstOrDefault(v => v.Id == id);
+        if (votacion != null && votacion.Tipo?.Equals("Multicriterio", StringComparison.OrdinalIgnoreCase) == true)
+        {
+            Nav.NavigateTo($"/{id}/resultados-multicriterio/");
+        }
+        else
+        {
+            Nav.NavigateTo($"/{id}/resultados/");
+        }
+    }
     private void Votar(string id) => Nav.NavigateTo($"/{id}/proyectos/");
 
     private void EliminarVotacion(string id)

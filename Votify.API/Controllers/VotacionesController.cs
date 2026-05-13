@@ -96,6 +96,13 @@ namespace Votify.API.Controllers
             return Ok(resultados);
         }
 
+        [HttpGet("{id}/resultados-multicriterio")]
+        public async Task<ActionResult<List<ResultadoMulticriterioDto>>> ObtenerResultadosMulticriterio(string id)
+        {
+            var resultados = await _service.ObtenerResultadosMulticriterioAsync(id);
+            return Ok(resultados);
+        }
+
         [HttpPatch("{id}/pausar")]
         public async Task<IActionResult> PausarVotacion(string id)
         {

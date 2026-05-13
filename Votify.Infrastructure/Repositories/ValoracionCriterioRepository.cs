@@ -89,6 +89,30 @@ namespace Votify.Infrastructure.Repositories
             return rows.Select(r => (r.ProyectoId.ToString(), r.Puntaje, r.Evaluaciones)).ToList();
         }
 
+        public async Task<List<(string ProyectoId, Guid CriterioId, double PromedioValoracion, int NumEvaluaciones)>> ObtenerDetallesPorCriterioAsync(string votacionId)
+        {
+            if (!Guid.TryParse(votacionId, out var votacionGuid))
+            {
+                return new List<(string, Guid, double, int)>();
+            }
+
+            var rows = await (
+                from valoracion in _db.ValoracionesCriterio
+                join criterio in _db.Criterios on valoracion.CriterioId equals criterio.Id
+                where criterio.VotacionId == votacionGuid
+                group valoracion by new { valoracion.ProyectoId, valoracion.CriterioId } into g
+                select new
+                {
+                    ProyectoId = g.Key.ProyectoId,
+                    CriterioId = g.Key.CriterioId,
+                    PromedioValoracion = g.Average(x => (double)x.Valoracion),
+                    NumEvaluaciones = g.Count()
+                })
+                .ToListAsync();
+
+            return rows.Select(r => (r.ProyectoId.ToString(), r.CriterioId, r.PromedioValoracion, r.NumEvaluaciones)).ToList();
+        }
+
         public async Task EliminarPorVotacionAsync(string votacionId)
         {
             if (!Guid.TryParse(votacionId, out var votacionGuid)) return;

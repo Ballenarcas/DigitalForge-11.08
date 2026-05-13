@@ -1,0 +1,655 @@
+@page "/{VotacionId}/resultados-multicriterio/"
+@using Votify.Client.DTOs
+@inject NavigationManager Nav
+@inject Votify.Client.Services.VotacionesService VotacionesService
+
+<div class="main-container">
+    <div class="header-principal">
+        <button class="btn-back" @onclick="HandleVolver">
+            <span class="icon-arrow">←</span> Votaciones
+        </button>
+        <div class="logo-container">
+            <div class="logo-icon small">
+                <img src="images/ranking-logo.png" alt="Ranking logo" class="ranking-logo-img" style="width:30px;height:30px;margin-left:0.75rem;" />
+            </div>
+            <span class="brand-name">Ranking Multicriterio</span>
+        </div>
+    </div>
+
+    <div class="content-wrapper">
+        <div class="results-header">
+            <div class="multi-badge">EVALUACIÓN MULTICRITERIO</div>
+            <h1 class="results-title">Clasificación por criterios</h1>
+            <p class="results-subtitle">Ranking por media ponderada multicriterio para los proyectos de: <strong>@(nombreVotacion ?? "...")</strong></p>
+            @if (criteriosVotacion.Any())
+            {
+                <div class="criteria-legend">
+                    @foreach (var criterio in criteriosVotacion)
+                    {
+                        <div class="criteria-pill">
+                            <span class="criteria-pill-name">@criterio.Nombre</span>
+                            <span class="criteria-pill-weight">@criterio.Peso.ToString("0.##")%</span>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        @if (listaResultados == null)
+        {
+            <div class="loader-container">
+                <div class="spinner"></div>
+                <p>Cargando resultados...</p>
+            </div>
+        }
+        else if (listaResultados.Count == 0)
+        {
+            <div class="empty-state">
+                <div class="empty-icon">📊</div>
+                <p>No hay evaluaciones multicriterio disponibles para esta votación.</p>
+                <p class="empty-hint">Los jurados deben evaluar los proyectos para que aparezcan resultados.</p>
+            </div>
+        }
+        else
+        {
+            @* ── Top 3 Podium ── *@
+            <div class="top-three-container">
+                @foreach (var resultado in listaResultados.Where(r => r.Posicion <= 3))
+                {
+                    var podiumClass = resultado.Posicion == 1 ? "podium-first" :
+                                     resultado.Posicion == 2 ? "podium-second" :
+                                     "podium-third";
+                    var medal = resultado.Posicion == 1 ? "🏆" :
+                               resultado.Posicion == 2 ? "🥈" :
+                               "🥉";
+
+                    <div class="podium-card @podiumClass">
+                        <div class="podium-position">@resultado.Posicion@GetOrdinalSuffix(resultado.Posicion)</div>
+                        <div class="podium-medal">@medal</div>
+                        <h3 class="podium-title">@resultado.Nombre</h3>
+                        <p class="podium-team">Equipo: @resultado.Equipo</p>
+                        <div class="podium-votes">
+                            <span class="votes-label">PUNTUACIÓN FINAL</span>
+                            <span class="votes-count">@resultado.PuntajeFinal.ToString("0.00")</span>
+                            <span class="eval-count">@resultado.Evaluaciones evaluación(es)</span>
+                        </div>
+
+                        @* Per-criterion bars *@
+                        @if (resultado.DetallesCriterios.Any())
+                        {
+                            <div class="criteria-breakdown">
+                                @foreach (var detalle in resultado.DetallesCriterios)
+                                {
+                                    var pct = Math.Min(100, (detalle.PromedioValoracion / 5.0) * 100);
+                                    <div class="criterion-row">
+                                        <div class="criterion-header-row">
+                                            <span class="criterion-name">@detalle.CriterioNombre</span>
+                                            <span class="criterion-score">@detalle.PromedioValoracion.ToString("0.0")<span class="criterion-max">/5</span></span>
+                                        </div>
+                                        <div class="progress-bar-bg">
+                                            <div class="progress-bar-fill" style="width: @pct.ToString("0.#", System.Globalization.CultureInfo.InvariantCulture)%"></div>
+                                        </div>
+                                        <div class="criterion-meta">
+                                            <span>Peso: @detalle.Peso.ToString("0.##")%</span>
+                                            <span>Ponderado: @detalle.PuntajePonderado.ToString("0.00")</span>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+
+            @* ── Detailed Table ── *@
+            @if (listaResultados.Count > 3)
+            {
+                <div class="results-table-container">
+                    <h2 class="table-section-title">Clasificación completa</h2>
+                    @foreach (var resultado in listaResultados.Where(r => r.Posicion > 3))
+                    {
+                        <div class="detail-card">
+                            <div class="detail-card-header">
+                                <div class="detail-position">
+                                    <span class="position-badge">@resultado.Posicion@GetOrdinalSuffix(resultado.Posicion)</span>
+                                </div>
+                                <div class="detail-info">
+                                    <h4 class="detail-name">@resultado.Nombre</h4>
+                                    <p class="detail-team">Equipo @resultado.Equipo</p>
+                                </div>
+                                <div class="detail-score">
+                                    <span class="detail-score-value">@resultado.PuntajeFinal.ToString("0.00")</span>
+                                    <span class="detail-score-label">pts</span>
+                                </div>
+                                <div class="detail-evals">
+                                    <span>@resultado.Evaluaciones eval.</span>
+                                </div>
+                            </div>
+
+                            @if (resultado.DetallesCriterios.Any())
+                            {
+                                <div class="detail-criteria-grid">
+                                    @foreach (var detalle in resultado.DetallesCriterios)
+                                    {
+                                        var pct = Math.Min(100, (detalle.PromedioValoracion / 5.0) * 100);
+                                        <div class="detail-criterion">
+                                            <div class="criterion-header-row">
+                                                <span class="criterion-name">@detalle.CriterioNombre</span>
+                                                <span class="criterion-score">@detalle.PromedioValoracion.ToString("0.0")<span class="criterion-max">/5</span></span>
+                                            </div>
+                                            <div class="progress-bar-bg">
+                                                <div class="progress-bar-fill" style="width: @pct.ToString("0.#", System.Globalization.CultureInfo.InvariantCulture)%"></div>
+                                            </div>
+                                            <div class="criterion-meta">
+                                                <span>Peso: @detalle.Peso.ToString("0.##")%</span>
+                                                <span>+@detalle.PuntajePonderado.ToString("0.00")</span>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        }
+    </div>
+</div>
+
+<style>
+    @@keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+    @@keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @@keyframes shimmer {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+    }
+    @@keyframes barGrow {
+        from { width: 0; }
+    }
+
+    /* ── Layout ── */
+    .main-container { 
+        background-color: #f8f9fc; 
+        min-height: 100vh; 
+        padding: 1.5rem; 
+        font-family: 'Inter', sans-serif; 
+    }
+
+    .header-principal { 
+        display: flex; 
+        justify-content: flex-start; 
+        align-items: center; 
+        max-width: 1200px; 
+        margin: 0 auto 2rem;
+        gap: 1.5rem;
+    }
+
+    .btn-back { 
+        background: white; 
+        border: 1px solid #e2e8f0; 
+        color: #64748b; 
+        padding: 0.5rem 1rem; 
+        border-radius: 10px; 
+        font-weight: 600; 
+        font-size: 0.85rem; 
+        cursor: pointer; 
+        transition: 0.2s; 
+        display: flex; 
+        align-items: center; 
+        gap: 0.5rem;
+        flex-shrink: 0;
+    }
+    .btn-back:hover { background: #f8f9fc; border-color: #ddd6fe; color: #7c3aed; }
+    .icon-arrow { font-size: 1rem; }
+
+    .logo-container { display: flex; align-items: center; }
+    .logo-icon.small { display: flex; align-items: center; }
+    .ranking-logo-img { object-fit: contain; }
+    .brand-name { font-weight: 800; font-size: 1.2rem; color: #4c1d95; letter-spacing: -0.02em; margin-left: 0.75rem; }
+
+    .content-wrapper { 
+        max-width: 1200px; 
+        margin: 0 auto; 
+    }
+
+    /* ── Header ── */
+    .results-header {
+        margin-bottom: 2.5rem;
+    }
+
+    .multi-badge {
+        display: inline-block;
+        background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+        color: white;
+        font-size: 0.7rem;
+        font-weight: 800;
+        padding: 0.35rem 1rem;
+        border-radius: 20px;
+        letter-spacing: 0.08em;
+        margin-bottom: 0.75rem;
+    }
+    
+    .results-title {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #1e293b;
+        margin: 0 0 0.5rem 0;
+    }
+    
+    .results-subtitle {
+        font-size: 0.95rem;
+        color: #64748b;
+        margin: 0 0 1rem 0;
+    }
+
+    .criteria-legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.75rem;
+    }
+
+    .criteria-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        background: #f3e8ff;
+        border: 1px solid #e9d5ff;
+        border-radius: 20px;
+        padding: 0.3rem 0.8rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .criteria-pill-name { color: #7c3aed; }
+    .criteria-pill-weight { color: #a78bfa; font-weight: 700; }
+
+    /* ── Top 3 Podium ── */
+    .top-three-container {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+        align-items: flex-start;
+    }
+    
+    .podium-card {
+        background: white;
+        border-radius: 24px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+        border: 1px solid #f1f5f9;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        transition: 0.3s;
+        position: relative;
+        animation: fadeInUp 0.5s ease forwards;
+    }
+    
+    .podium-card:hover {
+        border-color: #ddd6fe;
+        box-shadow: 0 12px 28px rgba(147, 51, 234, 0.1);
+        transform: translateY(-4px);
+    }
+    
+    .podium-first {
+        grid-column: 2;
+        background: linear-gradient(160deg, #faf5ff 0%, #f3e8ff 50%, #ede9fe 100%);
+        border: 2px solid #c4b5fd;
+    }
+    
+    .podium-second {
+        grid-column: 1;
+    }
+    
+    .podium-third {
+        grid-column: 3;
+    }
+    
+    .podium-position {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #9333ea;
+        margin-bottom: 0.25rem;
+    }
+    
+    .podium-medal {
+        font-size: 2.2rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .podium-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0 0 0.25rem 0;
+        line-height: 1.3;
+    }
+    
+    .podium-team {
+        font-size: 0.78rem;
+        color: #64748b;
+        margin: 0 0 0.75rem 0;
+    }
+    
+    .podium-votes {
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+        margin-bottom: 1rem;
+    }
+    
+    .votes-label {
+        font-size: 0.6rem;
+        color: #94a3b8;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+    }
+    
+    .votes-count {
+        font-size: 1.8rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #7c3aed, #a855f7);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .eval-count {
+        font-size: 0.7rem;
+        color: #a78bfa;
+        font-weight: 600;
+    }
+
+    /* ── Criteria breakdown (inside podium) ── */
+    .criteria-breakdown {
+        width: 100%;
+        margin-top: 0.5rem;
+        border-top: 1px solid #f1f5f9;
+        padding-top: 0.75rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+    }
+
+    .criterion-row,
+    .detail-criterion {
+        text-align: left;
+    }
+
+    .criterion-header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 0.25rem;
+    }
+
+    .criterion-name {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #475569;
+    }
+
+    .criterion-score {
+        font-size: 0.8rem;
+        font-weight: 800;
+        color: #7c3aed;
+    }
+
+    .criterion-max {
+        font-size: 0.65rem;
+        font-weight: 500;
+        color: #94a3b8;
+    }
+
+    .progress-bar-bg {
+        width: 100%;
+        height: 6px;
+        background: #f1f5f9;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .progress-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #a855f7 0%, #7c3aed 100%);
+        border-radius: 10px;
+        transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+        animation: barGrow 0.8s ease forwards;
+    }
+
+    .criterion-meta {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.65rem;
+        color: #94a3b8;
+        margin-top: 0.15rem;
+        font-weight: 500;
+    }
+
+    /* ── Detailed Table (pos > 3) ── */
+    .results-table-container {
+        background: white;
+        border-radius: 24px;
+        padding: 2rem;
+        border: 1px solid #f1f5f9;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+        margin-bottom: 2rem;
+    }
+
+    .table-section-title {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0 0 1.5rem 0;
+    }
+
+    .detail-card {
+        border: 1px solid #f1f5f9;
+        border-radius: 16px;
+        padding: 1.25rem;
+        margin-bottom: 1rem;
+        transition: 0.2s;
+        animation: fadeInUp 0.4s ease forwards;
+    }
+
+    .detail-card:hover {
+        border-color: #e9d5ff;
+        box-shadow: 0 4px 12px rgba(147, 51, 234, 0.06);
+    }
+
+    .detail-card:last-child {
+        margin-bottom: 0;
+    }
+
+    .detail-card-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .detail-position {
+        flex-shrink: 0;
+    }
+
+    .position-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.5rem;
+        height: 2.5rem;
+        background: linear-gradient(135deg, #f3e8ff 0%, #ede9fe 100%);
+        color: #9333ea;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 0.85rem;
+    }
+
+    .detail-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .detail-name {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .detail-team {
+        font-size: 0.78rem;
+        color: #64748b;
+        margin: 0;
+    }
+
+    .detail-score {
+        display: flex;
+        align-items: baseline;
+        gap: 0.2rem;
+        flex-shrink: 0;
+    }
+
+    .detail-score-value {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: #7c3aed;
+    }
+
+    .detail-score-label {
+        font-size: 0.7rem;
+        color: #a78bfa;
+        font-weight: 600;
+    }
+
+    .detail-evals {
+        font-size: 0.75rem;
+        color: #94a3b8;
+        font-weight: 600;
+        flex-shrink: 0;
+    }
+
+    .detail-criteria-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 0.75rem;
+        padding-top: 0.75rem;
+        border-top: 1px solid #f8fafc;
+    }
+
+    /* ── Loading / Empty ── */
+    .loader-container { 
+        text-align: center; 
+        padding: 4rem; 
+        color: #64748b; 
+    }
+    
+    .spinner { 
+        width: 35px; 
+        height: 35px; 
+        border: 4px solid #f3e8ff; 
+        border-top: 4px solid #9333ea; 
+        border-radius: 50%; 
+        animation: spin 1s linear infinite; 
+        margin: 0 auto 1rem; 
+    }
+    
+    .empty-state { 
+        text-align: center; 
+        padding: 4rem 2rem; 
+        background: white; 
+        border-radius: 24px; 
+        border: 2px dashed #e2e8f0; 
+        color: #64748b;
+    }
+
+    .empty-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    .empty-hint {
+        font-size: 0.85rem;
+        color: #94a3b8;
+        margin-top: 0.25rem;
+    }
+
+    /* ── Responsive ── */
+    @@media (max-width: 768px) {
+        .top-three-container {
+            grid-template-columns: 1fr;
+            align-items: auto;
+        }
+        
+        .podium-first,
+        .podium-second,
+        .podium-third {
+            grid-column: auto;
+        }
+        
+        .results-title {
+            font-size: 1.5rem;
+        }
+
+        .detail-card-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .detail-criteria-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+@code {
+    [Parameter]
+    public string? VotacionId { get; set; }
+    
+    private List<ResultadoMulticriterioDto>? listaResultados;
+    private string? nombreVotacion;
+    private string? eventoId;
+    private List<CriterioDto> criteriosVotacion = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!string.IsNullOrEmpty(VotacionId))
+        {
+            var votacion = await VotacionesService.ObtenerVotacion(VotacionId);
+            nombreVotacion = votacion?.Nombre;
+            eventoId = votacion?.EventoId;
+            criteriosVotacion = votacion?.Criterios ?? new List<CriterioDto>();
+            await CargarResultados();
+        }
+    }
+
+    private async Task CargarResultados()
+    {
+        try
+        {
+            listaResultados = await VotacionesService.ObtenerResultadosMulticriterio(VotacionId!) ?? new List<ResultadoMulticriterioDto>();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error cargando resultados multicriterio: {ex.Message}");
+            listaResultados = new List<ResultadoMulticriterioDto>();
+        }
+    }
+
+    private void HandleVolver() => Nav.NavigateTo($"/votaciones?eventoId={eventoId}");
+
+    private string GetOrdinalSuffix(int number) => "º";
+}

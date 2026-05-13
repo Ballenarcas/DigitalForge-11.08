@@ -99,6 +99,11 @@ namespace Votify.Client.Services
         {
             return await _http.GetFromJsonAsync<List<ResultadoProyectoDto>>($"api/votaciones/{votacionId}/resultados");
         }
+
+        public async Task<List<ResultadoMulticriterioDto>?> ObtenerResultadosMulticriterio(string votacionId)
+        {
+            return await _http.GetFromJsonAsync<List<ResultadoMulticriterioDto>>($"api/votaciones/{votacionId}/resultados-multicriterio");
+        }
         public async Task<bool> VerificarLimiteVotos(string votacionId, string votanteId)
         {
             try
