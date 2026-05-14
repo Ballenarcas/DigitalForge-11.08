@@ -5,5 +5,6 @@ namespace Votify.Application.Interfaces
     public interface IParticipanteFachada
     {
         Task<List<ParticipanteDto>> ObtenerTodosAsync();
+        Task<ParticipanteDto?> ObtenerPorIdAsync(Guid id);
     }
 }

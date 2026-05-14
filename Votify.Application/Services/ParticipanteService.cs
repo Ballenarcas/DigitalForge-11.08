@@ -27,5 +27,18 @@ namespace Votify.Application.Services
                 EquipoId = p.EquipoId
             }).ToList();
         }
+
+        public async Task<ParticipanteDto?> ObtenerPorIdAsync(Guid id)
+        {
+            var p = await _participanteRepository.ObtenerPorIdAsync(id);
+            if (p == null) return null;
+            return new ParticipanteDto
+            {
+                Id = p.Id,
+                Nombre = p.Nombre,
+                Email = p.Email,
+                EquipoId = p.EquipoId
+            };
+        }
     }
 }

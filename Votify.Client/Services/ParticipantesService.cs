@@ -22,7 +22,14 @@ namespace Votify.Client.Services
         }
         public async Task<ParticipanteDto?> ObtenerParticipantePorId(Guid id)
         {
-            return await _httpClient.GetFromJsonAsync<ParticipanteDto>($"api/participantes/{id}");
+            try
+            {
+                return await _httpClient.GetFromJsonAsync<ParticipanteDto>($"api/participantes/{id}");
+            }
+            catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                return null;
+            }
         }
     }
 
