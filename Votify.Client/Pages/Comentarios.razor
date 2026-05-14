@@ -4,6 +4,7 @@
 @inject ProyectosService ProyectosService
 @inject VotacionesService VotacionesService
 @inject NavigationManager Nav
+@using System.Globalization
 
 <div class="comments-wrapper">
     @if (cargando)
@@ -25,6 +26,81 @@
         </div>
 
         <div class="comments-card">
+            @if (EsMulticriterio && resultadoMulticriterio != null)
+            {
+                <div class="score-banner @(scoreRevelado ? "" : "unrevealed")">
+                    <div class="banner-text">
+                        <h2 class="banner-title">@MensajePuntuacion</h2>
+                        <p class="banner-desc">@(scoreRevelado ? "Aquí tienes el resumen y los comentarios de mejora detallados proporcionados por los jueces y organizadores del evento." : "Toca el regalo para descubrir la valoración de tu proyecto.")</p>
+                        @if (criterios.Any())
+                        {
+                            <div class="criteria-legend">
+                                <span class="criteria-label">Criterios:</span>
+                                @foreach (var criterio in criterios)
+                                {
+                                    <div class="criteria-pill">
+                                        <span class="criteria-pill-name">@criterio.Nombre</span>
+                                        <span class="criteria-pill-weight">@criterio.Peso.ToString("0.##")%</span>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                    <div class="gift-container @(scoreRevelado ? "opened" : "")" @onclick="RevelarNota">
+                        <div class="gift-box">
+                            <div class="gift-lid">
+                                <div class="lid-top"></div>
+                                <div class="lid-rim"></div>
+                                <div class="lid-ribbon"></div>
+                                <div class="lid-bow-left"></div>
+                                <div class="lid-bow-right"></div>
+                                <div class="lid-bow-center"></div>
+                            </div>
+                            <div class="gift-body">
+                                <div class="body-ribbon-v"></div>
+                                <div class="body-ribbon-h"></div>
+                            </div>
+                        </div>
+                        <div class="gift-particles">
+                            <span class="particle p1">✦</span>
+                            <span class="particle p2">✦</span>
+                            <span class="particle p3">✦</span>
+                            <span class="particle p4">✧</span>
+                            <span class="particle p5">✧</span>
+                            <span class="particle p6">✦</span>
+                            <span class="particle p7">★</span>
+                            <span class="particle p8">✧</span>
+                        </div>
+                        <div class="score-reveal">
+                            <span class="score-number">@resultadoMulticriterio.PuntajeFinal.ToString("0.0")</span>
+                            <span class="score-evals-text">@resultadoMulticriterio.Evaluaciones eval.</span>
+                        </div>
+                    </div>
+                </div>
+                @if (resultadoMulticriterio.DetallesCriterios.Any())
+                {
+                    <div class="score-breakdown-card">
+                        @foreach (var detalle in resultadoMulticriterio.DetallesCriterios)
+                        {
+                            var pct = Math.Min(100, (detalle.PromedioValoracion / 5.0) * 100);
+                            <div class="score-criterion">
+                                <div class="score-criterion-header">
+                                    <span class="score-criterion-name">@detalle.CriterioNombre</span>
+                                    <span class="score-criterion-value">@detalle.PromedioValoracion.ToString("0.0")<span class="score-criterion-max">/5</span></span>
+                                </div>
+                                <div class="score-bar-bg">
+                                    <div class="score-bar-fill" style="width: @pct.ToString("0.#", CultureInfo.InvariantCulture)%"></div>
+                                </div>
+                                <div class="score-criterion-meta">
+                                    <span>Peso: @detalle.Peso.ToString("0.##")%</span>
+                                    <span>Ponderado: @detalle.PuntajePonderado.ToString("0.00")</span>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            }
+
             @if (!string.IsNullOrWhiteSpace(errorCarga))
             {
                 <div class="access-error-state">
@@ -209,11 +285,470 @@
         margin: 0;
         line-height: 1.6;
     }
+    .criteria-legend {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 0.75rem;
+    }
+    .criteria-label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: #6b21a8;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    .criteria-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        background: #f3e8ff;
+        border: 1px solid #e9d5ff;
+        border-radius: 20px;
+        padding: 0.3rem 0.8rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    .criteria-pill-name { color: #7c3aed; }
+    .criteria-pill-weight { color: #a78bfa; font-weight: 700; }
+
+    .score-banner {
+        max-width: 1100px;
+        margin: 0 auto 1.5rem;
+        background: #8a2be2;
+        border-radius: 40px;
+        padding: 50px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: white;
+        box-shadow: 0 10px 30px rgba(138, 43, 226, 0.2);
+    }
+    .banner-text { max-width: 600px; }
+    .banner-title {
+        font-size: 32px;
+        margin: 0 0 12px 0;
+        font-weight: 800;
+        line-height: 1.25;
+    }
+    .banner-desc {
+        font-size: 16px;
+        line-height: 1.5;
+        opacity: 0.9;
+        margin: 0 0 16px 0;
+    }
+    .banner-text .criteria-legend {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 0;
+    }
+    .banner-text .criteria-label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: rgba(255,255,255,0.8);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    .banner-text .criteria-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        background: rgba(255,255,255,0.15);
+        border: 1px solid rgba(255,255,255,0.2);
+        border-radius: 20px;
+        padding: 0.3rem 0.8rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: white;
+    }
+    .banner-text .criteria-pill-name { color: white; }
+    .banner-text .criteria-pill-weight { color: rgba(255,255,255,0.7); font-weight: 700; }
+
+    .gift-container {
+        width: 150px;
+        height: 150px;
+        min-width: 150px;
+        min-height: 150px;
+        position: relative;
+        cursor: pointer;
+        margin-left: 2rem;
+    }
+    .gift-box {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        transition: transform 0.3s ease;
+    }
+    .gift-container:not(.opened):hover .gift-box {
+        transform: scale(1.05);
+    }
+    .gift-container:not(.opened):hover .gift-lid {
+        animation: lidRattle 0.4s ease-in-out;
+    }
+
+    /* ---- LID ---- */
+    .gift-lid {
+        position: absolute;
+        top: 14px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 106px;
+        height: 36px;
+        z-index: 3;
+        transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1),
+                    opacity 0.6s ease;
+    }
+    .gift-container.opened .gift-lid {
+        transform: translateX(-50%) translateY(-110px) rotate(-25deg) scale(0.5);
+        opacity: 0;
+        transition-delay: 0s;
+    }
+    .lid-top {
+        width: 100%;
+        height: 10px;
+        background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 100%);
+        border-radius: 4px 4px 0 0;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.3);
+    }
+    .lid-rim {
+        width: 100%;
+        height: 26px;
+        background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%);
+        border-radius: 0 0 4px 4px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.15);
+    }
+    .lid-ribbon {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 12px;
+        height: 100%;
+        background: linear-gradient(180deg, #ef4444 0%, #b91c1c 100%);
+    }
+    .lid-bow-left, .lid-bow-right, .lid-bow-center {
+        position: absolute;
+        border-radius: 50%;
+    }
+    .lid-bow-center {
+        top: -9px; left: 50%;
+        transform: translateX(-50%);
+        width: 18px; height: 18px;
+        background: radial-gradient(circle at 50% 40%, #fecaca 0%, #ef4444 100%);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    }
+    .lid-bow-left {
+        top: -5px; left: 50%;
+        transform: translateX(-22px) rotate(-25deg);
+        width: 14px; height: 9px;
+        background: radial-gradient(ellipse at 50% 60%, #fca5a5, #ef4444);
+    }
+    .lid-bow-right {
+        top: -5px; left: 50%;
+        transform: translateX(8px) rotate(25deg);
+        width: 14px; height: 9px;
+        background: radial-gradient(ellipse at 50% 60%, #fca5a5, #ef4444);
+    }
+
+    /* ---- BODY ---- */
+    .gift-body {
+        position: absolute;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100px;
+        height: 85px;
+        background: linear-gradient(180deg, #fcd34d 0%, #f59e0b 35%, #d97706 100%);
+        border-radius: 6px;
+        z-index: 1;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.18), inset 0 2px 6px rgba(255,255,255,0.25);
+        transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1),
+                    opacity 0.5s ease;
+    }
+    .gift-container.opened .gift-lid {
+        transform: translateX(-50%) translateY(-110px) rotate(-25deg) scale(0.5);
+        opacity: 0;
+        transition-delay: 0s;
+    }
+    .lid-top {
+        width: 100%;
+        height: 12px;
+        background: linear-gradient(180deg, #fcd34d 0%, #f59e0b 100%);
+        border-radius: 5px 5px 0 0;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.4);
+    }
+    .lid-ribbon {
+        position: absolute;
+        top: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 12px;
+        height: 16px;
+        background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
+        border-radius: 0 0 2px 2px;
+    }
+    .lid-bow-left, .lid-bow-right, .lid-bow-center {
+        position: absolute;
+        border-radius: 50%;
+    }
+    .lid-bow-center {
+        top: -8px; left: 50%;
+        transform: translateX(-50%);
+        width: 18px; height: 18px;
+        background: radial-gradient(circle at 50% 40%, #fecaca 0%, #ef4444 100%);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    }
+    .lid-bow-left {
+        top: -4px; left: 50%;
+        transform: translateX(-22px) rotate(-25deg);
+        width: 14px; height: 9px;
+        background: radial-gradient(ellipse at 50% 60%, #fca5a5, #ef4444);
+    }
+    .lid-bow-right {
+        top: -4px; left: 50%;
+        transform: translateX(8px) rotate(25deg);
+        width: 14px; height: 9px;
+        background: radial-gradient(ellipse at 50% 60%, #fca5a5, #ef4444);
+    }
+
+    /* ---- BODY ---- */
+    .gift-body {
+        position: absolute;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100px;
+        height: 90px;
+        background: linear-gradient(180deg, #fcd34d 0%, #f59e0b 40%, #d97706 100%);
+        border-radius: 6px;
+        z-index: 1;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.18), inset 0 2px 6px rgba(255,255,255,0.25);
+        transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1),
+                    opacity 0.5s ease;
+    }
+    .gift-container.opened .gift-body {
+        transform: translateX(-50%) scale(1.25);
+        opacity: 0;
+        transition-delay: 0.15s;
+    }
+    .body-ribbon-v {
+        position: absolute;
+        top: 0; left: 50%;
+        transform: translateX(-50%);
+        width: 12px; height: 100%;
+        background: linear-gradient(180deg, #ef4444 0%, #b91c1c 100%);
+    }
+    .body-ribbon-h {
+        position: absolute;
+        top: 52%; left: 0;
+        transform: translateY(-50%);
+        width: 100%; height: 12px;
+        background: linear-gradient(90deg, #ef4444 0%, #b91c1c 100%);
+    }
+
+    /* ---- PARTICLES ---- */
+    .gift-particles {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+    }
+    .particle {
+        position: absolute;
+        top: 50%; left: 50%;
+        font-size: 16px;
+        opacity: 0;
+    }
+    .gift-container.opened .p1 {
+        animation: particleFly 1s 0.1s cubic-bezier(0, 0.7, 0.3, 1) forwards;
+    }
+    .gift-container.opened .p2 {
+        animation: particleFly 0.9s 0.15s cubic-bezier(0, 0.7, 0.3, 1) forwards;
+    }
+    .gift-container.opened .p3 {
+        animation: particleFly 1.1s 0.2s cubic-bezier(0, 0.7, 0.3, 1) forwards;
+    }
+    .gift-container.opened .p4 {
+        animation: particleFly 0.8s 0.12s cubic-bezier(0, 0.7, 0.3, 1) forwards;
+    }
+    .gift-container.opened .p5 {
+        animation: particleFly 1s 0.18s cubic-bezier(0, 0.7, 0.3, 1) forwards;
+    }
+    .gift-container.opened .p6 {
+        animation: particleFly 0.9s 0.22s cubic-bezier(0, 0.7, 0.3, 1) forwards;
+    }
+    .gift-container.opened .p7 {
+        animation: particleFly 1.1s 0.14s cubic-bezier(0, 0.7, 0.3, 1) forwards;
+    }
+    .gift-container.opened .p8 {
+        animation: particleFly 0.8s 0.25s cubic-bezier(0, 0.7, 0.3, 1) forwards;
+    }
+
+    @@keyframes particleFly {
+        0% {
+            transform: translate(0, 0) scale(0);
+            opacity: 1;
+        }
+        30% {
+            opacity: 1;
+            transform: translate(var(--dx, 40px), var(--dy, -50px)) scale(1.4);
+        }
+        100% {
+            opacity: 0;
+            transform: translate(var(--dx2, 80px), var(--dy2, -120px)) scale(0);
+        }
+    }
+
+    /* Particle destinations */
+    .p1 { --dx: -70px; --dy: -80px; --dx2: -100px; --dy2: -140px; }
+    .p2 { --dx: 60px; --dy: -90px; --dx2: 90px; --dy2: -150px; }
+    .p3 { --dx: -40px; --dy: -100px; --dx2: -70px; --dy2: -170px; }
+    .p4 { --dx: 80px; --dy: -60px; --dx2: 110px; --dy2: -110px; }
+    .p5 { --dx: -90px; --dy: -50px; --dx2: -120px; --dy2: -100px; }
+    .p6 { --dx: 50px; --dy: -70px; --dx2: 80px; --dy2: -130px; }
+    .p7 { --dx: -20px; --dy: -110px; --dx2: -50px; --dy2: -180px; }
+    .p8 { --dx: 100px; --dy: -40px; --dx2: 130px; --dy2: -90px; }
+
+    /* ---- SCORE REVEAL ---- */
+    .score-reveal {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        opacity: 0;
+        pointer-events: none;
+    }
+    .gift-container.opened .score-reveal {
+        animation: scoreAppear 1s 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    .gift-container.opened {
+        cursor: default;
+    }
+    .score-number {
+        font-size: 44px;
+        font-weight: 900;
+        line-height: 1;
+        background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 25%, #fcd34d 50%, #f59e0b 75%, #fbbf24 100%);
+        background-size: 200% auto;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: shimmer 2s linear infinite;
+    }
+    .score-evals-text {
+        font-size: 12px;
+        text-transform: uppercase;
+        font-weight: 600;
+        color: rgba(255,255,255,0.6);
+        margin-top: 4px;
+        letter-spacing: 0.05em;
+    }
+
+    @@keyframes scoreAppear {
+        0% {
+            opacity: 0;
+            transform: scale(0.3) rotateY(90deg);
+        }
+        60% {
+            opacity: 1;
+            transform: scale(1.15) rotateY(-10deg);
+        }
+        80% {
+            transform: scale(0.95) rotateY(3deg);
+        }
+        100% {
+            opacity: 1;
+            transform: scale(1) rotateY(0deg);
+        }
+    }
+    @@keyframes shimmer {
+        to { background-position: 200% center; }
+    }
+    @@keyframes lidRattle {
+        0%, 100% { transform: translateX(-50%) rotate(0); }
+        25% { transform: translateX(-50%) rotate(-4deg); }
+        75% { transform: translateX(-50%) rotate(4deg); }
+    }
+    @@keyframes bounce {
+        0%, 100% { transform: translateX(-50%) scale(1); }
+        50% { transform: translateX(-50%) scale(1.04); }
+    }
+
+    .score-breakdown-card {
+        max-width: 1100px;
+        margin: 0 auto 1.5rem;
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 24px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    }
+    .score-criterion {
+        margin-bottom: 0.75rem;
+    }
+    .score-criterion:last-child { margin-bottom: 0; }
+    .score-criterion-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 0.25rem;
+    }
+    .score-criterion-name {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+    }
+    .score-criterion-value {
+        font-size: 0.85rem;
+        font-weight: 800;
+        color: #7c3aed;
+    }
+    .score-criterion-max {
+        font-size: 0.7rem;
+        font-weight: 500;
+        color: #94a3b8;
+    }
+    .score-bar-bg {
+        width: 100%;
+        height: 8px;
+        background: #f1f5f9;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    .score-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #a855f7 0%, #7c3aed 100%);
+        border-radius: 10px;
+        transition: width 0.8s ease;
+    }
+    .score-criterion-meta {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.72rem;
+        color: #94a3b8;
+        margin-top: 0.15rem;
+        font-weight: 500;
+    }
+
     @@keyframes spin { to { transform: rotate(360deg); } }
-    @@media (max-width: 900px) {
+    @@media (max-width: 768px) {
         .comments-wrapper { padding: 1rem; }
         .comments-header { gap: 0.75rem; }
         .comments-card { padding: 1.25rem; }
+        .score-banner {
+            flex-direction: column;
+            text-align: center;
+            padding: 30px 20px;
+            gap: 1.5rem;
+        }
+        .banner-title { font-size: 24px; }
+        .banner-text .criteria-legend { justify-content: center; }
+        .gift-container { margin-left: 0; }
     }
 </style>
 
@@ -226,13 +761,15 @@
     private ProyectoDto? proyecto;
     private VotacionDto? votacion;
     private List<ComentarioDto> comentarios = new();
+    private ResultadoMulticriterioDto? resultadoMulticriterio;
+    private bool scoreRevelado;
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
             errorCarga = null;
-                if (!string.IsNullOrEmpty(VotacionId))
+            if (!string.IsNullOrEmpty(VotacionId))
             {
                 votacion = await VotacionesService.ObtenerVotacion(VotacionId);
             }
@@ -241,6 +778,12 @@
             {
                 proyecto = await ProyectosService.ObtenerProyectoAsync(ProyectoId);
                 comentarios = await ProyectosService.ObtenerComentariosAsync(ProyectoId, VotacionId);
+            }
+
+            if (EsMulticriterio && !string.IsNullOrEmpty(VotacionId) && !string.IsNullOrEmpty(ProyectoId))
+            {
+                var resultados = await VotacionesService.ObtenerResultadosMulticriterio(VotacionId);
+                resultadoMulticriterio = resultados?.FirstOrDefault(r => r.Id == ProyectoId);
             }
         }
         catch (Exception ex)
@@ -256,7 +799,32 @@
 
     private void Volver() => Nav.NavigateTo($"/{VotacionId}/proyectos/{ProyectoId}");
 
-    private bool EsVotacionAnonima => votacion?.Tipo?.Equals("ANONIMA", StringComparison.OrdinalIgnoreCase) ?? false;
+    private void RevelarNota()
+    {
+        scoreRevelado = true;
+    }
+
+    private string MensajePuntuacion
+    {
+        get
+        {
+            var equipo = resultadoMulticriterio?.Equipo ?? "Equipo";
+            if (!scoreRevelado)
+                return $"¡Tienes un regalo, {equipo}!";
+            var nota = resultadoMulticriterio?.PuntajeFinal ?? 0;
+            return nota switch
+            {
+                >= 4.5 => $"¡Excelente, {equipo}! 🏆",
+                >= 3.5 => $"¡Gran Trabajo, {equipo}! 🎉",
+                >= 2.5 => $"¡Buen Trabajo, {equipo}! 💪",
+                _ => $"¡Ánimo, {equipo}! 🚀"
+            };
+        }
+    }
+
+    private bool EsVotacionAnonima => votacion?.EsAnonima ?? false;
+    private bool EsMulticriterio => votacion?.Tipo?.Equals("MULTICRITERIO", StringComparison.OrdinalIgnoreCase) ?? false;
+    private List<CriterioDto> criterios => votacion?.Criterios ?? new();
 
     private string GetAutorEtiqueta(ComentarioDto comentario, int index)
     {
