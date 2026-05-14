@@ -124,9 +124,9 @@
                         <h3 class="sidebar-title">Envía tu voto</h3>
                         <p class="sidebar-subtitle">Evalúa el proyecto según los criterios</p>
 
-                        @if (!EsJurado)
+                        @if (!EsJuradoOPublico)
                         {
-                            <div class="alert-err">Solo el rol Jurado puede evaluar esta votación multicriterio.</div>
+                            <div class="alert-err">Solo el rol Jurado o Público puede evaluar esta votación multicriterio.</div>
                         }
                         else if (YaEvaluoMulticriterio)
                         {
@@ -149,7 +149,7 @@
                                         var currentStar = star;
                                         <button type="button"
                                                 class="star-btn @(GetValoracion(criterio) >= currentStar ? "star-active" : "")"
-                                                disabled="@(!EsJurado || YaEvaluoMulticriterio || enviandoComentario || estaFinalizada || estaPausada || noIniciada)"
+                                                disabled="@(!EsJuradoOPublico || YaEvaluoMulticriterio || enviandoComentario || estaFinalizada || estaPausada || noIniciada)"
                                                 @onclick="() => SetValoracion(criterio, currentStar)">★</button>
                                     }
                                 </div>
@@ -162,7 +162,7 @@
                                   @bind="comentarioTexto"
                                   @bind:event="oninput"
                                   rows="6"
-                                  disabled="@(!EsJurado || YaEvaluoMulticriterio || enviandoComentario)">
+                                  disabled="@(!EsJuradoOPublico || YaEvaluoMulticriterio || enviandoComentario)">
                         </textarea>
 
                         @if (!string.IsNullOrEmpty(mensajeComentario))
@@ -973,12 +973,12 @@
     private bool estaActiva => votacion != null && votacion.Estado == 0 && DateTime.UtcNow >= votacion.FechaInicio && DateTime.UtcNow < votacion.FechaFin;
 
     private bool EsVotacionAnonima => votacion?.Tipo?.Equals("ANONIMA", StringComparison.OrdinalIgnoreCase) ?? false;
-    private bool EsMulticriterio => votacion?.Tipo?.Equals("Multicriterio", StringComparison.OrdinalIgnoreCase) ?? false;
-    private bool EsJurado => string.Equals(rolEnEvento?.Trim(), "Jurado", StringComparison.OrdinalIgnoreCase);
+    private bool EsMulticriterio => votacion?.Tipo?.ToUpper() == "MULTICRITERIO" || votacion?.Tipo?.ToUpper() == "MULTICRITERIO_PUBLICO";
+    private bool EsJuradoOPublico => string.Equals(rolEnEvento?.Trim(), "Jurado", StringComparison.OrdinalIgnoreCase) || string.Equals(rolEnEvento?.Trim(), "Público", StringComparison.OrdinalIgnoreCase);
     private bool YaTieneComentario => !EsVotacionAnonima && comentarios.Any(c => c.AutorId.ToString() == UsuarioVotanteId);
     private string UsuarioVotanteId => usuarioIdActual ?? usuarioTesterId;
 
-    private bool PuedeEnviarMulticriterio => EsJurado
+    private bool PuedeEnviarMulticriterio => EsJuradoOPublico
         && !YaEvaluoMulticriterio
         && !enviandoComentario
         && estaActiva

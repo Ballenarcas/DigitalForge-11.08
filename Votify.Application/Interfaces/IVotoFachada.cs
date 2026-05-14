@@ -6,6 +6,7 @@ namespace Votify.Application.Interfaces
     {
         Task VotarAsync(VotarDto dto);
         Task VotarMulticriterioAsync(VotoMulticriterioDto dto);
+        Task VotarMulticriterioAnonimoAsync(VotoMulticriterioAnonimoDto dto);
         Task<bool> PuedeVotarAsync(string votacionId, string votanteId);
         Task<bool> HaVotadoMulticriterioAsync(string proyectoId, string votanteId);
     }

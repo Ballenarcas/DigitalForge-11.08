@@ -313,13 +313,17 @@
     private void VerResultados(string id)
     {
         var votacion = listaVotaciones?.FirstOrDefault(v => v.Id == id);
-        if (votacion != null && votacion.Tipo?.Equals("Multicriterio", StringComparison.OrdinalIgnoreCase) == true)
+        if (votacion != null)
         {
-            Nav.NavigateTo($"/{id}/resultados-multicriterio/");
-        }
-        else
-        {
-            Nav.NavigateTo($"/{id}/resultados/");
+            var tipo = votacion.Tipo?.ToUpper() ?? "";
+            if (tipo == "MULTICRITERIO" || tipo == "MULTICRITERIO_PUBLICO")
+            {
+                Nav.NavigateTo($"/{id}/resultados-multicriterio/");
+            }
+            else
+            {
+                Nav.NavigateTo($"/{id}/resultados/");
+            }
         }
     }
     private void Votar(string id) => Nav.NavigateTo($"/{id}/proyectos/");

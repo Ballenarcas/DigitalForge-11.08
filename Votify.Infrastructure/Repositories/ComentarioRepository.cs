@@ -34,6 +34,25 @@ namespace Votify.Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
+        public async Task GuardarAnonimoAsync(string proyectoId, string texto)
+        {
+            if (!Guid.TryParse(proyectoId, out var guidProyectoId))
+            {
+                throw new ArgumentException("El ID del proyecto no es válido.");
+            }
+
+            var entity = new ComentarioEntity
+            {
+                Proyecto_Id = guidProyectoId,
+                Autor_Id = null,
+                Texto = texto,
+                FechaCreacion = DateTime.UtcNow
+            };
+
+            _context.Comentarios.Add(entity);
+            await _context.SaveChangesAsync();
+        }
+
         public async Task<List<Comentario>> ObtenerAsync(string proyectoId)
         {
             if (!Guid.TryParse(proyectoId, out var guidProyectoId))

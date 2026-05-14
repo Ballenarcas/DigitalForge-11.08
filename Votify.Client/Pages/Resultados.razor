@@ -424,7 +424,7 @@
             var votacion = await VotacionesService.ObtenerVotacion(VotacionId);
             nombreVotacion = votacion?.Nombre;
             eventoId = votacion?.EventoId;
-            EsMulticriterio = votacion?.Tipo?.Equals("Multicriterio", StringComparison.OrdinalIgnoreCase) ?? false;
+            EsMulticriterio = votacion?.Tipo?.ToUpper() == "MULTICRITERIO" || votacion?.Tipo?.ToUpper() == "MULTICRITERIO_PUBLICO";
             await CargarResultados();
         }
     }

@@ -29,7 +29,8 @@
                 <div class="select-wrapper">
                     <select class="form-control select-custom" @bind="Tipo">
                         <option value="ESTANDAR">Estándar</option>
-                        <option value="MULTICRITERIO">Multicriterio</option>
+                        <option value="MULTICRITERIO">Multicriterio (Jurado)</option>
+                        <option value="MULTICRITERIO_PUBLICO">Multicriterio (Público)</option>
                     </select>
                 </div>
             </div>
@@ -573,7 +574,7 @@ input:checked + .slider:before {
         new CriterioDto { Nombre = "Diseño", Peso = 60 }
     };
 
-    bool EsMulticriterio => Tipo == "MULTICRITERIO";
+    bool EsMulticriterio => Tipo == "MULTICRITERIO" || Tipo == "MULTICRITERIO_PUBLICO";
     decimal PesoTotal => Criterios.Sum(c => c.Peso);
     bool PesosValidos => Criterios.Count > 0
         && Criterios.All(c => !string.IsNullOrWhiteSpace(c.Nombre) && c.Peso > 0)

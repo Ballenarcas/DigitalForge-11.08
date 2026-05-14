@@ -18,6 +18,9 @@ namespace Votify.Application.Services.Fachadas
         public Task VotarMulticriterioAsync(VotoMulticriterioDto dto)
             => _votoService.VotarMulticriterioAsync(dto);
 
+        public Task VotarMulticriterioAnonimoAsync(VotoMulticriterioAnonimoDto dto)
+            => _votoService.VotarMulticriterioAnonimoAsync(dto);
+
         public Task<bool> PuedeVotarAsync(string votacionId, string votanteId)
             => _votoService.PuedeVotarAsync(votacionId, votanteId);
 

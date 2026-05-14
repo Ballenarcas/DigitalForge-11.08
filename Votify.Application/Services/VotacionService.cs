@@ -390,6 +390,7 @@ namespace Votify.Application.Services
             {
                 "ESTANDAR" => new VotacionEstandarFactory(),
                 "MULTICRITERIO" => new VotacionMulticriterioFactory(),
+                "MULTICRITERIO_PUBLICO" => new VotacionMulticriterioPublicoFactory(),
                 _ => throw new ArgumentException($"Tipo de votación no válido: {dto.Tipo}")
             };
 
@@ -458,7 +459,8 @@ namespace Votify.Application.Services
 
         private static bool EsMulticriterio(string? tipo)
         {
-            return string.Equals(tipo?.Trim(), "Multicriterio", StringComparison.OrdinalIgnoreCase);
+            var t = tipo?.Trim().ToUpper();
+            return t == "MULTICRITERIO" || t == "MULTICRITERIO_PUBLICO";
         }
 
         private static List<Criterio> MapCriterios(List<CriterioDto> criterios)

@@ -342,7 +342,7 @@
                 votacion = vot;
                 nombreVotacion = vot?.Nombre;
                 proyectosVotables = vot?.LimiteProy.ToString() ?? "0";
-                EsMulti = vot?.Tipo == "Multicriterio";
+                EsMulti = vot?.Tipo == "MULTICRITERIO" || vot?.Tipo == "MULTICRITERIO_PUBLICO";
 
                 if (!string.IsNullOrEmpty(usuarioId))
                 {

@@ -122,7 +122,8 @@ namespace Votify.Infrastructure.Repositories
             {
                 "ESTANDAR" => new VotacionEstandarFactory(),
                 "MULTICRITERIO" => new VotacionMulticriterioFactory(),
-                _ => throw new Exception($"Tipo de votación desconocido en la base de datos: {entity.Tipo}")
+                "MULTICRITERIO_PUBLICO" => new VotacionMulticriterioPublicoFactory(),
+                _ => new VotacionEstandarFactory()
             };
 
             var domain = factory.Crear(

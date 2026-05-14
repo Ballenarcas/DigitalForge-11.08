@@ -67,6 +67,31 @@ namespace Votify.API.Controllers
             }
         }
 
+        [HttpPost("multicriterio-publico")]
+        public async Task<IActionResult> VotarMulticriterioPublico([FromBody] VotoMulticriterioAnonimoDto request)
+        {
+            try
+            {
+                await _fachada.VotarMulticriterioAnonimoAsync(request);
+                return Ok(new { Mensaje = "Voto público registrado con éxito." });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { Error = ex.Message });
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound(new { Error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new {
+                    Error = "Ocurrió un error inesperado al procesar el voto multicriterio público.",
+                    Detalle = ex.InnerException != null ? ex.InnerException.Message : ex.Message
+                });
+            }
+        }
+
         [HttpGet("puede-votar/{votacionId}/{votanteId}")]
         public async Task<IActionResult> PuedeVotar(string votacionId, string votanteId)
         {

@@ -196,7 +196,8 @@
                     <div class="select-wrapper">
                         <select id="select-tipo" class="form-control select-custom" @bind="Tipo" disabled="@YaInicio">
                             <option value="ESTANDAR">Estándar</option>
-                            <option value="MULTICRITERIO">Multicriterio</option>
+                            <option value="MULTICRITERIO">Multicriterio (Jurado)</option>
+                            <option value="MULTICRITERIO_PUBLICO">Multicriterio (Público)</option>
                         </select>
                         <span class="select-arrow">▾</span>
                     </div>
@@ -1378,7 +1379,7 @@ input:checked + .slider:before {
     
     bool YaInicio    => DateTime.Now >= FechaInicioOriginal;
     bool YaFinalizo  => DateTime.Now >= FechaFinOriginal;
-    bool EsMulticriterio => Tipo == "MULTICRITERIO";
+    bool EsMulticriterio => Tipo == "MULTICRITERIO" || Tipo == "MULTICRITERIO_PUBLICO";
     decimal PesoTotal => Criterios.Sum(c => c.Peso);
     bool PesosValidos => Criterios.Count > 0
         && Criterios.All(c => !string.IsNullOrWhiteSpace(c.Nombre) && c.Peso > 0)
