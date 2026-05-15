@@ -52,37 +52,50 @@
                             <img src="@(string.IsNullOrEmpty(e.ImagenUrl) ? "images/evento-default.png" : e.ImagenUrl)" alt="@e.Nombre" />
                         </div>
                         <div class="card-content">
-                            <div class="card-top-row">
-                                <div class="card-badge">Evento</div>
-                                <div class="status-pill @(yaFinalizo ? "pill-ended" : yaInicio ? "pill-active" : "pill-pending")">
+                            <div class="card-type-hint">EVENTO</div>
+
+                            <h3>@e.Nombre</h3>
+                            
+                            <div class="description-container">
+                                <p class="descripcion-breve">@e.Descripcion</p>
+                            </div>
+
+                            <div class="info-row">
+                                <div class="date-row">
+                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="14" height="14">
+                                        <path d="M8 2V5M16 2V5M3.5 9.09H20.5M21 8.5V17C21 20 19.5 22 16 22H8C4.5 22 3 20 3 17V8.5C3 5.5 4.5 3.5 8 3.5H16C19.5 3.5 21 5.5 21 8.5Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M15.6947 13.7H15.7037M15.6947 16.7H15.7037M11.9955 13.7H12.0045M11.9955 16.7H12.0045M8.29639 13.7H8.30537M8.29639 16.7H8.30537" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    <span>@e.FechaInicio.ToLocalTime().ToString("dd/MM/yy") - @e.FechaFin.ToLocalTime().ToString("dd/MM/yy")</span>
+                                </div>
+                                <div class="status-indicator @(yaFinalizo ? "status-ended" : yaInicio ? "status-active" : "status-pending")">
+                                    <span class="status-dot pulse"></span>
                                     @(yaFinalizo ? "Finalizado" : yaInicio ? "En curso" : "Pendiente")
                                 </div>
                             </div>
-                            <h3>@e.Nombre</h3>
-                            <p class="descripcion-breve">@e.Descripcion</p>
-                            <p class="fecha">Finaliza: @e.FechaFin.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</p>
 
-                            @if (!misEventosIds.Contains(e.Id!))
-                            {
-                                <button class="btn-registrar" @onclick="() => Registrarse(e.Id!)">
-                                    Participar
-                                </button>
-                            }
-                            else if (yaInicio && !yaFinalizo)
-                            {
-                                <button class="btn-votar" @onclick='() => IrAVotaciones(e)'>
-                                    Ver Votaciones
-                                </button>
-                            }
-                            else
-                            {
-                                <button class="btn-votar" disabled>
-                                    Ver Votaciones
-                                </button>
-                            }
+                            <div class="actions-main">
+                                @if (!misEventosIds.Contains(e.Id!))
+                                {
+                                    <button class="btn-registrar" @onclick="() => Registrarse(e.Id!)">
+                                        Participar
+                                    </button>
+                                }
+                                else if (yaInicio && !yaFinalizo)
+                                {
+                                    <button class="btn-votar" @onclick='() => IrAVotaciones(e)'>
+                                        Ver Votaciones
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button class="btn-votar" disabled>
+                                        Ver Votaciones
+                                    </button>
+                                }
+                            </div>
 
                             <div class="card-footer">
-                                <span class="stats">Inicia: @e.FechaInicio.ToLocalTime().ToString("dd/MM/yyyy")</span>
                                 <div class="footer-actions">
                                     @if (yaFinalizo)
                                     {
