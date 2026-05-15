@@ -101,56 +101,78 @@
                 }
             }
 
-            @if (!string.IsNullOrWhiteSpace(errorCarga))
-            {
-                <div class="access-error-state">
-                    <strong>No se pudieron cargar los comentarios.</strong>
-                    <p>@errorCarga</p>
-                </div>
-            }
-            else if (comentarios.Count == 0)
-            {
-                <div class="empty-state">
-                    <p>No hay comentarios para este proyecto aún.</p>
-                </div>
-            }
-            else
-            {
-                <div class="comments-count">@comentarios.Count comentario(s)</div>
-                <div class="comments-list">
-                    @for (var index = 0; index < comentarios.Count; index++)
-                    {
-                        var comentario = comentarios[index];
-                        <div class="comment-item">
-                            <div class="comment-avatar">@GetAvatarLabel(comentario, index)</div>
-                            <div class="comment-content">
-                                <div class="comment-meta">@GetAutorEtiqueta(comentario, index)</div>
-                                <div class="comment-date">@comentario.FechaCreacion.ToLocalTime().ToString("dd MMM yyyy HH:mm")</div>
-                                <p class="comment-text">"@comentario.Texto"</p>
-                            </div>
-                        </div>
-                    }
-                </div>
-
-                @if (resumen != null)
+@if (!string.IsNullOrWhiteSpace(errorCarga))
                 {
-                    <div class="ai-summary-card">
-                        <div class="ai-summary-header">
-                            <h3>Resumen de Feedback</h3>
-                            @if (resumen.GeneradoPorIA)
-                            {
-                                <span class="ai-badge">Generado por IA</span>
-                            }
-                            else
-                            {
-                                <span class="fallback-badge">Resumen simple</span>
-                            }
-                        </div>
-                        <p class="ai-summary-text">@resumen.Resumen</p>
-                        <small class="ai-summary-meta">@resumen.TotalComentarios comentario(s) analizado(s) · @resumen.FechaGeneracion.ToLocalTime().ToString("dd MMM yyyy HH:mm")</small>
+                    <div class="access-error-state">
+                        <strong>No se pudieron cargar los comentarios.</strong>
+                        <p>@errorCarga</p>
                     </div>
                 }
-            }
+                else if (comentarios.Count == 0)
+                {
+                    <div class="empty-state">
+                        <p>No hay comentarios para este proyecto aún.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="comments-count">@comentarios.Count comentario(s)</div>
+                    <div class="comments-list">
+                        @for (var index = 0; index < comentarios.Count; index++)
+                        {
+                            var comentario = comentarios[index];
+                            <div class="comment-item">
+                                <div class="comment-avatar">@GetAvatarLabel(comentario, index)</div>
+                                <div class="comment-content">
+                                    <div class="comment-meta">@GetAutorEtiqueta(comentario, index)</div>
+                                    <div class="comment-date">@comentario.FechaCreacion.ToLocalTime().ToString("dd MMM yyyy HH:mm")</div>
+                                    <p class="comment-text">"@comentario.Texto"</p>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="ai-trigger-section">
+                        @if (resumen == null)
+                        {
+                            <button class="btn-generar-resumen" @onclick="GenerarResumen" disabled="@generandoResumen">
+                                @(generandoResumen ? "Generando..." : "🤖 Generar Resumen con IA")
+                            </button>
+                        }
+
+                        @if (generandoResumen)
+                        {
+                            <div class="ai-loading">
+                                <div class="spinner-small"></div>
+                                <span>Analizando comentarios con IA...</span>
+                            </div>
+                        }
+
+                        @if (errorResumen != null)
+                        {
+                            <div class="ai-error">@errorResumen</div>
+                        }
+                    </div>
+
+                    @if (resumen != null)
+                    {
+                        <div class="ai-summary-card">
+                            <div class="ai-summary-header">
+                                <h3>Resumen de Feedback</h3>
+                                @if (resumen.GeneradoPorIA)
+                                {
+                                    <span class="ai-badge">Generado por IA</span>
+                                }
+                                else
+                                {
+                                    <span class="fallback-badge">Resumen simple</span>
+                                }
+                            </div>
+                            <p class="ai-summary-text">@resumen.Resumen</p>
+                            <small class="ai-summary-meta">@resumen.TotalComentarios comentario(s) analizado(s) · @resumen.FechaGeneracion.ToLocalTime().ToString("dd MMM yyyy HH:mm")</small>
+                        </div>
+                    }
+                }
         </div>
     }
 </div>
@@ -754,6 +776,61 @@
         font-weight: 500;
     }
 
+    .ai-trigger-section {
+        margin-top: 1.25rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    .btn-generar-resumen {
+        background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+        color: white;
+        border: none;
+        border-radius: 16px;
+        padding: 0.85rem 2rem;
+        font-size: 0.95rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+        box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35);
+    }
+    .btn-generar-resumen:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(124, 58, 237, 0.45);
+    }
+    .btn-generar-resumen:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+    .ai-loading {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #7c3aed;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+    .spinner-small {
+        width: 18px;
+        height: 18px;
+        border: 2px solid #ede9fe;
+        border-top: 2px solid #7c3aed;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+    .ai-error {
+        padding: 0.75rem 1rem;
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        border-radius: 12px;
+        color: #991b1b;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-align: center;
+        max-width: 400px;
+    }
+
     .ai-summary-card {
         margin-top: 1.5rem;
         padding: 1.5rem;
@@ -825,6 +902,8 @@
 
     private bool cargando = true;
     private string? errorCarga;
+    private bool generandoResumen;
+    private string? errorResumen;
     private ProyectoDto? proyecto;
     private VotacionDto? votacion;
     private List<ComentarioDto> comentarios = new();
@@ -846,7 +925,6 @@
             {
                 proyecto = await ProyectosService.ObtenerProyectoAsync(ProyectoId);
                 comentarios = await ProyectosService.ObtenerComentariosAsync(ProyectoId, VotacionId);
-                resumen = await ProyectosService.ObtenerResumenAsync(ProyectoId);
             }
 
             if (EsMulticriterio && !string.IsNullOrEmpty(VotacionId) && !string.IsNullOrEmpty(ProyectoId))
@@ -917,4 +995,24 @@
     }
 
     private string GetAvatarLabel(ComentarioDto comentario, int index) => (EsVotacionAnonima || comentario.EsAnonimo) ? $"A{index + 1}" : "V";
+
+    private async Task GenerarResumen()
+    {
+        if (string.IsNullOrEmpty(ProyectoId)) return;
+        generandoResumen = true;
+        errorResumen = null;
+        try
+        {
+            resumen = await ProyectosService.ObtenerResumenAsync(ProyectoId);
+        }
+        catch (Exception ex)
+        {
+            errorResumen = "No se pudo generar el resumen. Intenta de nuevo.";
+            Console.WriteLine($"Error generando resumen: {ex.Message}");
+        }
+        finally
+        {
+            generandoResumen = false;
+        }
+    }
 }

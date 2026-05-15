@@ -158,7 +158,7 @@ public class AdaptadorClienteIA : IResumidorComentariosIA
 
     private async Task<string> EnviarRequestAsync(object requestBody)
     {
-        var url = $"{_options.BaseUrl}models/{_options.Model}:generateContent?key={_options.ApiKey}";
+        var url = $"{_options.BaseUrl}v1beta/models/{_options.Model}:generateContent?key={_options.ApiKey}";
         var json = JsonSerializer.Serialize(requestBody);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
         var response = await _httpClient.PostAsync(url, content);
