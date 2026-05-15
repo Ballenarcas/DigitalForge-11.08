@@ -61,6 +61,22 @@ namespace Votify.Application.Services
                 throw new UnauthorizedAccessException("No tienes permisos para ver los comentarios de este proyecto.");
             }
 
+            return await MapearComentariosAsync(proyectoId, proyecto);
+        }
+
+        public async Task<List<ComentarioDto>> ObtenerComentariosParaResumenAsync(string proyectoId)
+        {
+            var proyecto = await _proyectoRepository.ObtenerAsync(proyectoId);
+            if (proyecto == null)
+            {
+                return new List<ComentarioDto>();
+            }
+
+            return await MapearComentariosAsync(proyectoId, proyecto);
+        }
+
+        private async Task<List<ComentarioDto>> MapearComentariosAsync(string proyectoId, Proyecto proyecto)
+        {
             var comentarios = await _comentarioRepository.ObtenerAsync(proyectoId);
             var esVotacionAnonima = false;
 

@@ -1,5 +1,6 @@
 using Votify.Application.DTOs;
 using Votify.Application.Interfaces;
+using Votify.Domain.Interfaces;
 
 namespace Votify.Application.Services.Fachadas
 {
@@ -7,11 +8,16 @@ namespace Votify.Application.Services.Fachadas
     {
         private readonly IProyectoService _proyectoService;
         private readonly IComentarioService _comentarioService;
+        private readonly IResumidorComentariosIA _summarizer;
 
-        public ProyectoFachada(IProyectoService proyectoService, IComentarioService comentarioService)
+        public ProyectoFachada(
+            IProyectoService proyectoService,
+            IComentarioService comentarioService,
+            IResumidorComentariosIA summarizer)
         {
             _proyectoService = proyectoService;
             _comentarioService = comentarioService;
+            _summarizer = summarizer;
         }
 
         public Task<string> CrearProyectoAsync(ProyectoDto dto)
@@ -31,5 +37,21 @@ namespace Votify.Application.Services.Fachadas
 
         public Task<List<ComentarioDto>> ObtenerComentariosAsync(string proyectoId, Guid usuarioId, string? votacionId = null)
             => _comentarioService.ObtenerComentariosAsync(proyectoId, usuarioId, votacionId);
+
+        public async Task<ResumenComentario> ObtenerResumenComentariosAsync(string proyectoId)
+        {
+            var comentarios = await _comentarioService.ObtenerComentariosParaResumenAsync(proyectoId);
+            var proyecto = await _proyectoService.ObtenerProyectoAsync(proyectoId);
+
+            var items = comentarios.Select(c => new ComentarioResumenItem
+            {
+                Texto = c.Texto,
+                AutorNombre = c.AutorNombre,
+                EsAnonimo = c.EsAnonimo,
+                FechaCreacion = c.FechaCreacion
+            }).ToList();
+
+            return await _summarizer.ResumirComentariosAsync(items, proyecto?.Nombre ?? "Proyecto");
+        }
     }
 }

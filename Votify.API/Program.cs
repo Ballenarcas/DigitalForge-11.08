@@ -8,6 +8,11 @@ using Votify.Application.Services;
 using Votify.Application.Services.Fachadas;
 using Votify.Infrastructure.Repositories;
 using Votify.Domain.Interfaces;
+using Votify.Infrastructure.Configuration;
+using Votify.Infrastructure.Adapters;
+using Microsoft.Extensions.Options;
+using Polly;
+using Polly.Extensions.Http;
 using System.Text;
 
 static string? FindEnvFile()
@@ -99,6 +104,54 @@ builder.Services.AddScoped<IProyectoFachada, ProyectoFachada>();
 builder.Services.AddScoped<IEquipoFachada, EquipoFachada>();
 builder.Services.AddScoped<IParticipanteFachada, ParticipanteFachada>();
 
+// Resumidor de comentarios con IA (Patron Adapter)
+builder.Services.Configure<OpcionesResumidorIA>(options =>
+{
+    builder.Configuration.GetSection("AISummarizer").Bind(options);
+
+    var envEnabled = Environment.GetEnvironmentVariable("AI_SUMMARIZER_ENABLED");
+    var envBaseUrl = Environment.GetEnvironmentVariable("AI_SUMMARIZER_BASE_URL");
+    var envApiKey = Environment.GetEnvironmentVariable("AI_SUMMARIZER_API_KEY");
+    var envModel = Environment.GetEnvironmentVariable("AI_SUMMARIZER_MODEL");
+
+    if (!string.IsNullOrEmpty(envEnabled) && bool.TryParse(envEnabled, out var enabled))
+        options.Enabled = enabled;
+    if (!string.IsNullOrEmpty(envBaseUrl)) options.BaseUrl = envBaseUrl;
+    if (!string.IsNullOrEmpty(envApiKey)) options.ApiKey = envApiKey;
+    if (!string.IsNullOrEmpty(envModel)) options.Model = envModel;
+});
+
+var aiOptions = builder.Configuration.GetSection("AISummarizer").Get<OpcionesResumidorIA>()
+                ?? new OpcionesResumidorIA();
+
+var envEnabled = Environment.GetEnvironmentVariable("AI_SUMMARIZER_ENABLED");
+var envBaseUrl = Environment.GetEnvironmentVariable("AI_SUMMARIZER_BASE_URL");
+var envApiKey = Environment.GetEnvironmentVariable("AI_SUMMARIZER_API_KEY");
+var envModel = Environment.GetEnvironmentVariable("AI_SUMMARIZER_MODEL");
+
+if (!string.IsNullOrEmpty(envEnabled) && bool.TryParse(envEnabled, out var enabled))
+    aiOptions.Enabled = enabled;
+if (!string.IsNullOrEmpty(envBaseUrl)) aiOptions.BaseUrl = envBaseUrl;
+if (!string.IsNullOrEmpty(envApiKey)) aiOptions.ApiKey = envApiKey;
+if (!string.IsNullOrEmpty(envModel)) aiOptions.Model = envModel;
+
+builder.Services.AddScoped<ResumidorComentariosFallback>();
+
+if (aiOptions.Enabled && !string.IsNullOrEmpty(aiOptions.BaseUrl) && !string.IsNullOrEmpty(aiOptions.ApiKey))
+{
+    builder.Services.AddHttpClient<AdaptadorClienteIA, AdaptadorClienteIA>();
+    builder.Services.AddScoped<IResumidorComentariosIA>(sp =>
+        new ResumidorComentariosResiliente(
+            sp.GetRequiredService<AdaptadorClienteIA>(),
+            sp.GetRequiredService<ResumidorComentariosFallback>(),
+            sp.GetRequiredService<ILogger<ResumidorComentariosResiliente>>()));
+}
+else
+{
+    builder.Services.AddScoped<IResumidorComentariosIA, ResumidorComentariosFallback>();
+}
+
+Console.WriteLine($"Resumidor IA => Enabled={aiOptions.Enabled}, BaseUrl={aiOptions.BaseUrl}, Model={aiOptions.Model}, ApiKeyPresente={!string.IsNullOrEmpty(aiOptions.ApiKey)}");
 Console.WriteLine($"DB => {host}:{port}/{db} USER => {user}");
 
 builder.Services.AddControllers();

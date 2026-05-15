@@ -1,4 +1,5 @@
 using Votify.Application.DTOs;
+using Votify.Domain.Interfaces;
 
 namespace Votify.Application.Interfaces
 {
@@ -10,5 +11,6 @@ namespace Votify.Application.Interfaces
         Task<List<ProyectoDto>> ObtenerProyectosPorVotacionAsync(string votacionId);
         Task AgregarComentarioAsync(string proyectoId, string texto, Guid? autorId = null);
         Task<List<ComentarioDto>> ObtenerComentariosAsync(string proyectoId, Guid usuarioId, string? votacionId = null);
+        Task<ResumenComentario> ObtenerResumenComentariosAsync(string proyectoId);
     }
 }

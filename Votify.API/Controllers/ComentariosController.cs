@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Votify.API.DTOs;
 using Votify.Application.DTOs;
 using Votify.Application.Interfaces;
+using Votify.Domain.Interfaces;
 
 namespace Votify.API.Controllers
 {
@@ -53,6 +54,20 @@ namespace Votify.API.Controllers
             catch (UnauthorizedAccessException ex)
             {
                 return StatusCode(StatusCodes.Status403Forbidden, new { Message = ex.Message });
+            }
+        }
+
+        [HttpGet("resumen")]
+        public async Task<ActionResult<ResumenComentario>> ObtenerResumen(string proyectoId)
+        {
+            try
+            {
+                var resumen = await _fachada.ObtenerResumenComentariosAsync(proyectoId);
+                return Ok(resumen);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Error = "Error al generar resumen.", Detalle = ex.Message });
             }
         }
 

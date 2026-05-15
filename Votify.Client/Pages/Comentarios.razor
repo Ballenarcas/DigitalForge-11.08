@@ -126,11 +126,30 @@
                             <div class="comment-content">
                                 <div class="comment-meta">@GetAutorEtiqueta(comentario, index)</div>
                                 <div class="comment-date">@comentario.FechaCreacion.ToLocalTime().ToString("dd MMM yyyy HH:mm")</div>
-                                <p class="comment-text">“@comentario.Texto”</p>
+                                <p class="comment-text">"@comentario.Texto"</p>
                             </div>
                         </div>
                     }
                 </div>
+
+                @if (resumen != null)
+                {
+                    <div class="ai-summary-card">
+                        <div class="ai-summary-header">
+                            <h3>Resumen de Feedback</h3>
+                            @if (resumen.GeneradoPorIA)
+                            {
+                                <span class="ai-badge">Generado por IA</span>
+                            }
+                            else
+                            {
+                                <span class="fallback-badge">Resumen simple</span>
+                            }
+                        </div>
+                        <p class="ai-summary-text">@resumen.Resumen</p>
+                        <small class="ai-summary-meta">@resumen.TotalComentarios comentario(s) analizado(s) · @resumen.FechaGeneracion.ToLocalTime().ToString("dd MMM yyyy HH:mm")</small>
+                    </div>
+                }
             }
         </div>
     }
@@ -735,6 +754,54 @@
         font-weight: 500;
     }
 
+    .ai-summary-card {
+        margin-top: 1.5rem;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+        border: 1px solid #d8b4fe;
+        border-radius: 20px;
+    }
+    .ai-summary-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    .ai-summary-header h3 {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: #7c3aed;
+    }
+    .ai-badge {
+        background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+        color: white;
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+    }
+    .fallback-badge {
+        background: #e5e7eb;
+        color: #6b7280;
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+    }
+    .ai-summary-text {
+        margin: 0 0 0.75rem 0;
+        color: #334155;
+        line-height: 1.7;
+        font-size: 0.95rem;
+        white-space: pre-line;
+    }
+    .ai-summary-meta {
+        color: #94a3b8;
+        font-size: 0.78rem;
+        font-weight: 500;
+    }
+
     @@keyframes spin { to { transform: rotate(360deg); } }
     @@media (max-width: 768px) {
         .comments-wrapper { padding: 1rem; }
@@ -763,6 +830,7 @@
     private List<ComentarioDto> comentarios = new();
     private ResultadoMulticriterioDto? resultadoMulticriterio;
     private bool scoreRevelado;
+    private ResumenComentarioDto? resumen;
 
     protected override async Task OnInitializedAsync()
     {
@@ -778,6 +846,7 @@
             {
                 proyecto = await ProyectosService.ObtenerProyectoAsync(ProyectoId);
                 comentarios = await ProyectosService.ObtenerComentariosAsync(ProyectoId, VotacionId);
+                resumen = await ProyectosService.ObtenerResumenAsync(ProyectoId);
             }
 
             if (EsMulticriterio && !string.IsNullOrEmpty(VotacionId) && !string.IsNullOrEmpty(ProyectoId))

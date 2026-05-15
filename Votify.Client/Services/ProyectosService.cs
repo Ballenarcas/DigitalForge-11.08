@@ -77,5 +77,12 @@ namespace Votify.Client.Services
             var comentarios = await response.Content.ReadFromJsonAsync<List<ComentarioDto>>();
             return comentarios ?? new List<ComentarioDto>();
         }
+
+        public async Task<ResumenComentarioDto?> ObtenerResumenAsync(string proyectoId)
+        {
+            var response = await _httpClient.GetAsync($"api/proyectos/{proyectoId}/comentarios/resumen");
+            if (!response.IsSuccessStatusCode) return null;
+            return await response.Content.ReadFromJsonAsync<ResumenComentarioDto>();
+        }
     }
 }

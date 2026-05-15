@@ -74,6 +74,12 @@
                                     Ver Votaciones
                                 </button>
                             }
+                            else if (!yaInicio && EsOrganizador(e.Id!))
+                            {
+                                <button class="btn-votar btn-gestionar" @onclick='() => IrAVotaciones(e)'>
+                                    Gestionar Evento
+                                </button>
+                            }
                             else
                             {
                                 <button class="btn-votar" disabled>
@@ -125,6 +131,7 @@
 @code {
     private List<EventoDto>? listaEventos;
     private HashSet<string> misEventosIds = new();
+    private Dictionary<string, string> misRolesPorEvento = new();
     private bool isAuthenticated = true;
 
     protected override async Task OnInitializedAsync()
@@ -146,12 +153,27 @@
     {
         try 
         {
-            // Cargamos TODOS los eventos generales
             listaEventos = await EventosService.ObtenerEventosGenerales();
 
-            // Obtenemos a cuáles estamos inscriptos para saber su estado
             var misEventos = await EventosService.ObtenerMisEventos();
             misEventosIds = misEventos.Where(e => e.Id != null).Select(e => e.Id!).ToHashSet();
+
+            misRolesPorEvento.Clear();
+            foreach (var id in misEventosIds)
+            {
+                try
+                {
+                    var rol = await EventosService.ObtenerRolEnEvento(id);
+                    if (!string.IsNullOrEmpty(rol))
+                    {
+                        misRolesPorEvento[id] = rol;
+                    }
+                }
+                catch
+                {
+                    Console.WriteLine($"No se pudo obtener el rol para el evento {id}");
+                }
+            }
         }
         catch (Exception ex)
         {
@@ -177,6 +199,12 @@
     private void IrADetalles(string id)
     {
         Nav.NavigateTo($"/detalles-evento/{id}");
+    }
+
+    private bool EsOrganizador(string eventoId)
+    {
+        return misRolesPorEvento.TryGetValue(eventoId, out var rol)
+               && rol.Equals("ORGANIZADOR", StringComparison.OrdinalIgnoreCase);
     }
 
     private void IrAVotaciones(EventoDto? evento)
