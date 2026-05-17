@@ -170,5 +170,20 @@ namespace Votify.Client.Services
                 throw new Exception($"Error al abrir la votación: {error}");
             }
         }
+
+        public async Task<string> SubirImagen(MultipartFormDataContent content)
+        {
+            var resp = await _http.PostAsync("api/files/upload", content);
+            resp.EnsureSuccessStatusCode();
+            var result = await resp.Content.ReadFromJsonAsync<UploadResponse>();
+            
+            if (result != null && !string.IsNullOrEmpty(result.Url))
+            {
+                return _http.BaseAddress + result.Url;
+            }
+            return "";
+        }
+
+        private class UploadResponse { public string Url { get; set; } = ""; }
     }
 }

@@ -30,7 +30,8 @@ namespace Votify.Infrastructure.Repositories
                 ComentariosObligatorios = votacion.ComentariosObligatorios,
                 EsAnonima = votacion.EsAnonima,
                 EventoId = votacion.EventoId,
-                Estado = (int)votacion.Estado
+                Estado = (int)votacion.Estado,
+                ImagenUrl = votacion.ImagenUrl
             };
 
             await _db.Votaciones.AddAsync(entity);
@@ -76,6 +77,7 @@ namespace Votify.Infrastructure.Repositories
             entity.EsAnonima = votacion.EsAnonima;
             entity.EventoId = votacion.EventoId;
             entity.Estado = (int)votacion.Estado;
+            entity.ImagenUrl = votacion.ImagenUrl;
 
             await _db.SaveChangesAsync();
             return true;
@@ -134,7 +136,8 @@ namespace Votify.Infrastructure.Repositories
                 entity.Comentarios,
                 entity.ComentariosObligatorios,
                 entity.EventoId,
-                entity.EsAnonima
+                entity.EsAnonima,
+                entity.ImagenUrl
             );
             domain.Id = entity.Id;
             domain.Estado = (Domain.Entities.EstadoVotacion)entity.Estado;

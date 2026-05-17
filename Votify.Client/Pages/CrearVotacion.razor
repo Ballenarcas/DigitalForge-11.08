@@ -66,6 +66,33 @@
                 </div>
             }
 
+            <div class="form-group">
+                <label>Imagen de portada</label>
+                <div class="upload-container">
+                    @if (!string.IsNullOrEmpty(ImagenUrl))
+                    {
+                        <div class="preview-container">
+                            <img src="@ImagenUrl" class="image-preview" />
+                            <button class="btn-remove-image" @onclick="() => ImagenUrl = null">Eliminar</button>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="upload-box">
+                            <InputFile OnChange="HandleFileSelected" id="fileInput" class="hidden-input" accept="image/*" />
+                            <label for="fileInput" class="upload-label">
+                                <span class="upload-icon">📷</span>
+                                <span class="upload-text">Seleccionar imagen</span>
+                                <span class="upload-subtext">PNG, JPG o WEBP</span>
+                            </label>
+                        </div>
+                    }
+                </div>
+                @if (subiendoImagen)
+                {
+                    <p class="uploading-text">Subiendo imagen...</p>
+                }
+            </div>
 
             <div class="grid-dates">
                 <div class="form-group">
@@ -142,7 +169,13 @@
             </div>
 
 
-            <button class="btn-submit" @onclick="HandleCrearVotacion" disabled="@(EsMulticriterio && !PesosValidos)">Crear Votación</button>
+            <button class="btn-submit" @onclick="HandleCrearVotacion" disabled="@(subiendoImagen || (EsMulticriterio && !PesosValidos))">
+                @if (creando)
+                {
+                    <span class="spinner-small"></span>
+                }
+                Crear Votación
+            </button>
 
             @if (!string.IsNullOrEmpty(Mensaje))
             {
@@ -516,11 +549,66 @@ input:checked + .slider:before {
     opacity: 0.9;
 }
 
-.btn-submit:active {
+.btn-submit:active:not(:disabled) {
     transform: scale(0.99);
-    opacity: 0.5;
-
 }
+
+.btn-submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.spinner-small {
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 0.5rem;
+}
+@@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+/* Image Upload */
+.upload-container { margin-top: 0.5rem; }
+.upload-box {
+    border: 2px dashed #e2e8f0;
+    border-radius: 20px;
+    padding: 2rem;
+    text-align: center;
+    transition: 0.2s;
+    cursor: pointer;
+}
+.upload-box:hover { border-color: #a855f7; background: #fdfaff; }
+.hidden-input { display: none; }
+.upload-label { cursor: pointer; display: flex; flex-direction: column; align-items: center; }
+.upload-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+.upload-text { font-weight: 700; color: #1e293b; }
+.upload-subtext { font-size: 0.8rem; color: #94a3b8; }
+
+.preview-container {
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    height: 200px;
+    border: 1px solid #e2e8f0;
+}
+.image-preview { width: 100%; height: 100%; object-fit: cover; }
+.btn-remove-image {
+    position: absolute;
+    top: 10px; right: 10px;
+    background: rgba(239, 68, 68, 0.9);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+.uploading-text { color: #a855f7; font-size: 0.85rem; font-weight: 600; margin-top: 0.5rem; }
 
 .breadcrumb-link {
     color: #aa7ad7;
@@ -568,6 +656,9 @@ input:checked + .slider:before {
     bool Comentarios = true;
     bool ComentariosObligatorios = false;
     string? Mensaje;
+    string? ImagenUrl;
+    bool subiendoImagen = false;
+    bool creando = false;
     List<CriterioDto> Criterios = new()
     {
         new CriterioDto { Nombre = "Innovación", Peso = 40 },
@@ -647,6 +738,9 @@ input:checked + .slider:before {
         }
 
         try {
+            creando = true;
+            StateHasChanged();
+            
             VotacionDto? request = new VotacionDto {
                 Nombre = Nombre, Tipo = Tipo, 
                 FechaInicio = FechaInicio.ToUniversalTime(), 
@@ -654,6 +748,7 @@ input:checked + .slider:before {
                 LimiteProy = LimiteProy, Comentarios = Comentarios, 
                 ComentariosObligatorios = ComentariosObligatorios,
                 EsAnonima = EsAnonima,
+                ImagenUrl = ImagenUrl,
                 EventoId = AppState.EventoId ?? "",
                 Criterios = EsMulticriterio ? Criterios : new List<CriterioDto>()
             };
@@ -672,7 +767,42 @@ input:checked + .slider:before {
                 msg = System.Text.RegularExpressions.Regex.Match(msg, "\"Error\":\"(.*?)\"").Groups[1].Value;
             Mensaje = $"Error al crear la votación: {(string.IsNullOrEmpty(msg) ? ex.Message : msg)}"; 
         }
+        finally
+        {
+            creando = false;
+            StateHasChanged();
+        }
     }
+
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        try
+        {
+            subiendoImagen = true;
+            StateHasChanged();
+
+            var file = e.File;
+            if (file != null)
+            {
+                var content = new MultipartFormDataContent();
+                var fileContent = new StreamContent(file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024));
+                fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(file.ContentType);
+                content.Add(fileContent, "file", file.Name);
+
+                ImagenUrl = await VotacionesService.SubirImagen(content);
+            }
+        }
+        catch (Exception ex)
+        {
+            Mensaje = "Error al subir la imagen: " + ex.Message;
+        }
+        finally
+        {
+            subiendoImagen = false;
+            StateHasChanged();
+        }
+    }
+
     private void AgregarCriterio() => Criterios.Add(new CriterioDto { Nombre = "", Peso = 0 });
     private void QuitarCriterio(CriterioDto criterio)
     {

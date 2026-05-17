@@ -14,5 +14,6 @@ namespace Votify.Application.DTOs
         public string EventoId { get; set; } = default!;
         public int Estado { get; set; }
         public List<CriterioDto> Criterios { get; set; } = new();
+        public string? ImagenUrl { get; set; }
     }
 }

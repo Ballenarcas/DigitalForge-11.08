@@ -41,5 +41,8 @@ namespace Votify.Infrastructure.Persistence.Entities
 
         [Column("estado")]
         public int Estado { get; set; }
+
+        [Column("imagen_url")]
+        public string? ImagenUrl { get; set; }
     }
 }

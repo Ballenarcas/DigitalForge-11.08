@@ -7,17 +7,21 @@
 @inject AuthenticationStateProvider AuthStateProvider
 
 <div class="roles-container">
-    <!-- Header Section -->
-    <div class="roles-header">
-        <div>
-            <span class="roles-breadcrumb-badge">VOTACIÓN ABIERTA</span>
-            <h1 class="roles-page-title">Gestión de Roles del Evento</h1>
-            <p class="roles-page-description">Administra los permisos y categorías de los miembros del equipo y participantes asignados a este evento.</p>
-        </div>
-        <button class="btn roles-invite-btn" @onclick="VolverAlaVotaciones">
-            <span class="roles-invite-icon">←</span> Volver
+    <!-- Back button + Title -->
+    <div class="roles-top-nav">
+        <button class="btn-volver" @onclick="VolverAlaVotaciones">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="16" height="16">
+                <path d="M15 19L8 12L15 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Votaciones
         </button>
     </div>
+
+    <div class="roles-title-row">
+        <img src="images/logo-cambio-votacion.png" alt="Gestión de Roles" style="width:20px;height:20px;" />
+        <span class="brand-name">Gestión de Roles — @EventName</span>
+    </div>
+    <p class="roles-page-description" style="max-width:1000px; margin: -1rem auto 1.5rem; color:#64748b; font-size:0.9rem;">Administra los permisos y categorías de los miembros del equipo y participantes asignados a este evento.</p>
 
     @if (!string.IsNullOrWhiteSpace(StatusMessage))
     {
@@ -159,15 +163,58 @@
     .roles-container {
         background: #f5f5f7;
         min-height: 100vh;
-        padding: 3rem 2rem;
+        padding: 1.5rem 2rem;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .roles-top-nav {
+        display: flex;
+        align-items: center;
+        max-width: 1000px;
+        margin: 0 auto 1.25rem;
+    }
+
+    .btn-volver {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        background: white;
+        border: 1px solid #e2e8f0;
+        color: #64748b;
+        padding: 0.4rem 0.8rem;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-volver:hover {
+        background: #f8f9fc;
+        border-color: #ddd6fe;
+        color: #7c3aed;
+    }
+
+    .roles-title-row {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 2rem;
+        max-width: 1000px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .brand-name {
+        font-weight: 800;
+        font-size: 1.2rem;
+        color: #4c1d95;
+        letter-spacing: -0.02em;
     }
 
     .roles-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        gap: 3rem;
-        margin-bottom: 3rem;
+        max-width: 1000px;
+        margin: 0 auto 2rem;
     }
 
     .roles-breadcrumb-badge {

@@ -12,7 +12,8 @@ namespace Votify.Domain.Factory
             bool comentarios,
             bool comentariosObligatorios,
             Guid eventoId,
-            bool esAnonima = false
+            bool esAnonima = false,
+            string? imagenUrl = null
         );
     }
 }

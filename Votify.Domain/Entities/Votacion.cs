@@ -13,6 +13,7 @@ namespace Votify.Domain.Entities
         public bool EsAnonima { get; }
         public Guid EventoId { get; set; }
         public EstadoVotacion Estado { get; set; }
+        public string? ImagenUrl { get; set; }
         
         private IEstadoVotacion _estado => Estado switch
         {
@@ -22,7 +23,7 @@ namespace Votify.Domain.Entities
             _ => new EstadoActiva()
         };
 
-        protected Votacion(string nombre, DateTime inicio, DateTime fin, int limite, bool comentarios, bool comentariosObligatorios, string tipo, bool esAnonima, Guid eventoId)
+        protected Votacion(string nombre, DateTime inicio, DateTime fin, int limite, bool comentarios, bool comentariosObligatorios, string tipo, bool esAnonima, Guid eventoId, string? imagenUrl = null)
         {
             Id = Guid.NewGuid();
             Nombre = nombre;
@@ -35,6 +36,7 @@ namespace Votify.Domain.Entities
             EsAnonima = esAnonima;
             EventoId = eventoId;
             Estado = EstadoVotacion.Abierta;
+            ImagenUrl = imagenUrl;
         }
 
         public void Pausar()

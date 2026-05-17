@@ -13,4 +13,5 @@ public class CrearVotacionDto
     public string? EventoId { get; set; }
     public int? Estado { get; set; }
     public List<CriterioDto> Criterios { get; set; } = new();
+    public string? ImagenUrl { get; set; }
 }

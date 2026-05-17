@@ -51,13 +51,13 @@
                 <button class="btn-crear" @onclick="IrACrearVotacion">
                     <span>+</span> Nueva Votación
                 </button>
-                <button class="btn-crear" @onclick="IrAGestionRoles" style="background-color:#6f42c1; border-color:#6f42c1;">
+                <button class="btn-crear" @onclick="IrAGestionRoles" style="background-color:#D4A2F5; border-color:#D4A2F5;">
                     Gestionar Roles
                 </button>
             }
             @if (Rol != null)
             {
-                <button class="btn-crear" style="background-color:#4f46e5; border-color:#4f46e5;" @onclick="IrACrearEquipo">
+                <button class="btn-crear" style="background-color:#D4A2F5; border-color:#D4A2F5;" @onclick="IrACrearEquipo">
                     Equipos
                 </button>
             }
@@ -68,7 +68,7 @@
     <div class="page-header-row">
         <div class="logo-container">
             <div class="logo-icon small">
-                <img src="images/votaciones-logo.png" alt="Votaciones logo" class="evento-logo-img" style="width:45px;height:45px;" />
+                <img src="images/votaciones-logo.png" alt="Votaciones logo" class="evento-logo-img" style="width:20px;height:20px;" />
             </div>
             <span class="brand-name">Votaciones de @(AppState.EventoNombre ?? "Evento")</span>
         </div>
@@ -109,114 +109,82 @@
                     var cardClass = noIniciada ? "card-pending" : estaActiva ? "card-active" : estaPausada ? "card-paused" : "card-ended";
                     var pillClass = noIniciada ? "pill-pending" : estaActiva ? "pill-active" : estaPausada ? "pill-paused" : "pill-ended";
 
-                    <div class="votacion-card @cardClass">
-                        <div class="card-top-row">
-                            <div class="card-badge">@v.Tipo</div>
-                            <div class="status-pill @pillClass">
-                                @if (noIniciada)
-                                {
-                                    <span> Votación programada</span>
-                                }
-                                else if (estaActiva)
-                                {
-                                    <span> Votación activa</span>
-                                }
-                                else if (estaPausada)
-                                {
-                                    <span> Votación pausada</span>
-                                }
-                                else
-                                {
-                                    <span> Votación finalizada</span>
-                                }
-                            </div>
+                    <div class="votacion-card @cardClass" style="animation-delay: 0s;">
+                        <div class="card-cover">
+                            <img src="@(string.IsNullOrEmpty(v.ImagenUrl) ? "images/Votación-default.jpg" : v.ImagenUrl)" alt="@v.Nombre" onerror="this.src='images/Votación-default.jpg'" />
                         </div>
-                        <h3>@v.Nombre</h3>
-                        
-                        @if (noIniciada)
-                        {
-                            <p class="fecha-info">
-                                <strong>Inicia:</strong> @v.FechaInicio.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
-                            </p>
-                            <p class="tiempo-restante">Comienza en @GetTiempoRestante((v.FechaInicio - ahora).TotalMinutes)</p>
-                        }
-                        else if (estaActiva)
-                        {
-                            <p class="fecha-info">
-                                <strong>Finaliza:</strong> @v.FechaFin.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
-                            </p>
-                            <p class="tiempo-restante">@GetTiempoRestante(minutosRestantes)</p>
-                        }
-                        else if (estaPausada)
-                        {
-                            <p class="fecha-info">
-                                <strong>Pausa hasta:</strong> @v.FechaFin.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
-                            </p>
-                            <p class="tiempo-restante">Votación en pausa</p>
-                        }
-                        else
-                        {
-                            <p class="fecha-info">
-                                <strong>Finalizada:</strong> @v.FechaFin.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
-                            </p>
-                            <p class="tiempo-restante">Votación cerrada</p>
-                        }
+                        <div class="card-content">
+                            <div class="card-type-hint">VOTACIÓN @v.Tipo</div>
 
-                        @if (noIniciada)
-                        {
-                            <button class="btn-votar btn-disabled" disabled title="La votación aún no ha comenzado">
-                                No iniciada
-                            </button>
-                        }
-                        else if (estaActiva)
-                        {
-                            <button class="btn-votar btn-active" @onclick="() => Votar(v.Id)" title="¡Haz tu voto ahora!">
-                                Votar ahora
-                            </button>
-                        }
-                        else if (estaPausada)
-                        {
-                            <button class="btn-votar btn-disabled" disabled title="La votación está en pausa">
-                                Votación pausada
-                            </button>
-                        }
-                        else
-                        {
-                            <button class="btn-votar btn-closed" disabled title="Esta votación ya ha finalizado">
-                                Votación cerrada
-                            </button>
-                        }
+                            <h3>@v.Nombre</h3>
+                            
+                            <div class="description-container">
+                                <p class="descripcion-breve">Límite de votos: @v.LimiteProy proyectos.</p>
+                            </div>
 
-                        <div class="card-footer">
-                            <span class="stats">@v.LimiteProy Proyectos disponibles</span>
-                            <div class="footer-actions">
-                                @if (estaActiva || estaPausada)
-                                {
-                                    <button class="btn-resultados" @onclick="() => VerResultados(v.Id)" title="Ver resultados en tiempo real">
-                                        Resultados
-                                    </button>
-                                }
-                                @if (estaFinalizada)
-                                {
-                                    <button class="btn-resultados" @onclick="() => VerResultados(v.Id)" title="Ver resultados finales">
-                                        Resultados
-                                    </button>
-                                }
-                                @if (Rol == "ORGANIZADOR")
-                                {
-                                    @if (!estaFinalizada)
+                            <div class="info-row">
+                                <div class="date-row">
+                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="14" height="14">
+                                        <path d="M8 2V5M16 2V5M3.5 9.09H20.5M21 8.5V17C21 20 19.5 22 16 22H8C4.5 22 3 20 3 17V8.5C3 5.5 4.5 3.5 8 3.5H16C19.5 3.5 21 5.5 21 8.5Z" stroke="currentColor" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M15.6947 13.7H15.7037M15.6947 16.7H15.7037M11.9955 13.7H12.0045M11.9955 16.7H12.0045M8.29639 13.7H8.30537M8.29639 16.7H8.30537" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    <span>@v.FechaInicio.ToLocalTime().ToString("dd/MM/yy") - @v.FechaFin.ToLocalTime().ToString("dd/MM/yy")</span>
+                                </div>
+                                <div class="status-indicator @(noIniciada ? "status-pending" : estaActiva ? "status-active" : estaPausada ? "status-paused" : "status-ended")">
+                                    <span class="status-dot @(estaActiva ? "pulse" : "")"></span>
+                                    @(noIniciada ? "Programada" : estaActiva ? "Activa" : estaPausada ? "Pausada" : "Finalizada")
+                                </div>
+                            </div>
+
+                            @if (noIniciada)
+                            {
+                                <button class="btn-votar btn-disabled" disabled title="La votación aún no ha comenzado">
+                                    No iniciada
+                                </button>
+                            }
+                            else if (estaActiva)
+                            {
+                                <button class="btn-votar btn-active" @onclick="() => Votar(v.Id)" title="¡Haz tu voto ahora!">
+                                    Votar ahora
+                                </button>
+                            }
+                            else if (estaPausada)
+                            {
+                                <button class="btn-votar btn-disabled" disabled title="La votación está en pausa">
+                                    Votación pausada
+                                </button>
+                            }
+                            else
+                            {
+                                <button class="btn-votar btn-closed" disabled title="Esta votación ya ha finalizado">
+                                    Votación cerrada
+                                </button>
+                            }
+
+                            <div class="card-footer">
+                                <div class="footer-actions">
+                                    @if (estaActiva || estaPausada || estaFinalizada)
                                     {
-                                        <button class="btn-ver" @onclick="() => Gestionar(v.Id)" title="Editar configuración">
-                                            Editar
+                                        <button class="btn-ver" @onclick="() => VerResultados(v.Id)" title="Ver resultados">
+                                            Resultados
                                         </button>
                                     }
-                                    @if (estaFinalizada)
+                                    @if (Rol == "ORGANIZADOR")
                                     {
-                                        <button class="btn-eliminar" @onclick="() => EliminarVotacion(v.Id)" title="Eliminar esta votación">
-                                            Eliminar
-                                        </button>
+                                        @if (!estaFinalizada)
+                                        {
+                                            <button class="btn-ver" @onclick="() => Gestionar(v.Id)" title="Editar configuración">
+                                                Editar
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <button class="btn-eliminar" @onclick="() => EliminarVotacion(v.Id)" title="Eliminar esta votación">
+                                                Eliminar
+                                            </button>
+                                        }
                                     }
-                                }
+                                </div>
                             </div>
                         </div>
                     </div>

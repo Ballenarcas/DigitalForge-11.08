@@ -117,11 +117,11 @@
                                 <p class="descripcion-breve">@p.Descripcion</p>
                             </div>
 
-                            <div class="info-row" style="justify-content: flex-end;">
-                                <div class="status-indicator status-active">
-                                    <span class="status-dot pulse"></span>
-                                    Participante
-                                </div>
+                            <div class="info-row" style="justify-content: flex-start;">
+                                <span class="stats" style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: flex; align-items: center; gap: 0.4rem;">
+                                    <svg viewBox="0 0 24 24" fill="none" width="16" height="16" xmlns="http://www.w3.org/2000/svg"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M23 21v-2a4 4 0 0 0-3-3.87" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                    @ObtenerNombreEquipo(p.Equipo_Id)
+                                </span>
                             </div>
 
                             <div class="actions-main">
@@ -139,8 +139,7 @@
                                 }
                             </div>
 
-                            <div class="card-footer">
-                                <span class="stats">Equipo: @ObtenerNombreEquipo(p.Equipo_Id)</span>
+                            <div class="card-footer" style="justify-content: flex-start;">
                                 <div class="footer-actions">
                                     <button class="btn-ver" @onclick="() => VerDetalles(p.Id)">Detalles</button>
                                 </div>
