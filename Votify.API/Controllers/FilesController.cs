@@ -22,8 +22,8 @@ namespace Votify.API.Controllers
             if (file == null || file.Length == 0)
                 return BadRequest("No file uploaded.");
 
-            if (bucket != "Eventos" && bucket != "proyectos")
-                bucket = "proyectos";
+            if (bucket != "Eventos" && !bucket.Equals("Proyectos", StringComparison.OrdinalIgnoreCase))
+                bucket = "Proyectos";
 
             var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
 

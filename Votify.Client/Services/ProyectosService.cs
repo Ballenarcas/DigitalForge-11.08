@@ -31,7 +31,7 @@ namespace Votify.Client.Services
             return await resp.Content.ReadAsStringAsync();
         }
 
-        public async Task<string> SubirImagen(MultipartFormDataContent content, string bucket = "proyectos")
+        public async Task<string> SubirImagen(MultipartFormDataContent content, string bucket = "Proyectos")
         {
             var resp = await _httpClient.PostAsync($"api/files/upload?bucket={Uri.EscapeDataString(bucket)}", content);
             resp.EnsureSuccessStatusCode();
