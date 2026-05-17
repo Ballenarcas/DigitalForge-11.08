@@ -10,6 +10,7 @@ using Votify.Infrastructure.Repositories;
 using Votify.Domain.Interfaces;
 using Votify.Infrastructure.Configuration;
 using Votify.Infrastructure.Adapters;
+using Votify.Infrastructure.Storage;
 using Microsoft.Extensions.Options;
 using Polly;
 using Polly.Extensions.Http;
@@ -153,6 +154,24 @@ else
 
 Console.WriteLine($"Resumidor IA => Enabled={aiOptions.Enabled}, BaseUrl={aiOptions.BaseUrl}, Model={aiOptions.Model}, ApiKeyPresente={!string.IsNullOrEmpty(aiOptions.ApiKey)}");
 Console.WriteLine($"DB => {host}:{port}/{db} USER => {user}");
+
+var supabaseUrl = Environment.GetEnvironmentVariable("SUPABASE_URL") ?? "";
+var supabaseKey = Environment.GetEnvironmentVariable("SUPABASE_SERVICE_KEY") ?? "";
+builder.Services.AddHttpClient<IStorageService, SupabaseStorageService>(client =>
+{
+    client.DefaultRequestHeaders.Add("apikey", supabaseKey);
+})
+.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler());
+builder.Services.AddScoped<SupabaseStorageService>(sp =>
+{
+    var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>();
+    var httpClient = httpClientFactory.CreateClient(nameof(SupabaseStorageService));
+    var logger = sp.GetRequiredService<ILogger<SupabaseStorageService>>();
+    return new SupabaseStorageService(httpClient, supabaseUrl, supabaseKey, logger);
+});
+builder.Services.AddScoped<IStorageService>(sp => sp.GetRequiredService<SupabaseStorageService>());
+
+Console.WriteLine($"Supabase Storage => Url={supabaseUrl}, KeyPresente={!string.IsNullOrEmpty(supabaseKey)}");
 
 builder.Services.AddControllers();
 

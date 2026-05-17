@@ -42,16 +42,15 @@ namespace Votify.Client.Services
             resp.EnsureSuccessStatusCode();
         }
 
-        public async Task<string> SubirImagen(MultipartFormDataContent content)
+        public async Task<string> SubirImagen(MultipartFormDataContent content, string bucket = "Eventos")
         {
-            var resp = await _http.PostAsync("api/files/upload", content);
+            var resp = await _http.PostAsync($"api/files/upload?bucket={Uri.EscapeDataString(bucket)}", content);
             resp.EnsureSuccessStatusCode();
             var result = await resp.Content.ReadFromJsonAsync<UploadResponse>();
             
             if (result != null && !string.IsNullOrEmpty(result.Url))
             {
-                // Return absolute URL for uploaded images
-                return _http.BaseAddress + result.Url;
+                return result.Url;
             }
             return "";
         }

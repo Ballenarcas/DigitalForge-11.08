@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Votify.Domain.Interfaces;
 
 namespace Votify.API.Controllers
 {
@@ -6,33 +7,37 @@ namespace Votify.API.Controllers
     [Route("api/files")]
     public class FilesController : ControllerBase
     {
-        private readonly IWebHostEnvironment _env;
+        private readonly IStorageService _storageService;
+        private readonly ILogger<FilesController> _logger;
 
-        public FilesController(IWebHostEnvironment env)
+        public FilesController(IStorageService storageService, ILogger<FilesController> logger)
         {
-            _env = env;
+            _storageService = storageService;
+            _logger = logger;
         }
 
         [HttpPost("upload")]
-        public async Task<IActionResult> Upload(IFormFile file)
+        public async Task<IActionResult> Upload(IFormFile file, [FromQuery] string bucket = "proyectos")
         {
             if (file == null || file.Length == 0)
                 return BadRequest("No file uploaded.");
 
-            var uploads = Path.Combine(_env.ContentRootPath, "wwwroot", "images", "uploads");
-            if (!Directory.Exists(uploads))
-                Directory.CreateDirectory(uploads);
+            if (bucket != "Eventos" && bucket != "proyectos")
+                bucket = "proyectos";
 
             var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
-            var filePath = Path.Combine(uploads, fileName);
 
-            using (var stream = new FileStream(filePath, FileMode.Create))
+            try
             {
-                await file.CopyToAsync(stream);
+                using var stream = file.OpenReadStream();
+                var url = await _storageService.SubirArchivoAsync(bucket, stream, fileName, file.ContentType);
+                return Ok(new { url });
             }
-
-            var url = $"images/uploads/{fileName}";
-            return Ok(new { url });
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error subiendo archivo a Supabase Storage");
+                return StatusCode(500, new { Error = "Error al subir la imagen.", Detalle = ex.Message });
+            }
         }
     }
 }
