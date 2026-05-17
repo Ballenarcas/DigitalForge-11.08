@@ -318,6 +318,7 @@ namespace Votify.Application.Services
                 EsAnonima = e.EsAnonima,
                 EventoId = e.EventoId.ToString(),
                 Estado = (int)e.Estado,
+                ImagenUrl = e.ImagenUrl,
                 Criterios = criterios ?? new List<CriterioDto>()
             };
         }
@@ -407,7 +408,8 @@ namespace Votify.Application.Services
                 dto.Comentarios,
                 dto.ComentariosObligatorios,
                 eventoGuid,
-                dto.EsAnonima
+                dto.EsAnonima,
+                dto.ImagenUrl
             );
 
             // Inicializar pausada si la fecha de inicio es en el futuro
