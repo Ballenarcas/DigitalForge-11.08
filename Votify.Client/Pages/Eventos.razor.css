@@ -99,6 +99,23 @@
     letter-spacing: 0.1em;
     margin-bottom: 0.25rem;
 }
+.card-type-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.25rem;
+}
+.card-type-row .card-type-hint {
+    margin-bottom: 0;
+}
+.rol-organizador { background: #f5f3ff; color: #6d28d9; }
+.rol-organizador .status-dot { background: #7c3aed; }
+.rol-jurado { background: #eff6ff; color: #1d4ed8; }
+.rol-jurado .status-dot { background: #3b82f6; }
+.rol-competidor { background: #f0fdf4; color: #15803d; }
+.rol-competidor .status-dot { background: #22c55e; }
+.rol-publico { background: #f8fafc; color: #64748b; }
+.rol-publico .status-dot { background: #94a3b8; }
 .card-cover img {
     width: 100%;
     height: 100%;

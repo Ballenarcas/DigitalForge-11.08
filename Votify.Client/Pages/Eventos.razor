@@ -52,7 +52,22 @@
                             <img src="@(string.IsNullOrEmpty(e.ImagenUrl) ? "images/evento-default.png" : e.ImagenUrl)" alt="@e.Nombre" />
                         </div>
                         <div class="card-content">
-                            <div class="card-type-hint">EVENTO</div>
+                            <div class="card-type-row">
+                                <div class="card-type-hint">EVENTO</div>
+                                @if (e.Id != null && misRolesPorEvento.TryGetValue(e.Id, out var rolEvento))
+                                {
+                                    var rolClass = rolEvento.ToUpper() switch {
+                                        "ORGANIZADOR" => "rol-organizador",
+                                        "JURADO" => "rol-jurado",
+                                        "COMPETIDOR" => "rol-competidor",
+                                        _ => "rol-publico"
+                                    };
+                                    <div class="status-indicator @rolClass">
+                                        <span class="status-dot"></span>
+                                        @rolEvento
+                                    </div>
+                                }
+                            </div>
 
                             <h3>@e.Nombre</h3>
                             
