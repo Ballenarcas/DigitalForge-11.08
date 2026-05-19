@@ -21,9 +21,9 @@ builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
-builder.Services.AddScoped(sp => new HttpClient 
-{ 
-BaseAddress = new Uri("http://localhost:5154/")
+builder.Services.AddScoped(sp => new HttpClient
+{
+    BaseAddress = new Uri("http://localhost:5154/")
 });
 
 await builder.Build().RunAsync();
