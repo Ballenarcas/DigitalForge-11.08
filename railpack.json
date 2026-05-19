@@ -1,7 +1,0 @@
-{
-  "$schema": "https://schema.railpack.com",
-  "provider": "dotnet",
-  "deploy": {
-    "startCommand": "./out/Votify.API"
-  }
-}
