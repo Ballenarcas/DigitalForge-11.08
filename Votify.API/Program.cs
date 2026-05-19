@@ -180,7 +180,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowBlazor",
         policy =>
         {
-            policy.AllowAnyOrigin()
+            policy.WithOrigins("https://ballenarcas.github.io")
                   .AllowAnyMethod()
                   .AllowAnyHeader();
         });
