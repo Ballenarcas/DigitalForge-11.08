@@ -23,7 +23,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddScoped(sp => new HttpClient 
 { 
-    BaseAddress = new Uri("https://digitalforge-1108-production.up.railway.app/") 
+    BaseAddress = new Uri("http://localhost:5154/") 
 });
 
 await builder.Build().RunAsync();
