@@ -17,8 +17,8 @@
             <span class="icon-arrow">←</span> Volver
         </button>
         <div class="breadcrumbs">
-            <a href="/" class="breadcrumb-link">Eventos</a> <span class="separator">></span>
-            <a href="/votaciones" class="breadcrumb-link">Votaciones</a> <span class="separator">></span>
+            <a href="" class="breadcrumb-link" @onclick:preventDefault @onclick="() => Nav.NavigateTo("/")">Eventos</a> <span class="separator">></span>
+            <a href="" class="breadcrumb-link" @onclick:preventDefault @onclick="() => Nav.NavigateTo("/votaciones")">Votaciones</a> <span class="separator">></span>
             <span class="current-page">Subir Proyecto</span>
         </div>
     </div>
