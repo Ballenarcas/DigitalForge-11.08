@@ -9,7 +9,7 @@
             <div class="header-spacer"></div>
 
             <div class="logo-container">
-                <a href="" @onclick:preventDefault @onclick="() => NavManager.NavigateTo("/")">
+                <a href="/">
                     <div class="logo-icon">
                         <img src="images/votify-logo-blanco.png" alt="Votify Logo" />
                     </div>
@@ -40,8 +40,8 @@
                         </div>
                     </Authorized>
                     <NotAuthorized>
-                        <a href="" class="btn-login" @onclick:preventDefault @onclick="() => NavManager.NavigateTo("/login")">Iniciar Sesión</a>
-                        <a href="" class="btn-register" @onclick:preventDefault @onclick="() => NavManager.NavigateTo("/registro")">Registrarse</a>
+                        <a href="/login" class="btn-login">Iniciar Sesión</a>
+                        <a href="/registro" class="btn-register">Registrarse</a>
                     </NotAuthorized>
                 </AuthorizeView>
             </div>
