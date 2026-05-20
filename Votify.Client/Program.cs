@@ -23,7 +23,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddScoped(sp => new HttpClient
 {
-    BaseAddress = new Uri("/")
+    BaseAddress = new Uri("http://localhost:5154/")
 });
 
 await builder.Build().RunAsync();
