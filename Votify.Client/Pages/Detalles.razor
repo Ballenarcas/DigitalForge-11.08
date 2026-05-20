@@ -278,19 +278,57 @@
                     {
                         <div class="alert-voto @(votoOk ? "alert-ok" : "alert-err")">@mensajeVoto</div>
                     }
-                    <!-- Animacion maximalista de votacion -->
+                    <!-- ==========================================
+                         CELEBRACION EPICA DE VOTACION
+                         ========================================== -->
                     @if (mostrarCelebracion)
                     {
-                        <div class="vote-particles-container">
-                            @for (int i = 0; i < 20; i++)
+                        <div class="vote-celebration-overlay">
+                            <!-- Flash dorado -->
+                            <div class="vote-flash-gold"></div>
+
+                            <!-- Ondas de choque concentricas -->
+                            <div class="shockwave-ring"></div>
+                            <div class="shockwave-ring"></div>
+                            <div class="shockwave-ring"></div>
+
+                            <!-- 40 particulas explosivas -->
+                            @for (int i = 0; i < 40; i++)
                             {
-                                <div class="particle"></div>
+                                var shapeClass = (i % 3) switch
+                                {
+                                    0 => "circle",
+                                    1 => "star",
+                                    _ => "diamond"
+                                };
+                                var sizeClass = (i % 5) switch
+                                {
+                                    0 => "size-xs",
+                                    1 => "size-sm",
+                                    2 => "size-md",
+                                    3 => "size-lg",
+                                    _ => "size-xl"
+                                };
+                                var colorClass = $"p-color-{(i % 8) + 1}";
+                                <div class="celebration-particle @shapeClass @sizeClass @colorClass"></div>
                             }
+
+                            <!-- Confeti que cae -->
+                            @for (int i = 0; i < 10; i++)
+                            {
+                                var confettiShape = i % 2 == 0 ? "square" : "strip";
+                                <div class="confetti-piece @confettiShape"></div>
+                            }
+
+                            <!-- Banner "VOTO REGISTRADO" -->
+                            <div class="vote-success-banner">
+                                <div class="banner-text">VOTO REGISTRADO</div>
+                                <div class="banner-sub">Gracias por participar</div>
+                            </div>
                         </div>
-                        <div class="vote-success-flash"></div>
                     }
 
-                    <button class="btn-votar-proyecto @(votando ? "votando-anim" : "") @(votoOk ? "voto-exito" : "")" @onclick="Votar" disabled="@(votando || votoOk || limiteAlcanzado || estaFinalizada || estaPausada || noIniciada)">
+                    <button class="btn-votar-proyecto @(votando ? "votando-anim" : "") @(votoOk ? "voto-exito" : "") @(mostrarCelebracion ? "screen-shake" : "")" @onclick="Votar" disabled="@(votando || votoOk || limiteAlcanzado || estaFinalizada || estaPausada || noIniciada)">
                         @if (votando)
                         {
                             <span class="spinner-sm"></span>
@@ -1149,6 +1187,17 @@
             mensajeVoto = "¡Tu voto ha sido registrado con éxito!";
             votoOk = true;
             mostrarCelebracion = true;
+
+            // Resetear la celebracion despues de que termine la animacion
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(2500);
+                await InvokeAsync(() =>
+                {
+                    mostrarCelebracion = false;
+                    StateHasChanged();
+                });
+            });
         }
         catch (Exception ex)
         {
