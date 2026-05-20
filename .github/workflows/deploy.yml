@@ -15,14 +15,26 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Log in to Azure Container Registry
-        uses: azure/docker-login@v1
-        with:
-          login-server: ${{ secrets.ACR_LOGIN_SERVER }}
-          username: ${{ secrets.ACR_USERNAME }}
-          password: ${{ secrets.ACR_PASSWORD }}
-
       - name: Build and Push Docker image
+        env:
+          ACR_LOGIN: ${{ secrets.ACR_LOGIN_SERVER }}
+          ACR_USER: ${{ secrets.ACR_USERNAME }}
+          ACR_PASS: ${{ secrets.ACR_PASSWORD }}
         run: |
-          docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/votify:latest .
-          docker push ${{ secrets.ACR_LOGIN_SERVER }}/votify:latest
+          if [ -z "$ACR_PASS" ]; then
+            echo "::error::El secreto ACR_PASSWORD esta vacio. Revisa que este creado como 'Repository secret' y no como 'Environment secret'."
+            exit 1
+          fi
+          if [ -z "$ACR_USER" ]; then
+            echo "::error::El secreto ACR_USERNAME esta vacio."
+            exit 1
+          fi
+          
+          echo "Iniciando sesion en docker ($ACR_LOGIN)..."
+          echo "$ACR_PASS" | docker login "$ACR_LOGIN" -u "$ACR_USER" --password-stdin
+          
+          echo "Construyendo imagen..."
+          docker build -t "$ACR_LOGIN/votify:latest" .
+          
+          echo "Subiendo imagen a ACR..."
+          docker push "$ACR_LOGIN/votify:latest"
