@@ -1,6 +1,7 @@
 @page "/evento/{EventoId:guid}/roles"
 @using System.Linq
 @using Votify.Client.DTOs
+@using Votify.Client.Utilities
 @inject Votify.Client.Services.EventosService EventosService
 @inject NavigationManager Nav
 @inject Votify.Client.Services.AppState AppState
@@ -1102,12 +1103,13 @@
             CurrentPage = 1;
         }
         catch (Exception ex)
-        {
-            Participantes = new List<ParticipanteRolDto>();
-            Stats = new RoleStatisticsDto();
-            isAuthorized = false;
-            ShowError(ex.Message.Contains("No tienes permisos", StringComparison.OrdinalIgnoreCase) ? "No tienes permisos" : ex.Message);
-        }
+         {
+             var extractedError = ErrorMessageParser.ExtractErrorMessage(ex.Message);
+             Participantes = new List<ParticipanteRolDto>();
+             Stats = new RoleStatisticsDto();
+             isAuthorized = false;
+             ShowError(extractedError);
+         }
         finally
         {
             isLoading = false;
@@ -1141,11 +1143,12 @@
             Stats = await EventosService.ObtenerEstadisticasRoles(EventoId.ToString());
             ShowSuccess(string.IsNullOrWhiteSpace(previousRole) ? "Rol asignado correctamente" : "Rol cambiado exitosamente");
         }
-        catch (Exception ex)
-        {
-            user.Rol = previousRole;
-            ShowError(ex.Message);
-        }
+         catch (Exception ex)
+         {
+             var extractedError = ErrorMessageParser.ExtractErrorMessage(ex.Message);
+             user.Rol = previousRole;
+             ShowError(extractedError);
+         }
     }
 
     private async Task QuitarParticipante(ParticipanteRolDto user)
@@ -1162,10 +1165,11 @@
             ShowSuccess("Participante quitado correctamente");
             await LoadParticipantesAsync();
         }
-        catch (Exception ex)
-        {
-            ShowError(ex.Message);
-        }
+         catch (Exception ex)
+         {
+             var extractedError = ErrorMessageParser.ExtractErrorMessage(ex.Message);
+             ShowError(extractedError);
+         }
     }
 
     private void VolverAlaVotaciones()

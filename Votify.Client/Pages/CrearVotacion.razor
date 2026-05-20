@@ -1,5 +1,6 @@
 @page "/nueva-votacion"
 @using Votify.Client.DTOs
+@using Votify.Client.Utilities
 @inject VotacionesService VotacionesService
 @inject NavigationManager Nav
 @inject AppState AppState
@@ -814,12 +815,10 @@ input:checked + .slider:before {
             Nav.NavigateTo($"/votaciones?eventoId={AppState.EventoId}");
         } 
         catch (Exception ex) 
-        { 
-            var msg = ex.Message;
-            if (msg.Contains("\"Error\""))
-                msg = System.Text.RegularExpressions.Regex.Match(msg, "\"Error\":\"(.*?)\"").Groups[1].Value;
-            Mensaje = $"Error al crear la votación: {(string.IsNullOrEmpty(msg) ? ex.Message : msg)}"; 
-        }
+         { 
+             var extractedError = ErrorMessageParser.ExtractErrorMessage(ex.Message);
+             Mensaje = $"Error al crear la votación: {extractedError}"; 
+         }
         finally
         {
             creando = false;
@@ -846,9 +845,10 @@ input:checked + .slider:before {
             }
         }
         catch (Exception ex)
-        {
-            Mensaje = "Error al subir la imagen: " + ex.Message;
-        }
+         {
+             var extractedError = ErrorMessageParser.ExtractErrorMessage(ex.Message);
+             Mensaje = $"Error al subir la imagen: {extractedError}";
+         }
         finally
         {
             subiendoImagen = false;

@@ -3,6 +3,7 @@
 @using System.Security.Claims
 @using Microsoft.AspNetCore.Components.Authorization
 @using Votify.Client.DTOs
+@using Votify.Client.Utilities
 @using Votify.Client.Services
 @inject ProyectosService ProyectosService
 @inject VotacionesService VotacionesService
@@ -506,13 +507,10 @@
                 ImagenUrl = await ProyectosService.SubirImagen(content);
             }
         }
-        catch (Exception ex)
-        {
-            var msg = ex.Message;
-            if (msg.Contains("\"Error\""))
-                msg = System.Text.RegularExpressions.Regex.Match(msg, "\"Error\":\"(.*?)\"").Groups[1].Value;
-            Mensaje = "Error al subir la imagen: " + (string.IsNullOrEmpty(msg) ? ex.Message : msg);
-        }
+         catch (Exception ex)
+         {
+             Mensaje = "Error al subir la imagen: " + ErrorMessageParser.ExtractErrorMessage(ex.Message);
+         }
         finally
         {
             subiendoImagen = false;
@@ -576,13 +574,10 @@
             await Task.Delay(1000);
             Nav.NavigateTo($"/{VotacionId}/proyectos/");
         }
-        catch (Exception ex)
-        {
-            var msg = ex.Message;
-            if (msg.Contains("\"Error\""))
-                msg = System.Text.RegularExpressions.Regex.Match(msg, "\"Error\":\"(.*?)\"").Groups[1].Value;
-            Mensaje = "Error al subir el proyecto: " + (string.IsNullOrEmpty(msg) ? ex.Message : msg);
-        }
+         catch (Exception ex)
+         {
+             Mensaje = "Error al subir el proyecto: " + ErrorMessageParser.ExtractErrorMessage(ex.Message);
+         }
         finally
         {
             creando = false;

@@ -1,5 +1,6 @@
 @page "/votacion/{Id}"
 @using Votify.Client.DTOs
+@using Votify.Client.Utilities
 @inject VotacionesService VotacionesService
 @inject NavigationManager Nav
 @inject IJSRuntime JSRuntime
@@ -1505,10 +1506,11 @@ input:checked + .slider:before {
                     new CriterioDto { Nombre = "Diseño", Peso = 60 }
                 };
         }
-        catch
-        {
-            errorCarga = true;
-        }
+         catch (Exception ex)
+         {
+             Console.WriteLine($"[ERROR] Error cargando votación: {ex.Message}");
+             errorCarga = true;
+         }
         finally
         {
             cargando = false;
@@ -1559,10 +1561,11 @@ input:checked + .slider:before {
             await Task.Delay(800);
             Nav.NavigateTo($"/votaciones?eventoId={EventoId}");
         }
-        catch
-        {
-            Mensaje = "Error al guardar los cambios. Inténtalo de nuevo.";
-        }
+         catch (Exception ex)
+         {
+             var extractedError = ErrorMessageParser.ExtractErrorMessage(ex.Message);
+             Mensaje = $"Error al guardar los cambios: {extractedError}";
+         }
         finally
         {
             guardando = false;
@@ -1586,11 +1589,12 @@ input:checked + .slider:before {
             await Task.Delay(800);
             Nav.NavigateTo($"/votaciones?eventoId={EventoId}");
         }
-        catch
-        {
-            Mensaje = "Error al eliminar la votación. Inténtalo de nuevo.";
-            mostrarModalConfirmacion = false;
-        }
+         catch (Exception ex)
+         {
+             var extractedError = ErrorMessageParser.ExtractErrorMessage(ex.Message);
+             Mensaje = $"Error al eliminar la votación: {extractedError}";
+             mostrarModalConfirmacion = false;
+         }
         finally
         {
             eliminando = false;
@@ -1624,14 +1628,12 @@ input:checked + .slider:before {
             EstadoActual = 1;
             Mensaje = "✅ Votación pausada correctamente.";
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[ERROR] Exception al pausar: {ex.Message}");
-            var msg = ex.Message;
-            if (msg.Contains("\"error\":"))
-                msg = System.Text.RegularExpressions.Regex.Match(msg, "\"error\":\"(.*?)\"", System.Text.RegularExpressions.RegexOptions.IgnoreCase).Groups[1].Value;
-            Mensaje = $"❌ Error al pausar: {msg}";
-        }
+         catch (Exception ex)
+         {
+             Console.WriteLine($"[ERROR] Exception al pausar: {ex.Message}");
+             var extractedError = ErrorMessageParser.ExtractErrorMessage(ex.Message);
+             Mensaje = $"❌ Error al pausar: {extractedError}";
+         }
         finally
         {
             cambiandoEstado = false;
@@ -1660,13 +1662,11 @@ input:checked + .slider:before {
             Mensaje = "✅ Votación finalizada correctamente.";
             mostrarModalConfirmacionFinalizar = false;
         }
-        catch (Exception ex)
-        {
-            var msg = ex.Message;
-            if (msg.Contains("\"Error\""))
-                msg = System.Text.RegularExpressions.Regex.Match(msg, "\"Error\":\"(.*?)\"").Groups[1].Value;
-            Mensaje = $"❌ Error al finalizar: {(string.IsNullOrEmpty(msg) ? ex.Message : msg)}";
-        }
+         catch (Exception ex)
+         {
+             var extractedError = ErrorMessageParser.ExtractErrorMessage(ex.Message);
+             Mensaje = $"❌ Error al finalizar: {extractedError}";
+         }
         finally
         {
             cambiandoEstado = false;
@@ -1686,14 +1686,12 @@ input:checked + .slider:before {
             EstadoActual = 0;
             Mensaje = "✅ Votación reabierta correctamente.";
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[ERROR] Exception al reabrir: {ex.Message}");
-            var msg = ex.Message;
-            if (msg.Contains("\"error\":"))
-                msg = System.Text.RegularExpressions.Regex.Match(msg, "\"error\":\"(.*?)\"", System.Text.RegularExpressions.RegexOptions.IgnoreCase).Groups[1].Value;
-            Mensaje = $"❌ Error al reabrir: {msg}";
-        }
+         catch (Exception ex)
+         {
+             Console.WriteLine($"[ERROR] Exception al reabrir: {ex.Message}");
+             var extractedError = ErrorMessageParser.ExtractErrorMessage(ex.Message);
+             Mensaje = $"❌ Error al reabrir: {extractedError}";
+         }
         finally
         {
             cambiandoEstado = false;
@@ -1720,10 +1718,11 @@ input:checked + .slider:before {
                 ImagenUrl = await VotacionesService.SubirImagen(content);
             }
         }
-        catch (Exception ex)
-        {
-            Mensaje = $"Error al subir imagen: {ex.Message}";
-        }
+         catch (Exception ex)
+         {
+             var extractedError = ErrorMessageParser.ExtractErrorMessage(ex.Message);
+             Mensaje = $"Error al subir imagen: {extractedError}";
+         }
         finally
         {
             subiendoImagen = false;

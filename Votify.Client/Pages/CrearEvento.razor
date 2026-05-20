@@ -1,6 +1,7 @@
 @page "/nuevo-evento"
 @using Votify.Client.DTOs
 @using Votify.Client.Services
+@using Votify.Client.Utilities
 @inject EventosService EventosService
 @inject NavigationManager Nav
 
@@ -412,12 +413,10 @@ input[type="datetime-local"].form-control::-webkit-datetime-edit {
             }
         }
         catch (Exception ex)
-        {
-            var msg = ex.Message;
-            if (msg.Contains("\"Error\""))
-                msg = System.Text.RegularExpressions.Regex.Match(msg, "\"Error\":\"(.*?)\"").Groups[1].Value;
-            Mensaje = "Error al subir la imagen: " + (string.IsNullOrEmpty(msg) ? ex.Message : msg);
-        }
+         {
+             var extractedError = ErrorMessageParser.ExtractErrorMessage(ex.Message);
+             Mensaje = $"Error al subir la imagen: {extractedError}";
+         }
         finally
         {
             subiendoImagen = false;
@@ -461,12 +460,10 @@ input[type="datetime-local"].form-control::-webkit-datetime-edit {
             Nav.NavigateTo("/");
         }
         catch (Exception ex)
-        {
-            var msg = ex.Message;
-            if (msg.Contains("\"Error\""))
-                msg = System.Text.RegularExpressions.Regex.Match(msg, "\"Error\":\"(.*?)\"").Groups[1].Value;
-            Mensaje = "Error al crear el evento: " + (string.IsNullOrEmpty(msg) ? ex.Message : msg);
-        }
+         {
+             var extractedError = ErrorMessageParser.ExtractErrorMessage(ex.Message);
+             Mensaje = $"Error al crear el evento: {extractedError}";
+         }
         finally
         {
             creando = false;
