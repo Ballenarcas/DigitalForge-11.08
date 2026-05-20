@@ -1,7 +1,7 @@
 ADR-008: Uso del Patron de Diseno Adapter para Integracion con API de IA Externa
 Fecha: 15-05-2026
-Sprint: S4
-Estado: Propuesto
+Sprint: S3
+Estado: Aceptado
 
 1) Contexto
 Los competidores de Votify reciben multiples comentarios de diferentes jurados y organizadores sobre sus proyectos. Actualmente, estos comentarios se muestran como una lista individual sin consolidacion. Se necesita una funcionalidad que unifique todos los comentarios en un solo resumen de texto, facilitando al competidor la comprension del feedback recibido.
@@ -91,7 +91,6 @@ Riesgos y mitigaciones:
 
 6) Evidencia
 - Se han definido las ubicaciones de los nuevos archivos: Votify.Domain/Interfaces/, Votify.Infrastructure/Adapters/, Votify.Infrastructure/Configuration/.
-- Se ha producido el documento docs/patronadapter.md con la guia completa de implementacion (10 pasos).
 - Se han identificado los archivos a crear: IAICommentSummarizer.cs, AIClientAdapter.cs, FallbackCommentSummarizer.cs, ResilientCommentSummarizer.cs, AISummarizerOptions.cs, ComentarioResumenItem.cs, ResumenComentarioDto.cs.
 - Se han identificado los archivos a modificar: IProyectoFachada.cs, ProyectoFachada.cs, ComentariosController.cs, Program.cs, ProyectosService.cs (Client), Comentarios.razor.
 - Se han identificado los paquetes NuGet necesarios: Microsoft.Extensions.Http.Polly, Polly.

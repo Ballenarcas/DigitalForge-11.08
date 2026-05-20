@@ -174,6 +174,7 @@ builder.Services.AddScoped<IStorageService>(sp => sp.GetRequiredService<Supabase
 Console.WriteLine($"Supabase Storage => Url={supabaseUrl}, KeyPresente={!string.IsNullOrEmpty(supabaseKey)}");
 
 builder.Services.AddControllers();
+builder.Services.AddHealthChecks();
 
 builder.Services.AddCors(options =>
 {
@@ -196,5 +197,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHealthChecks("/healthz");
 
 app.Run();

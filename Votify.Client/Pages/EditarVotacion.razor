@@ -199,8 +199,35 @@
                             <option value="MULTICRITERIO">Multicriterio (Jurado)</option>
                             <option value="MULTICRITERIO_PUBLICO">Multicriterio (Público)</option>
                         </select>
-                        <span class="select-arrow">▾</span>
                     </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Imagen de portada</label>
+                    <div class="upload-container">
+                        @if (!string.IsNullOrEmpty(ImagenUrl))
+                        {
+                            <div class="preview-container">
+                                <img src="@ImagenUrl" class="image-preview" />
+                                <button class="btn-remove-image" @onclick="() => ImagenUrl = null">Eliminar</button>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="upload-box">
+                                <InputFile OnChange="HandleFileSelected" id="fileInput" class="hidden-input" accept="image/*" />
+                                <label for="fileInput" class="upload-label">
+                                    <span class="upload-icon">📷</span>
+                                    <span class="upload-text">Seleccionar imagen</span>
+                                    <span class="upload-subtext">PNG, JPG o WEBP</span>
+                                </label>
+                            </div>
+                        }
+                    </div>
+                    @if (subiendoImagen)
+                    {
+                        <p class="uploading-text">Subiendo imagen...</p>
+                    }
                 </div>
 
                 @if (EsMulticriterio)
@@ -1363,6 +1390,8 @@ input:checked + .slider:before {
     int Estado = 0;
     string EventoId = "";
     string? Mensaje;
+    string? ImagenUrl;
+    bool subiendoImagen = false;
     List<CriterioDto> Criterios = new();
 
     bool cargando = true;
@@ -1413,6 +1442,7 @@ input:checked + .slider:before {
             ComentariosObligatorios = votacion.ComentariosObligatorios;
             EsAnonima = votacion.EsAnonima;
             EventoId = votacion.EventoId;
+            ImagenUrl = votacion.ImagenUrl;
             Estado = votacion.Estado;
             EstadoActual = votacion.Estado;
             Criterios = votacion.Criterios?.Any() == true
@@ -1466,6 +1496,7 @@ input:checked + .slider:before {
                 Comentarios       = Comentarios,
                 ComentariosObligatorios = ComentariosObligatorios,
                 EsAnonima         = EsAnonima,
+                ImagenUrl         = ImagenUrl,
                 EventoId          = EventoId,
                 Estado            = EstadoActual,
                 Criterios         = EsMulticriterio ? Criterios : new List<CriterioDto>()
@@ -1618,4 +1649,33 @@ input:checked + .slider:before {
     }
 
     void HandleVolver() => Nav.NavigateTo($"/votaciones?eventoId={EventoId}");
+
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        try
+        {
+            subiendoImagen = true;
+            StateHasChanged();
+
+            var file = e.File;
+            if (file != null)
+            {
+                var content = new MultipartFormDataContent();
+                var fileContent = new StreamContent(file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024));
+                fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(file.ContentType);
+                content.Add(fileContent, "file", file.Name);
+
+                ImagenUrl = await VotacionesService.SubirImagen(content);
+            }
+        }
+        catch (Exception ex)
+        {
+            Mensaje = $"Error al subir imagen: {ex.Message}";
+        }
+        finally
+        {
+            subiendoImagen = false;
+            StateHasChanged();
+        }
+    }
 }

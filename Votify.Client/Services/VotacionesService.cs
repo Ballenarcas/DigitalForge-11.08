@@ -171,14 +171,19 @@ namespace Votify.Client.Services
             }
         }
 
-        public async Task<string> SubirImagen(MultipartFormDataContent content)
+        public async Task<string> SubirImagen(MultipartFormDataContent content, string bucket = "Votaciones")
         {
-            var resp = await _http.PostAsync("api/files/upload", content);
+            var resp = await _http.PostAsync($"api/files/upload?bucket={Uri.EscapeDataString(bucket)}", content);
             resp.EnsureSuccessStatusCode();
             var result = await resp.Content.ReadFromJsonAsync<UploadResponse>();
             
             if (result != null && !string.IsNullOrEmpty(result.Url))
             {
+                // Si la URL ya es absoluta (Supabase), devuélvela tal cual
+                if (result.Url.StartsWith("http"))
+                {
+                    return result.Url;
+                }
                 return _http.BaseAddress + result.Url;
             }
             return "";
