@@ -1,6 +1,5 @@
 /* ==========================================
-   RIPPLE EFFECT - Material Design style
-   GPU-accelerated, 60fps, ultra-fluido
+   RIPPLE EFFECT - Ultra visible
    ========================================== */
 
 button,
@@ -13,77 +12,34 @@ button[type="button"],
     transform: translate3d(0, 0, 0);
 }
 
-/* El elemento ripple inyectado por JS */
+/* El elemento ripple */
 .ripple-span {
     position: absolute;
     border-radius: 50%;
     transform: scale(0);
     pointer-events: none;
     will-change: transform, opacity;
-    z-index: 1;
+    z-index: 9999;
+    background: rgba(255, 255, 255, 0.85) !important;
 }
 
 /* Animacion de expansion */
 @keyframes ripple-animation {
     0% {
         transform: scale(0);
-        opacity: 0.55;
+        opacity: 0.85;
     }
     100% {
-        transform: scale(4);
+        transform: scale(5);
         opacity: 0;
     }
 }
 
 .ripple-span.ripple-animate {
-    animation: ripple-animation 650ms cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    animation: ripple-animation 750ms cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 
-/* ==========================================
-   COLORES DEL RIPPLE
-   ========================================== */
-
-/* Ripple blanco para botones con fondo de color (la mayoria) */
-.btn-submit .ripple-span,
-.btn-primary-custom .ripple-span,
-.btn-crear .ripple-span,
-.btn-votar .ripple-span,
-.btn-active .ripple-span,
-.btn-ver .ripple-span,
-.btn-ver-comentarios .ripple-span,
-.btn-generar-resumen .ripple-span,
-.btn-votar-proyecto .ripple-span,
-.btn-enviar-feedback .ripple-span,
-.btn-login-modal .ripple-span,
-.btn-state .ripple-span,
-.btn-add-criterion .ripple-span,
-.btn-registrar .ripple-span,
-.accordion-header .ripple-span,
-.btn-modal-end .ripple-span,
-.btn-votar-proyecto .ripple-span,
-.btn-submit .ripple-span,
-.btn-crear .ripple-span {
-    background: rgba(255, 255, 255, 0.65);
-}
-
-/* Ripple oscuro para botones claros / outline */
-.btn-volver .ripple-span,
-.btn-back .ripple-span,
-.btn-cancel .ripple-span,
-.btn-modal-cancel .ripple-span,
-.btn-delete .ripple-span,
-.btn-modal-delete .ripple-span,
-.btn-remove-image .ripple-span,
-.btn-remove-criterion .ripple-span,
-.btn-eliminar .ripple-span,
-.btn-closed .ripple-span,
-.btn-disabled .ripple-span,
-.roles-page-btn .ripple-span,
-.roles-action-btn .ripple-span {
-    background: rgba(0, 0, 0, 0.18);
-}
-
-/* Botones deshabilitados: ocultar ripple */
+/* Botones deshabilitados: sin ripple */
 button:disabled .ripple-span,
 button[disabled] .ripple-span {
     display: none !important;
