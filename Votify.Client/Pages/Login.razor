@@ -2,179 +2,80 @@
 @inject IAuthService AuthService
 @inject NavigationManager NavigationManager
 
-<div class="auth-wrapper">
-    <div class="auth-card">
-        <div class="icon-container">
-            <svg viewBox="0 0 24 24" fill="none" width="48" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M12 8v4m0 4v.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+<div class="auth-epic-wrapper">
+    <!-- Orbes de luz flotantes -->
+    <div class="auth-orb orb-1"></div>
+    <div class="auth-orb orb-2"></div>
+    <div class="auth-orb orb-3"></div>
+
+    <!-- Particulas sutiles -->
+    @for (int i = 0; i < 20; i++)
+    {
+        var left = (i * 5.3) % 100;
+        var duration = 10 + (i % 8);
+        var delay = i * 0.4;
+        var size = 2 + (i % 3);
+        <div class="auth-particle" style="left:@(left)%; width:@(size)px; height:@(size)px; animation-duration:@(duration)s; animation-delay:@(delay)s;"></div>
+    }
+
+    <div class="auth-epic-card">
+        <div class="auth-icon">
+            <svg viewBox="0 0 24 24" fill="none" width="32" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="12" cy="7" r="4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
         </div>
-        <h1 class="title">Bienvenido a Votify</h1>
-        <p class="subtitle">Inicia sesión para continuar</p>
+        <h1 class="auth-title">Bienvenido a Votify</h1>
+        <p class="auth-subtitle">Inicia sesión para continuar</p>
 
         <EditForm Model="loginModel" OnValidSubmit="HandleLogin">
             <DataAnnotationsValidator />
 
             @if (!string.IsNullOrEmpty(errorMessage))
             {
-                <div class="error-message">@errorMessage</div>
+                <div class="auth-error">@errorMessage</div>
             }
 
-            <div class="form-group">
+            <div class="auth-form-group">
                 <label>Correo Electrónico</label>
-                <InputText @bind-Value="loginModel.Email" class="form-control" placeholder="ejemplo@correo.com" />
+                <InputText @bind-Value="loginModel.Email" class="auth-input" placeholder="ejemplo@correo.com" />
             </div>
 
-            <div class="form-group">
+            <div class="auth-form-group">
                 <label>Contraseña</label>
-                <InputText @bind-Value="loginModel.Password" type="password" class="form-control" placeholder="••••••••" />
+                <InputText @bind-Value="loginModel.Password" type="password" class="auth-input" placeholder="••••••••" />
             </div>
 
-            <div class="forgot-password">
+            <div class="auth-forgot">
                 <a href="#">¿Olvidaste tu contraseña?</a>
             </div>
 
-            <button type="submit" class="btn-primary-custom" disabled="@isLoading">
-                @if(isLoading) { <span>Cargando...</span> } else { <span>Iniciar Sesión</span> }
+            <button type="submit" class="auth-btn-primary" disabled="@isLoading">
+                @if(isLoading)
+                {
+                    <span class="btn-spinner"></span>
+                    <span>Iniciando sesión...</span>
+                }
+                else
+                {
+                    <span>Iniciar Sesión</span>
+                }
             </button>
         </EditForm>
 
-        <div class="divider">
+        <div class="auth-divider">
             <span>¿No tienes una cuenta?</span>
         </div>
 
-        <div class="footer-link">
+        <div class="auth-footer">
             <a href="/registro">Regístrate aquí</a>
         </div>
     </div>
 </div>
 
 <style>
-    /* Estilos fieles al mockup */
-    .auth-wrapper {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 80vh;
-        background-color: #f8f9fa; /* Fondo gris claro */
-        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    }
-
-    .auth-card {
-        background: white;
-        padding: 40px;
-        border-radius: 20px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-        width: 100%;
-        max-width: 400px;
-        text-align: center;
-    }
-
-    .icon-container {
-        font-size: 40px;
-        margin-bottom: 10px;
-    }
-
-    .title {
-        font-size: 24px;
-        font-weight: 800;
-        color: #1a202c;
-        margin-bottom: 5px;
-    }
-
-    .subtitle {
-        color: #718096;
-        font-size: 14px;
-        margin-bottom: 30px;
-    }
-
-    .form-group {
-        text-align: left;
-        margin-bottom: 20px;
-    }
-
-    .form-group label {
-        display: block;
-        font-weight: 600;
-        margin-bottom: 8px;
-        color: #2d3748;
-        font-size: 14px;
-    }
-
-    .form-control {
-        width: 100%;
-        padding: 12px;
-        border: 1px solid #e2e8f0;
-        border-radius: 12px;
-        box-sizing: border-box;
-        font-size: 14px;
-        transition: border-color 0.2s;
-    }
-
-    .form-control:focus {
-        outline: none;
-        border-color: #8b5cf6;
-    }
-
-    .forgot-password {
-        text-align: right;
-        margin-bottom: 24px;
-    }
-
-    .forgot-password a, .footer-link a {
-        color: #8b5cf6;
-        text-decoration: none;
-        font-weight: 600;
-        font-size: 14px;
-    }
-
-    .btn-primary-custom {
-        width: 100%;
-        padding: 14px;
-        background-color: #8b5cf6; /* Púrpura del mockup */
-        color: white;
-        border: none;
-        border-radius: 12px;
-        font-size: 16px;
-        font-weight: bold;
-        cursor: pointer;
-        transition: background-color 0.2s;
-    }
-
-    .btn-primary-custom:hover {
-        background-color: #7c3aed;
-    }
-    
-    .btn-primary-custom:disabled {
-        background-color: #c4b5fd;
-        cursor: not-allowed;
-    }
-
-    .divider {
-        display: flex;
-        align-items: center;
-        text-align: center;
-        margin: 30px 0;
-        color: #a0aec0;
-        font-size: 14px;
-    }
-
-    .divider::before, .divider::after {
-        content: '';
-        flex: 1;
-        border-bottom: 1px solid #e2e8f0;
-    }
-
-    .divider span {
-        padding: 0 10px;
-    }
-
-    .error-message {
-        background-color: #fed7d7;
-        color: #c53030;
-        padding: 10px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-        font-size: 14px;
-    }
+    /* Reset local para no heredar estilos antiguos */
+    :scope { all: initial; }
 </style>
 
 @code {
@@ -205,7 +106,7 @@
 
         if (response.IsSuccess)
         {
-            NavigationManager.NavigateTo("/"); // Redirige al inicio si tiene éxito
+            NavigationManager.NavigateTo("/");
         }
         else
         {
