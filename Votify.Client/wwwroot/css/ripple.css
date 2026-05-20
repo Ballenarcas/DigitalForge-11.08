@@ -1,0 +1,154 @@
+/* ==========================================
+   RIPPLE EFFECT - Animacion de expansion de circulo
+   100% CSS puro, sin JavaScript
+   GPU-accelerated, 60fps, ultra-fluido
+   ========================================== */
+
+/* Aplicar a TODOS los botones */
+button,
+button[type="submit"],
+button[type="button"],
+[class*="btn-"],
+.btn {
+    position: relative !important;
+    overflow: hidden !important;
+    transform: translate3d(0, 0, 0);
+}
+
+/* Pseudo-elemento ripple */
+button::after,
+button[type="submit"]::after,
+button[type="button"]::after,
+[class*="btn-"]::after,
+.btn::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    aspect-ratio: 1;
+    background: radial-gradient(
+        circle,
+        rgba(255, 255, 255, 0.4) 0%,
+        rgba(255, 255, 255, 0.15) 40%,
+        transparent 70%
+    );
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(3);
+    opacity: 0;
+    pointer-events: none;
+    transition:
+        transform 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+        opacity 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: transform, opacity;
+}
+
+/* Al presionar (active): resetear a punto central, opaco e instantaneo */
+button:active::after,
+button[type="submit"]:active::after,
+button[type="button"]:active::after,
+[class*="btn-"]:active::after,
+.btn:active::after {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0.55;
+    transition: 0s;
+}
+
+/* Al soltar: el circulo EXPANDE y se desvanece simultaneamente */
+/* El navegador anima la transicion desde scale(0) hacia scale(3) */
+
+/* ==========================================
+   VARIANTES DE COLOR SEGUN TIPO DE BOTON
+   ========================================== */
+
+/* --- Ripple CLARO (para botones oscuros / con fondo de color) --- */
+.btn-submit::after,
+.btn-primary-custom::after,
+.btn-crear::after,
+.btn-votar::after,
+.btn-active::after,
+.btn-ver::after,
+.btn-ver-comentarios::after,
+.btn-generar-resumen::after,
+.btn-votar-proyecto::after,
+.btn-enviar-feedback::after,
+.btn-login-modal::after,
+.btn-state::after,
+.btn-add-criterion::after,
+.btn-registrar::after,
+.accordion-header::after,
+.btn-modal-end::after {
+    background: radial-gradient(
+        circle,
+        rgba(255, 255, 255, 0.5) 0%,
+        rgba(255, 255, 255, 0.2) 45%,
+        transparent 70%
+    );
+}
+
+/* --- Ripple OSCURO (para botones claros / outline / fondo blanco) --- */
+.btn-volver::after,
+.btn-back::after,
+.btn-cancel::after,
+.btn-modal-cancel::after,
+.btn-delete::after,
+.btn-modal-delete::after,
+.btn-remove-image::after,
+.btn-remove-criterion::after,
+.btn-eliminar::after,
+.btn-closed::after,
+.btn-disabled::after,
+.roles-page-btn::after,
+.roles-action-btn::after {
+    background: radial-gradient(
+        circle,
+        rgba(0, 0, 0, 0.12) 0%,
+        rgba(0, 0, 0, 0.06) 45%,
+        transparent 70%
+    );
+}
+
+/* ==========================================
+   BOTONES DESHABILITADOS (sin ripple)
+   ========================================== */
+button:disabled::after,
+button[disabled]::after,
+.btn-disabled::after,
+button:disabled:active::after,
+button[disabled]:active::after {
+    display: none !important;
+    content: none !important;
+    animation: none !important;
+    transition: none !important;
+}
+
+/* ==========================================
+   EFECTO EXTRA: leve brillo en hover (opcional)
+   ========================================== */
+button::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        120deg,
+        transparent 30%,
+        rgba(255, 255, 255, 0.06) 50%,
+        transparent 70%
+    );
+    opacity: 0;
+    transform: translateX(-100%);
+    transition: opacity 0.3s ease, transform 0s 0.3s;
+    pointer-events: none;
+    border-radius: inherit;
+}
+
+button:hover::before {
+    opacity: 1;
+    transform: translateX(100%);
+    transition: transform 0.7s ease-in-out, opacity 0.3s ease;
+}
+
+button:disabled::before,
+button[disabled]::before {
+    display: none !important;
+}
