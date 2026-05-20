@@ -1,12 +1,33 @@
 @page "/ayuda"
+@inject NavigationManager Nav
+@inject IJSRuntime JS
 
 <div class="ayuda-container">
-    <div class="ayuda-header">
-        <h1>Centro de Ayuda</h1>
-        <p>Encuentra respuestas a las preguntas más frecuentes sobre el uso de la plataforma Votify.</p>
+
+    <!-- Botón volver (igual que en otras pantallas) -->
+    <div class="header-principal">
+        <button class="btn-volver" @onclick="HandleVolver">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="16" height="16">
+                <path d="M15 19L8 12L15 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Volver
+        </button>
     </div>
 
+    <!-- Título con logo (mismo formato que el resto de páginas) -->
+    <div class="page-header-row">
+        <div class="logo-icon small">
+            <img src="images/ayuda-logo.png" alt="Logo Ayuda" class="ayuda-logo-img" style="height:22px;width:auto;object-fit:contain;" />
+        </div>
+        <span class="brand-name">Ayuda</span>
+    </div>
+
+    <!-- Encabezado de sección -->
+
+
+    <!-- Desplegables -->
     <div class="accordion-list">
+
         <!-- Pregunta 1 -->
         <div class="accordion-item @(isOpen1 ? "active" : "")">
             <button class="accordion-header" @onclick="Toggle1">
@@ -79,6 +100,7 @@
                 </div>
             </div>
         </div>
+
     </div>
 </div>
 
@@ -92,4 +114,9 @@
     private void Toggle2() => isOpen2 = !isOpen2;
     private void Toggle3() => isOpen3 = !isOpen3;
     private void Toggle4() => isOpen4 = !isOpen4;
+
+    private async Task HandleVolver()
+    {
+        await JS.InvokeVoidAsync("history.back");
+    }
 }

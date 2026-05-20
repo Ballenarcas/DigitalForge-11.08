@@ -1,31 +1,89 @@
 .ayuda-container {
-    max-width: 800px;
-    margin: 3rem auto;
-    padding: 0 1.5rem;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fc;
+    min-height: 100vh;
+    padding: 2rem;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
 }
 
+/* ---- Botón volver (igual que otras páginas) ---- */
+.header-principal {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin-bottom: 1.25rem;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.btn-volver {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: white;
+    border: 1px solid #e2e8f0;
+    color: #64748b;
+    padding: 0.4rem 0.8rem;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-volver:hover {
+    background: #f8f9fc;
+    border-color: #ddd6fe;
+    color: #7c3aed;
+}
+
+/* ---- Fila de título con logo (igual que otras páginas) ---- */
+.page-header-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.brand-name {
+    font-weight: 800;
+    font-size: 1.2rem;
+    color: #4c1d95;
+    letter-spacing: -0.02em;
+}
+
+/* ---- Encabezado de sección ---- */
 .ayuda-header {
     text-align: center;
     margin-bottom: 2.5rem;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .ayuda-header h1 {
     color: #621d95;
-    font-size: 2.5rem;
+    font-size: 2rem;
     font-weight: 800;
     margin-bottom: 0.5rem;
+    letter-spacing: -0.025em;
 }
 
 .ayuda-header p {
     color: #64748b;
-    font-size: 1.1rem;
+    font-size: 1rem;
 }
 
+/* ---- Lista de desplegables ---- */
 .accordion-list {
     display: flex;
     flex-direction: column;
     gap: 1.25rem;
+    max-width: 800px;
+    margin: 0 auto;
 }
 
 .accordion-item {
@@ -56,7 +114,7 @@
     border: none;
     text-align: left;
     cursor: pointer;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     font-weight: 700;
     color: #1e293b;
     transition: background-color 0.2s ease;
@@ -78,6 +136,7 @@
     font-size: 1rem;
     font-weight: 800;
     margin-right: 1.25rem;
+    flex-shrink: 0;
 }
 
 .header-text {
@@ -95,24 +154,23 @@
     color: #621d95;
 }
 
-/* Transición suave para expandir el desplegable */
+/* ---- Transición suave de expansión ---- */
 .accordion-content {
     max-height: 0;
     overflow: hidden;
-    transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .accordion-item.active .accordion-content {
-    max-height: 500px; /* Altura máxima suficiente para que quepa el texto */
+    max-height: 500px;
 }
 
 .content-body {
-    padding: 0 1.6rem 1.6rem 1.6rem;
+    padding: 1.25rem 1.6rem 1.6rem 1.6rem;
     color: #475569;
     font-size: 1rem;
     line-height: 1.65;
     border-top: 1px solid #f1f5f9;
-    padding-top: 1.25rem;
 }
 
 .content-body p {
