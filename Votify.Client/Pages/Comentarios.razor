@@ -19,13 +19,13 @@
         <div class="comments-header">
             <button class="btn-volver" @onclick="Volver">← Volver</button>
             <div class="comments-title-group">
-                <p class="section-label">Evento</p>
-                <h1 class="comments-title">Comentarios de feedback</h1>
-                <p class="comments-subtitle">Proyecto: <strong>@proyecto?.Nombre</strong></p>
+                <p class="section-label" style="animation-delay: 0.1s">Evento</p>
+                <h1 class="comments-title" style="animation-delay: 0.2s">Comentarios de feedback</h1>
+                <p class="comments-subtitle" style="animation-delay: 0.3s">Proyecto: <strong>@proyecto?.Nombre</strong></p>
             </div>
         </div>
 
-        <div class="comments-card">
+        <div class="comments-card" style="animation-delay: 0.4s">
             @if (EsMulticriterio && resultadoMulticriterio != null)
             {
                 <div class="score-banner @(scoreRevelado ? "" : "unrevealed")">
@@ -121,7 +121,7 @@
                         @for (var index = 0; index < comentarios.Count; index++)
                         {
                             var comentario = comentarios[index];
-                            <div class="comment-item">
+                            <div class="comment-item" style="animation-delay: @(0.5 + index * 0.08)s">
                                 <div class="comment-avatar">@GetAvatarLabel(comentario, index)</div>
                                 <div class="comment-content">
                                     <div class="comment-meta">@GetAutorEtiqueta(comentario, index)</div>
@@ -200,9 +200,15 @@
         color: #475569;
         font-weight: 700;
         cursor: pointer;
-        transition: background 0.2s, border-color 0.2s;
+        transition: background 0.2s, border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+        animation: fadeInDown 0.6s ease-out 0s both;
     }
-    .btn-volver:hover { background: #f8f9fc; border-color: #ddd6fe; }
+    .btn-volver:hover { 
+        background: #f8f9fc; 
+        border-color: #ddd6fe;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(124, 58, 237, 0.15);
+    }
     .comments-title-group { max-width: 840px; }
     .section-label {
         margin: 0 0 0.4rem;
@@ -211,17 +217,20 @@
         color: #7c3aed;
         font-size: 0.8rem;
         font-weight: 800;
+        animation: fadeInUp 0.6s ease-out both;
     }
     .comments-title {
         margin: 0;
         font-size: 2.25rem;
         font-weight: 900;
         color: #111827;
+        animation: fadeInUp 0.6s ease-out both;
     }
     .comments-subtitle {
         margin: 0.75rem 0 0 0;
         color: #475569;
         font-size: 0.95rem;
+        animation: fadeInUp 0.6s ease-out both;
     }
     .comments-card {
         max-width: 1100px;
@@ -231,12 +240,14 @@
         border-radius: 28px;
         padding: 1.75rem;
         box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
+        animation: fadeInUp 0.6s ease-out both;
     }
     .comments-count {
         color: #6b7280;
         font-size: 0.9rem;
         font-weight: 700;
         margin-bottom: 1rem;
+        animation: fadeInUp 0.6s ease-out 0.5s both;
     }
     .comments-list {
         display: grid;
@@ -249,6 +260,15 @@
         border: 1px solid #e5e7eb;
         border-radius: 20px;
         background: #f8fafc;
+        animation: fadeInUp 0.6s ease-out both;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                    box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                    border-color 0.3s ease;
+    }
+    .comment-item:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(124, 58, 237, 0.1);
+        border-color: #c4b5fd;
     }
     .comment-avatar {
         width: 44px;
@@ -880,6 +900,14 @@
     }
 
     @@keyframes spin { to { transform: rotate(360deg); } }
+    @@keyframes fadeInDown {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @@keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
     @@media (max-width: 768px) {
         .comments-wrapper { padding: 1rem; }
         .comments-header { gap: 0.75rem; }

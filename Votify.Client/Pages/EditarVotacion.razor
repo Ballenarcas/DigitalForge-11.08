@@ -1626,7 +1626,7 @@ input:checked + .slider:before {
             Console.WriteLine($"[DEBUG] Pausa exitosa. Actualizando UI a estado 1 (Pausada)");
             Estado = 1;
             EstadoActual = 1;
-            Mensaje = "✅ Votación pausada correctamente.";
+            Mensaje = "Votación pausada correctamente.";
         }
          catch (Exception ex)
          {
@@ -1659,7 +1659,7 @@ input:checked + .slider:before {
             await VotacionesService.DetenerVotacion(Id);
             Estado = 2;
             EstadoActual = 2;
-            Mensaje = "✅ Votación finalizada correctamente.";
+            Mensaje = "Votación finalizada correctamente.";
             mostrarModalConfirmacionFinalizar = false;
         }
          catch (Exception ex)
@@ -1684,7 +1684,7 @@ input:checked + .slider:before {
             Console.WriteLine($"[DEBUG] Reactivación exitosa. Actualizando UI a estado 0 (Activa)");
             Estado = 0;
             EstadoActual = 0;
-            Mensaje = "✅ Votación reabierta correctamente.";
+            Mensaje = "Votación reabierta correctamente.";
         }
          catch (Exception ex)
          {

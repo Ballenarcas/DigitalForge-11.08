@@ -8,7 +8,10 @@
 <div class="main-container">
     <div class="top-nav">
         <button class="btn-back"@onclick="HandleVolver">
-            <span class="icon-arrow">←</span> Volver
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="16" height="16">
+                <path d="M15 19L8 12L15 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+             Volver
         </button>
         <div class="breadcrumbs">
             <a href="/" class="breadcrumb-link">@(AppState.EventoNombre ?? "Evento")</a> <span class="separator">></span> <a href="/votaciones" class="breadcrumb-link">Votaciones</a> <span class="separator">></span> <span class="current-page">Nueva Votación</span>
