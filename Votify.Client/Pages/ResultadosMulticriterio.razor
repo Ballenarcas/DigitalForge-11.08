@@ -1,5 +1,6 @@
 @page "/{VotacionId}/resultados-multicriterio/"
 @using Votify.Client.DTOs
+@using Votify.Client.Utilities
 @inject NavigationManager Nav
 @inject Votify.Client.Services.VotacionesService VotacionesService
 
@@ -656,7 +657,8 @@
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error cargando resultados multicriterio: {ex.Message}");
+            var errorMsg = ErrorMessageParser.ExtractErrorMessage(ex.Message);
+            Console.WriteLine($"Error cargando resultados multicriterio: {errorMsg}");
             listaResultados = new List<ResultadoMulticriterioDto>();
         }
     }

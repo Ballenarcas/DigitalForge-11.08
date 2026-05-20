@@ -1,6 +1,7 @@
 @page "/detalles-evento/{EventoId}"
 @using Votify.Client.DTOs
 @using Votify.Client.Services
+@using Votify.Client.Utilities
 @inject EventosService EventosService
 @inject NavigationManager Nav
 @inject AppState AppState
@@ -253,7 +254,8 @@
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error cargando evento: {ex.Message}");
+            var errorMsg = ErrorMessageParser.ExtractErrorMessage(ex.Message);
+            Console.WriteLine($"Error cargando evento: {errorMsg}");
         }
         finally
         {
@@ -274,7 +276,8 @@
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error al participar: {ex.Message}");
+            var errorMsg = ErrorMessageParser.ExtractErrorMessage(ex.Message);
+            Console.WriteLine($"Error al participar: {errorMsg}");
         }
         finally
         {

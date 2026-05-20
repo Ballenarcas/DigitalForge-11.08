@@ -2,6 +2,7 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @using Votify.Client.DTOs
 @using Votify.Client.Services
+@using Votify.Client.Utilities
 @inject NavigationManager Nav
 @inject EventosService EventosService
 @inject AppState AppState
@@ -201,7 +202,8 @@
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error cargando eventos: {ex.Message}");
+            var errorMsg = ErrorMessageParser.ExtractErrorMessage(ex.Message);
+            Console.WriteLine($"Error cargando eventos: {errorMsg}");
             listaEventos = new List<EventoDto>();
         }
     }
@@ -216,7 +218,8 @@
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error al registrarse en el evento: {ex.Message}");
+            var errorMsg = ErrorMessageParser.ExtractErrorMessage(ex.Message);
+            Console.WriteLine($"Error al registrarse en el evento: {errorMsg}");
         }
     }
 
