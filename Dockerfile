@@ -8,12 +8,19 @@
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build-client
 WORKDIR /src
 
+# Votify.Client depende de Votify.Application y Votify.Domain, copiamos sus .csproj
 COPY Votify.Client/Votify.Client.csproj Votify.Client/
+COPY Votify.Application/Votify.Application.csproj Votify.Application/
+COPY Votify.Domain/Votify.Domain.csproj Votify.Domain/
 
-# Restore solo el cliente
+# Restore del cliente (restaurará automáticamente sus dependencias)
 RUN dotnet restore Votify.Client/Votify.Client.csproj
 
+# Copiar el código fuente completo de los proyectos que necesita el cliente
 COPY Votify.Client/ Votify.Client/
+COPY Votify.Application/ Votify.Application/
+COPY Votify.Domain/ Votify.Domain/
+
 RUN dotnet publish Votify.Client/Votify.Client.csproj \
     -c Release \
     -o /app/client-publish \
