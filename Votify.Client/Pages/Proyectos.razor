@@ -544,10 +544,35 @@
         catch (Exception ex)
         {
             var msg = ex.Message;
-            if (msg.Contains("\"Error\""))
+            
+            // Extraer el mensaje limpio del JSON
+            if (msg.Contains("\"error\""))
             {
-                msg = System.Text.RegularExpressions.Regex.Match(msg, "\"Error\":\"(.*?)\"").Groups[1].Value;
+                var match = System.Text.RegularExpressions.Regex.Match(msg, "\"error\"\\s*:\\s*\"([^\"]+)\"");
+                if (match.Success)
+                {
+                    msg = match.Groups[1].Value;
+                }
             }
+            else if (msg.Contains("Error HTTP"))
+            {
+                // Si comienza con "Error HTTP:", quitarlo
+                var idx = msg.IndexOf("{");
+                if (idx > 0)
+                {
+                    var jsonPart = msg.Substring(idx);
+                    try
+                    {
+                        var match = System.Text.RegularExpressions.Regex.Match(jsonPart, "\"error\"\\s*:\\s*\"([^\"]+)\"");
+                        if (match.Success)
+                        {
+                            msg = match.Groups[1].Value;
+                        }
+                    }
+                    catch { }
+                }
+            }
+            
             if (msg.Contains("límite") || msg.Contains("limite") || msg.Contains("máximo") || msg.Contains("maximo") || msg.Contains("votar más") || msg.Contains("votar mas") || msg.Contains("excedido") || msg.Contains("no puedes votar"))
             {
                 limiteAlcanzado = true;

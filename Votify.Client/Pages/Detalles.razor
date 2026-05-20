@@ -1365,11 +1365,40 @@
             mensajeComentario = "¡Comentario enviado correctamente!";
             comentarioOk = true;
         }
-        catch (Exception ex)
-        {
-            mensajeComentario = $"Error al enviar: {ex.Message}";
-            comentarioOk = false;
-        }
+         catch (Exception ex)
+         {
+             var msg = ex.Message;
+             
+             // Extraer el mensaje limpio del JSON
+             if (msg.Contains("\"error\""))
+             {
+                 var match = System.Text.RegularExpressions.Regex.Match(msg, "\"error\"\\s*:\\s*\"([^\"]+)\"");
+                 if (match.Success)
+                 {
+                     msg = match.Groups[1].Value;
+                 }
+             }
+             else if (msg.Contains("Error HTTP"))
+             {
+                 var idx = msg.IndexOf("{");
+                 if (idx > 0)
+                 {
+                     var jsonPart = msg.Substring(idx);
+                     try
+                     {
+                         var match = System.Text.RegularExpressions.Regex.Match(jsonPart, "\"error\"\\s*:\\s*\"([^\"]+)\"");
+                         if (match.Success)
+                         {
+                             msg = match.Groups[1].Value;
+                         }
+                     }
+                     catch { }
+                 }
+             }
+             
+             mensajeComentario = $"Error al enviar: {msg}";
+             comentarioOk = false;
+         }
         finally
         {
             enviandoComentario = false;
@@ -1430,14 +1459,41 @@
                 });
             });
         }
-        catch (Exception ex)
-        {
-            var msg = ex.Message;
-            if (msg.Contains("\"Error\""))
-                msg = System.Text.RegularExpressions.Regex.Match(msg, "\"Error\":\"(.*?)\"").Groups[1].Value;
-            mensajeVoto = string.IsNullOrEmpty(msg) ? ex.Message : msg;
-            votoOk = false;
-        }
+         catch (Exception ex)
+         {
+             var msg = ex.Message;
+             
+             // Extraer el mensaje limpio del JSON
+             if (msg.Contains("\"error\""))
+             {
+                 var match = System.Text.RegularExpressions.Regex.Match(msg, "\"error\"\\s*:\\s*\"([^\"]+)\"");
+                 if (match.Success)
+                 {
+                     msg = match.Groups[1].Value;
+                 }
+             }
+             else if (msg.Contains("Error HTTP"))
+             {
+                 // Si comienza con "Error HTTP:", quitarlo
+                 var idx = msg.IndexOf("{");
+                 if (idx > 0)
+                 {
+                     var jsonPart = msg.Substring(idx);
+                     try
+                     {
+                         var match = System.Text.RegularExpressions.Regex.Match(jsonPart, "\"error\"\\s*:\\s*\"([^\"]+)\"");
+                         if (match.Success)
+                         {
+                             msg = match.Groups[1].Value;
+                         }
+                     }
+                     catch { }
+                 }
+             }
+             
+             mensajeVoto = string.IsNullOrEmpty(msg) ? ex.Message : msg;
+             votoOk = false;
+         }
         finally
         {
             votando = false;
@@ -1489,14 +1545,40 @@
             mensajeComentario = "¡Voto registrado con éxito!";
         }
         
-        catch (Exception ex)
-        {
-            var msg = ex.Message;
-            if (msg.Contains("\"Error\""))
-                msg = System.Text.RegularExpressions.Regex.Match(msg, "\"Error\":\"(.*?)\"").Groups[1].Value;
-            mensajeComentario = string.IsNullOrEmpty(msg) ? ex.Message : msg;
-            comentarioOk = false;
-        }
+         catch (Exception ex)
+         {
+             var msg = ex.Message;
+             
+             // Extraer el mensaje limpio del JSON
+             if (msg.Contains("\"error\""))
+             {
+                 var match = System.Text.RegularExpressions.Regex.Match(msg, "\"error\"\\s*:\\s*\"([^\"]+)\"");
+                 if (match.Success)
+                 {
+                     msg = match.Groups[1].Value;
+                 }
+             }
+             else if (msg.Contains("Error HTTP"))
+             {
+                 var idx = msg.IndexOf("{");
+                 if (idx > 0)
+                 {
+                     var jsonPart = msg.Substring(idx);
+                     try
+                     {
+                         var match = System.Text.RegularExpressions.Regex.Match(jsonPart, "\"error\"\\s*:\\s*\"([^\"]+)\"");
+                         if (match.Success)
+                         {
+                             msg = match.Groups[1].Value;
+                         }
+                     }
+                     catch { }
+                 }
+             }
+             
+             mensajeComentario = string.IsNullOrEmpty(msg) ? ex.Message : msg;
+             comentarioOk = false;
+         }
         finally
         {
             enviandoComentario = false;
