@@ -6,8 +6,10 @@
 <div class="page">
     <main>
         <div class="brand-header">
+            <!-- Spacer para centrar el logo en combinación con flex -->
             <div class="header-spacer"></div>
 
+            <!-- Logo centrado -->
             <div class="logo-container">
                 <a href="/">
                     <div class="logo-icon">
@@ -16,34 +18,41 @@
                 </a>
             </div>
 
+            <!-- Controles de autenticación con el botón de ayuda arriba -->
             <div class="auth-controls">
-                <AuthorizeView>
-                    <Authorized>
-                        <div class="user-header-wrapper">
-                            <div class="user-header-info">
-                                <div class="header-user-name">@GetUserName(context.User)</div>
-                                <div class="header-user-email">@GetUserEmail(context.User)</div>
-                            </div>
+                <div class="top-row">
+                    <a href="/ayuda" class="btn-ayuda">Ayuda</a>
+                </div>
+                
+                <div class="bottom-row">
+                    <AuthorizeView>
+                        <Authorized>
+                            <div class="user-header-wrapper">
+                                <div class="user-header-info">
+                                    <div class="header-user-name">@GetUserName(context.User)</div>
+                                    <div class="header-user-email">@GetUserEmail(context.User)</div>
+                                </div>
 
-                            <div class="user-menu-container" @onclick="ToggleUserMenu" @onfocusout="HideUserMenu" tabindex="0">
-                                <span class="user-greeting"><img src="images/usuario-logo.png" class="user-logo" alt="User Logo" /> ▼</span>
+                                <div class="user-menu-container" @onclick="ToggleUserMenu" @onfocusout="HideUserMenu" tabindex="0">
+                                    <span class="user-greeting"><img src="images/usuario-logo.png" class="user-logo" alt="User Logo" /> ▼</span>
 
-                                @if (showUserMenu)
-                                {
-                                    <div class="user-dropdown">
-                                        <a class="dropdown-item text-danger" @onclick="CerrarSesion" @onclick:stopPropagation="true">
-                                            🚪 Cerrar Sesión
-                                        </a>
-                                    </div>
-                                }
+                                    @if (showUserMenu)
+                                    {
+                                        <div class="user-dropdown">
+                                            <a class="dropdown-item text-danger" @onclick="CerrarSesion" @onclick:stopPropagation="true">
+                                                Cerrar Sesión
+                                            </a>
+                                        </div>
+                                    }
+                                </div>
                             </div>
-                        </div>
-                    </Authorized>
-                    <NotAuthorized>
-                        <a href="/login" class="btn-login">Iniciar Sesión</a>
-                        <a href="/registro" class="btn-register">Registrarse</a>
-                    </NotAuthorized>
-                </AuthorizeView>
+                        </Authorized>
+                        <NotAuthorized>
+                            <a href="/login" class="btn-login">Iniciar Sesión</a>
+                            <a href="/registro" class="btn-register">Registrarse</a>
+                        </NotAuthorized>
+                    </AuthorizeView>
+                </div>
             </div>
         </div>
 

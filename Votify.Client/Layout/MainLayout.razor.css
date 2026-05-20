@@ -66,12 +66,28 @@ article {
     transform: scale(1.08);
 }
 
+/* Controles organizados verticalmente para poner Ayuda arriba */
 .auth-controls {
     flex: 1;
     display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 8px; /* Espacio vertical entre el botón de ayuda y el de cuenta/login */
+}
+
+.top-row {
+    display: flex;
     justify-content: flex-end;
-    gap: 15px;
-    align-items: center;
+    width: 100%;
+}
+
+.bottom-row {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    position: relative; /* Clave para que el dropdown de cuenta no se desfase */
+    gap: 15px; /* Por si hay múltiples botones en la fila inferior en otras vistas */
 }
 
 .user-header-wrapper {
@@ -185,6 +201,29 @@ article {
     background-color: #fef2f2;
 }
 
+.btn-ayuda {
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.6);
+    padding: 6px 18px; /* Un poco más estilizado para su posición superior */
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(4px);
+    letter-spacing: 0.3px;
+}
+
+.btn-ayuda:hover {
+    background: white;
+    color: #621d95;
+    border-color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
 .btn-login {
     background: white;
     color: #621d95;
@@ -242,6 +281,10 @@ article {
 
     .auth-controls {
         width: 100%;
+        align-items: center;
+    }
+    
+    .top-row, .bottom-row {
         justify-content: center;
     }
 }

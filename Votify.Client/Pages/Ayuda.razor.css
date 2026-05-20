@@ -1,0 +1,138 @@
+.ayuda-container {
+    max-width: 800px;
+    margin: 3rem auto;
+    padding: 0 1.5rem;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.ayuda-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.ayuda-header h1 {
+    color: #621d95;
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+}
+
+.ayuda-header p {
+    color: #64748b;
+    font-size: 1.1rem;
+}
+
+.accordion-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.accordion-item {
+    background-color: white;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.accordion-item:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+}
+
+.accordion-item.active {
+    border-color: #621d95;
+    box-shadow: 0 10px 20px -5px rgba(98, 29, 149, 0.15);
+}
+
+.accordion-header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    padding: 1.3rem 1.6rem;
+    background: none;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #1e293b;
+    transition: background-color 0.2s ease;
+}
+
+.accordion-header:hover {
+    background-color: #f8fafc;
+}
+
+.header-number {
+    color: #621d95;
+    background-color: #f3e8ff;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 1rem;
+    font-weight: 800;
+    margin-right: 1.25rem;
+}
+
+.header-text {
+    flex: 1;
+}
+
+.chevron-icon {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.accordion-item.active .chevron-icon {
+    transform: rotate(180deg);
+    color: #621d95;
+}
+
+/* Transición suave para expandir el desplegable */
+.accordion-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.accordion-item.active .accordion-content {
+    max-height: 500px; /* Altura máxima suficiente para que quepa el texto */
+}
+
+.content-body {
+    padding: 0 1.6rem 1.6rem 1.6rem;
+    color: #475569;
+    font-size: 1rem;
+    line-height: 1.65;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 1.25rem;
+}
+
+.content-body p {
+    margin-top: 0;
+    margin-bottom: 1rem;
+}
+
+.content-body p:last-child {
+    margin-bottom: 0;
+}
+
+.content-body ul {
+    margin: 0;
+    padding-left: 1.5rem;
+}
+
+.content-body li {
+    margin-bottom: 0.75rem;
+}
+
+.content-body li:last-child {
+    margin-bottom: 0;
+}
