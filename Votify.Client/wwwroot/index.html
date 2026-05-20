@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="css/app.css" />
     <link rel="stylesheet" href="css/ripple.css" />
     <link rel="stylesheet" href="css/vote-celebration.css" />
+    <link rel="stylesheet" href="css/results-epic.css" />
     <link rel="icon" type="image/png" href="lib/favicon.png" />
     <link href="Votify.Client.styles.css" rel="stylesheet" />
 </head>
@@ -68,6 +69,41 @@
 
             document.addEventListener('pointerdown', addRipple, true);
         });
+
+        // =========================================================
+        // RESULTADOS: Contador animado de numeros
+        // =========================================================
+        function animateCounters() {
+            var counters = document.querySelectorAll('.count-up-number');
+            counters.forEach(function(el) {
+                var target = parseFloat(el.getAttribute('data-target')) || 0;
+                var decimals = parseInt(el.getAttribute('data-decimals')) || 0;
+                var duration = parseInt(el.getAttribute('data-duration')) || 1500;
+                var startTime = null;
+                var startVal = 0;
+
+                function step(timestamp) {
+                    if (!startTime) startTime = timestamp;
+                    var progress = Math.min((timestamp - startTime) / duration, 1);
+                    var eased = 1 - Math.pow(1 - progress, 3); // easeOutCubic
+                    var current = startVal + (target - startVal) * eased;
+                    el.textContent = current.toFixed(decimals);
+                    if (progress < 1) {
+                        requestAnimationFrame(step);
+                    }
+                }
+                requestAnimationFrame(step);
+            });
+        }
+
+        // Observar cuando aparezcan los contadores en el DOM
+        var resultsObserver = new MutationObserver(function(mutations) {
+            if (document.querySelector('.count-up-number')) {
+                setTimeout(animateCounters, 500);
+                resultsObserver.disconnect();
+            }
+        });
+        resultsObserver.observe(document.body, { childList: true, subtree: true });
     </script>
 </body>
 

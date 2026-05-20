@@ -16,7 +16,19 @@
         </div>
     </div>
 
-    <div class="content-wrapper">
+    <div class="content-wrapper" style="position:relative; z-index:1;">
+        <!-- Particulas flotantes de fondo -->
+        <div class="results-particles-bg">
+            @for (int i = 0; i < 15; i++)
+            {
+                var size = 4 + (i % 4) * 3;
+                var left = (i * 7) % 100;
+                var duration = 8 + (i % 5);
+                var delay = i * 0.5;
+                <div class="float-particle" style="width:@(size)px; height:@(size)px; left:@(left)%; background:#@(i % 2 == 0 ? "c4b5fd" : "a78bfa"); animation-duration:@(duration)s; animation-delay:@(delay)s;"></div>
+            }
+        </div>
+
         <div class="results-header">
             <h1 class="results-title">Clasificación de proyectos</h1>
             <p class="results-subtitle">@(EsMulticriterio ? "Ranking por media ponderada multicriterio" : "Conteo de votos final") para los proyectos del evento: <strong>@(nombreVotacion ?? "...")</strong></p>
@@ -55,7 +67,16 @@
                         <p class="podium-team">Equipo:  @resultado.Equipo</p>
                         <div class="podium-votes">
                             <span class="votes-label">@(EsMulticriterio ? "PUNTUACIÓN FINAL" : "VOTOS TOTALES")</span>
-                            <span class="votes-count">@(EsMulticriterio ? (resultado.PuntajeFinal?.ToString("0.00") ?? "0.00") : resultado.TotalVotos.ToString("N0"))</span>
+                            <span class="votes-count">
+                                @if (EsMulticriterio)
+                                {
+                                    <span class="count-up-number" data-target="@(resultado.PuntajeFinal ?? 0)" data-decimals="2" data-duration="2000">0.00</span>
+                                }
+                                else
+                                {
+                                    <span class="count-up-number" data-target="@resultado.TotalVotos" data-decimals="0" data-duration="2000">0</span>
+                                }
+                            </span>
                         </div>
                     </div>
                 }
@@ -87,7 +108,16 @@
                                         </div>
                                     </td>
                                     <td class="col-votes">
-                                        <span class="votes-count-table">@(EsMulticriterio ? $"{resultado.PuntajeFinal:0.00} pts" : $"{resultado.TotalVotos:N0} votos")</span>
+                                        <span class="votes-count-table">
+                                            @if (EsMulticriterio)
+                                            {
+                                                <span class="count-up-number" data-target="@resultado.PuntajeFinal" data-decimals="2" data-duration="2000">0.00</span><span> pts</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="count-up-number" data-target="@resultado.TotalVotos" data-decimals="0" data-duration="2000">0</span><span> votos</span>
+                                            }
+                                        </span>
                                     </td>
                                 </tr>
                             }

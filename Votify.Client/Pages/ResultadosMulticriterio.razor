@@ -16,7 +16,19 @@
         </div>
     </div>
 
-    <div class="content-wrapper">
+    <div class="content-wrapper" style="position:relative; z-index:1;">
+        <!-- Particulas flotantes de fondo -->
+        <div class="results-particles-bg">
+            @for (int i = 0; i < 15; i++)
+            {
+                var size = 4 + (i % 4) * 3;
+                var left = (i * 7) % 100;
+                var duration = 8 + (i % 5);
+                var delay = i * 0.5;
+                <div class="float-particle" style="width:@(size)px; height:@(size)px; left:@(left)%; background:#@(i % 2 == 0 ? "c4b5fd" : "a78bfa"); animation-duration:@(duration)s; animation-delay:@(delay)s;"></div>
+            }
+        </div>
+
         <div class="results-header">
             <div class="multi-badge">EVALUACIÓN MULTICRITERIO</div>
             <h1 class="results-title">Clasificación por criterios</h1>
@@ -70,7 +82,7 @@
                         <p class="podium-team">Equipo: @resultado.Equipo</p>
                         <div class="podium-votes">
                             <span class="votes-label">PUNTUACIÓN FINAL</span>
-                            <span class="votes-count">@resultado.PuntajeFinal.ToString("0.00")</span>
+                            <span class="votes-count"><span class="count-up-number" data-target="@resultado.PuntajeFinal" data-decimals="2" data-duration="2000">0.00</span></span>
                             <span class="eval-count">@resultado.Evaluaciones evaluación(es)</span>
                         </div>
 
@@ -84,11 +96,11 @@
                                     <div class="criterion-row">
                                         <div class="criterion-header-row">
                                             <span class="criterion-name">@detalle.CriterioNombre</span>
-                                            <span class="criterion-score">@detalle.PromedioValoracion.ToString("0.0")<span class="criterion-max">/5</span></span>
-                                        </div>
-                                        <div class="progress-bar-bg">
-                                            <div class="progress-bar-fill" style="width: @pct.ToString("0.#", System.Globalization.CultureInfo.InvariantCulture)%"></div>
-                                        </div>
+                                                <span class="criterion-score"><span class="count-up-number" data-target="@detalle.PromedioValoracion" data-decimals="1" data-duration="1500">0.0</span><span class="criterion-max">/5</span></span>
+                                            </div>
+                                            <div class="progress-bar-bg">
+                                                <div class="progress-bar-fill" style="width: @pct.ToString("0.#", System.Globalization.CultureInfo.InvariantCulture)%"></div>
+                                            </div>
                                         <div class="criterion-meta">
                                             <span>Peso: @detalle.Peso.ToString("0.##")%</span>
                                             <span>Ponderado: @detalle.PuntajePonderado.ToString("0.00")</span>
@@ -118,7 +130,7 @@
                                     <p class="detail-team">Equipo @resultado.Equipo</p>
                                 </div>
                                 <div class="detail-score">
-                                    <span class="detail-score-value">@resultado.PuntajeFinal.ToString("0.00")</span>
+                                    <span class="detail-score-value"><span class="count-up-number" data-target="@resultado.PuntajeFinal" data-decimals="2" data-duration="2000">0.00</span></span>
                                     <span class="detail-score-label">pts</span>
                                 </div>
                                 <div class="detail-evals">
@@ -135,7 +147,7 @@
                                         <div class="detail-criterion">
                                             <div class="criterion-header-row">
                                                 <span class="criterion-name">@detalle.CriterioNombre</span>
-                                                <span class="criterion-score">@detalle.PromedioValoracion.ToString("0.0")<span class="criterion-max">/5</span></span>
+                                            <span class="criterion-score"><span class="count-up-number" data-target="@detalle.PromedioValoracion" data-decimals="1" data-duration="1500">0.0</span><span class="criterion-max">/5</span></span>
                                             </div>
                                             <div class="progress-bar-bg">
                                                 <div class="progress-bar-fill" style="width: @pct.ToString("0.#", System.Globalization.CultureInfo.InvariantCulture)%"></div>
