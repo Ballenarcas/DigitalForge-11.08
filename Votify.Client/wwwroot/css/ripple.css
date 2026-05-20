@@ -1,10 +1,8 @@
 /* ==========================================
-   RIPPLE EFFECT - Animacion de expansion de circulo
-   100% CSS puro, sin JavaScript
+   RIPPLE EFFECT - Material Design style
    GPU-accelerated, 60fps, ultra-fluido
    ========================================== */
 
-/* Aplicar a TODOS los botones */
 button,
 button[type="submit"],
 button[type="button"],
@@ -15,140 +13,78 @@ button[type="button"],
     transform: translate3d(0, 0, 0);
 }
 
-/* Pseudo-elemento ripple */
-button::after,
-button[type="submit"]::after,
-button[type="button"]::after,
-[class*="btn-"]::after,
-.btn::after {
-    content: "";
+/* El elemento ripple inyectado por JS */
+.ripple-span {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 100%;
-    aspect-ratio: 1;
-    background: radial-gradient(
-        circle,
-        rgba(255, 255, 255, 0.4) 0%,
-        rgba(255, 255, 255, 0.15) 40%,
-        transparent 70%
-    );
     border-radius: 50%;
-    transform: translate(-50%, -50%) scale(3);
-    opacity: 0;
+    transform: scale(0);
     pointer-events: none;
-    transition:
-        transform 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-        opacity 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     will-change: transform, opacity;
+    z-index: 1;
 }
 
-/* Al presionar (active): resetear a punto central, opaco e instantaneo */
-button:active::after,
-button[type="submit"]:active::after,
-button[type="button"]:active::after,
-[class*="btn-"]:active::after,
-.btn:active::after {
-    transform: translate(-50%, -50%) scale(0);
-    opacity: 0.55;
-    transition: 0s;
+/* Animacion de expansion */
+@keyframes ripple-animation {
+    0% {
+        transform: scale(0);
+        opacity: 0.55;
+    }
+    100% {
+        transform: scale(4);
+        opacity: 0;
+    }
 }
 
-/* Al soltar: el circulo EXPANDE y se desvanece simultaneamente */
-/* El navegador anima la transicion desde scale(0) hacia scale(3) */
-
-/* ==========================================
-   VARIANTES DE COLOR SEGUN TIPO DE BOTON
-   ========================================== */
-
-/* --- Ripple CLARO (para botones oscuros / con fondo de color) --- */
-.btn-submit::after,
-.btn-primary-custom::after,
-.btn-crear::after,
-.btn-votar::after,
-.btn-active::after,
-.btn-ver::after,
-.btn-ver-comentarios::after,
-.btn-generar-resumen::after,
-.btn-votar-proyecto::after,
-.btn-enviar-feedback::after,
-.btn-login-modal::after,
-.btn-state::after,
-.btn-add-criterion::after,
-.btn-registrar::after,
-.accordion-header::after,
-.btn-modal-end::after {
-    background: radial-gradient(
-        circle,
-        rgba(255, 255, 255, 0.5) 0%,
-        rgba(255, 255, 255, 0.2) 45%,
-        transparent 70%
-    );
-}
-
-/* --- Ripple OSCURO (para botones claros / outline / fondo blanco) --- */
-.btn-volver::after,
-.btn-back::after,
-.btn-cancel::after,
-.btn-modal-cancel::after,
-.btn-delete::after,
-.btn-modal-delete::after,
-.btn-remove-image::after,
-.btn-remove-criterion::after,
-.btn-eliminar::after,
-.btn-closed::after,
-.btn-disabled::after,
-.roles-page-btn::after,
-.roles-action-btn::after {
-    background: radial-gradient(
-        circle,
-        rgba(0, 0, 0, 0.12) 0%,
-        rgba(0, 0, 0, 0.06) 45%,
-        transparent 70%
-    );
+.ripple-span.ripple-animate {
+    animation: ripple-animation 650ms cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 
 /* ==========================================
-   BOTONES DESHABILITADOS (sin ripple)
+   COLORES DEL RIPPLE
    ========================================== */
-button:disabled::after,
-button[disabled]::after,
-.btn-disabled::after,
-button:disabled:active::after,
-button[disabled]:active::after {
-    display: none !important;
-    content: none !important;
-    animation: none !important;
-    transition: none !important;
+
+/* Ripple blanco para botones con fondo de color (la mayoria) */
+.btn-submit .ripple-span,
+.btn-primary-custom .ripple-span,
+.btn-crear .ripple-span,
+.btn-votar .ripple-span,
+.btn-active .ripple-span,
+.btn-ver .ripple-span,
+.btn-ver-comentarios .ripple-span,
+.btn-generar-resumen .ripple-span,
+.btn-votar-proyecto .ripple-span,
+.btn-enviar-feedback .ripple-span,
+.btn-login-modal .ripple-span,
+.btn-state .ripple-span,
+.btn-add-criterion .ripple-span,
+.btn-registrar .ripple-span,
+.accordion-header .ripple-span,
+.btn-modal-end .ripple-span,
+.btn-votar-proyecto .ripple-span,
+.btn-submit .ripple-span,
+.btn-crear .ripple-span {
+    background: rgba(255, 255, 255, 0.65);
 }
 
-/* ==========================================
-   EFECTO EXTRA: leve brillo en hover (opcional)
-   ========================================== */
-button::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-        120deg,
-        transparent 30%,
-        rgba(255, 255, 255, 0.06) 50%,
-        transparent 70%
-    );
-    opacity: 0;
-    transform: translateX(-100%);
-    transition: opacity 0.3s ease, transform 0s 0.3s;
-    pointer-events: none;
-    border-radius: inherit;
+/* Ripple oscuro para botones claros / outline */
+.btn-volver .ripple-span,
+.btn-back .ripple-span,
+.btn-cancel .ripple-span,
+.btn-modal-cancel .ripple-span,
+.btn-delete .ripple-span,
+.btn-modal-delete .ripple-span,
+.btn-remove-image .ripple-span,
+.btn-remove-criterion .ripple-span,
+.btn-eliminar .ripple-span,
+.btn-closed .ripple-span,
+.btn-disabled .ripple-span,
+.roles-page-btn .ripple-span,
+.roles-action-btn .ripple-span {
+    background: rgba(0, 0, 0, 0.18);
 }
 
-button:hover::before {
-    opacity: 1;
-    transform: translateX(100%);
-    transition: transform 0.7s ease-in-out, opacity 0.3s ease;
-}
-
-button:disabled::before,
-button[disabled]::before {
+/* Botones deshabilitados: ocultar ripple */
+button:disabled .ripple-span,
+button[disabled] .ripple-span {
     display: none !important;
 }

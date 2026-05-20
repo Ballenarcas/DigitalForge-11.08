@@ -28,6 +28,29 @@
     </div>
 
     <script src="_framework/blazor.webassembly.js"></script>
+    <script>
+        // Ripple effect - 1 listener global, event delegation, max performance
+        (function() {
+            document.addEventListener('click', function(e) {
+                var btn = e.target.closest('button, .btn, [class*="btn-"]');
+                if (!btn || btn.disabled) return;
+
+                var rect = btn.getBoundingClientRect();
+                var size = Math.max(rect.width, rect.height) * 2.2;
+                var x = e.clientX - rect.left - size / 2;
+                var y = e.clientY - rect.top - size / 2;
+
+                var ripple = document.createElement('span');
+                ripple.className = 'ripple-span ripple-animate';
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+
+                btn.appendChild(ripple);
+                setTimeout(function() { ripple.remove(); }, 700);
+            });
+        })();
+    </script>
 </body>
 
 </html>
