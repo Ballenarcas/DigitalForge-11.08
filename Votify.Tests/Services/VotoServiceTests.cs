@@ -2,7 +2,9 @@ using Moq;
 using Xunit;
 using Votify.Application.DTOs;
 using Votify.Application.Services;
+using Votify.Application.Services.Estrategia;
 using Votify.Domain.Entities;
+using Votify.Application.Interfaces;
 using Votify.Domain.Interfaces;
 using System;
 
@@ -13,6 +15,8 @@ namespace Votify.Tests.Services
         private readonly Mock<IVotoRepository> _mockVotoRepository;
         private readonly Mock<IVotacionRepository> _mockVotacionRepository;
         private readonly Mock<IParticipanteEventoRepository> _mockParticipanteEventoRepository;
+        private readonly Mock<IVotacionStrategy> _mockEstandarStrategy;
+        private readonly VotacionStrategyResolver _strategyResolver;
         private readonly VotoService _votoService;
 
         public VotoServiceTests()
@@ -20,18 +24,23 @@ namespace Votify.Tests.Services
             _mockVotoRepository = new Mock<IVotoRepository>();
             _mockVotacionRepository = new Mock<IVotacionRepository>();
             _mockParticipanteEventoRepository = new Mock<IParticipanteEventoRepository>();
+            _mockEstandarStrategy = new Mock<IVotacionStrategy>();
+            _mockEstandarStrategy.Setup(s => s.Tipo).Returns("ESTANDAR");
+
+            _strategyResolver = new VotacionStrategyResolver(new[] { _mockEstandarStrategy.Object });
 
             _votoService = new VotoService(
                 _mockVotoRepository.Object,
                 _mockVotacionRepository.Object,
-                _mockParticipanteEventoRepository.Object
+                _mockParticipanteEventoRepository.Object,
+                _strategyResolver
             );
         }
 
         #region VotarAsync Tests
 
         [Fact]
-        public async Task VotarAsync_WithValidData_ShouldSaveVoto()
+        public async Task VotarAsync_WithValidData_ShouldDelegateToStrategy()
         {
             // Arrange
             var votacionId = Guid.NewGuid().ToString();
@@ -59,15 +68,14 @@ namespace Votify.Tests.Services
 
             _mockVotacionRepository.Setup(x => x.ObtenerAsync(votacionId)).ReturnsAsync(votacion);
             _mockVotacionRepository.Setup(x => x.ObtenerEventoIdAsync(votacionId)).ReturnsAsync(eventoId);
-            _mockVotoRepository.Setup(x => x.ContarVotosPorUsuarioYVotacionAsync(votacionId, votanteId)).ReturnsAsync(0);
             _mockParticipanteEventoRepository.Setup(x => x.ObtenerRolAsync(Guid.Parse(eventoId), Guid.Parse(votanteId))).ReturnsAsync("PARTICIPANTE");
-            _mockVotoRepository.Setup(x => x.HaVotadoPorProyectoAsync(votacionId, proyectoId, votanteId)).ReturnsAsync(false);
+            _mockEstandarStrategy.Setup(x => x.ProcesarVotoAsync(It.IsAny<Votacion>(), It.IsAny<VotarDto>())).Returns(Task.CompletedTask);
 
             // Act
             await _votoService.VotarAsync(dto);
 
             // Assert
-            _mockVotoRepository.Verify(x => x.GuardarAsync(It.IsAny<Voto>()), Times.Once);
+            _mockEstandarStrategy.Verify(x => x.ProcesarVotoAsync(votacion, dto), Times.Once);
         }
 
         [Fact]
@@ -89,7 +97,7 @@ namespace Votify.Tests.Services
         }
 
         [Fact]
-        public async Task VotarAsync_WithExceededVoteLimit_ShouldThrowException()
+        public async Task VotarAsync_WithExceededVoteLimit_ShouldThrowException_FromStrategy()
         {
             // Arrange
             var votacionId = Guid.NewGuid().ToString();
@@ -118,7 +126,9 @@ namespace Votify.Tests.Services
 
             _mockVotacionRepository.Setup(x => x.ObtenerAsync(votacionId)).ReturnsAsync(votacion);
             _mockVotacionRepository.Setup(x => x.ObtenerEventoIdAsync(votacionId)).ReturnsAsync(eventoId);
-            _mockVotoRepository.Setup(x => x.ContarVotosPorUsuarioYVotacionAsync(votacionId, votanteId)).ReturnsAsync(limiteProy);
+            _mockParticipanteEventoRepository.Setup(x => x.ObtenerRolAsync(Guid.Parse(eventoId), Guid.Parse(votanteId))).ReturnsAsync("PARTICIPANTE");
+            _mockEstandarStrategy.Setup(x => x.ProcesarVotoAsync(It.IsAny<Votacion>(), It.IsAny<VotarDto>()))
+                .ThrowsAsync(new InvalidOperationException($"No puedes votar. Has alcanzado el límite de {limiteProy} votos para esta votación."));
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => _votoService.VotarAsync(dto));
@@ -154,7 +164,6 @@ namespace Votify.Tests.Services
 
             _mockVotacionRepository.Setup(x => x.ObtenerAsync(votacionId)).ReturnsAsync(votacion);
             _mockVotacionRepository.Setup(x => x.ObtenerEventoIdAsync(votacionId)).ReturnsAsync(eventoId);
-            _mockVotoRepository.Setup(x => x.ContarVotosPorUsuarioYVotacionAsync(votacionId, votanteId)).ReturnsAsync(0);
             _mockParticipanteEventoRepository.Setup(x => x.ObtenerRolAsync(Guid.Parse(eventoId), Guid.Parse(votanteId))).ReturnsAsync("ORGANIZADOR");
 
             // Act & Assert
@@ -163,7 +172,7 @@ namespace Votify.Tests.Services
         }
 
         [Fact]
-        public async Task VotarAsync_WithDuplicateVote_ShouldThrowException()
+        public async Task VotarAsync_WithDuplicateVote_ShouldThrowException_FromStrategy()
         {
             // Arrange
             var votacionId = Guid.NewGuid().ToString();
@@ -191,9 +200,9 @@ namespace Votify.Tests.Services
 
             _mockVotacionRepository.Setup(x => x.ObtenerAsync(votacionId)).ReturnsAsync(votacion);
             _mockVotacionRepository.Setup(x => x.ObtenerEventoIdAsync(votacionId)).ReturnsAsync(eventoId);
-            _mockVotoRepository.Setup(x => x.ContarVotosPorUsuarioYVotacionAsync(votacionId, votanteId)).ReturnsAsync(0);
             _mockParticipanteEventoRepository.Setup(x => x.ObtenerRolAsync(Guid.Parse(eventoId), Guid.Parse(votanteId))).ReturnsAsync("PARTICIPANTE");
-            _mockVotoRepository.Setup(x => x.HaVotadoPorProyectoAsync(votacionId, proyectoId, votanteId)).ReturnsAsync(true);
+            _mockEstandarStrategy.Setup(x => x.ProcesarVotoAsync(It.IsAny<Votacion>(), It.IsAny<VotarDto>()))
+                .ThrowsAsync(new InvalidOperationException("Ya has votado por este proyecto en esta votacion."));
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => _votoService.VotarAsync(dto));
@@ -201,9 +210,9 @@ namespace Votify.Tests.Services
         }
 
         [Fact]
-        public async Task VotarAsync_WithAnonymousVoter_ShouldThrowException_DueToNullVotanteId()
+        public async Task VotarAsync_WithAnonymousVoter_ShouldDelegateToStrategy()
         {
-            // Arrange - This test exposes a bug in VotoService where it tries to parse null votanteId
+            // Arrange
             var votacionId = Guid.NewGuid().ToString();
             var eventoId = Guid.NewGuid().ToString();
             var proyectoId = Guid.NewGuid().ToString();
@@ -228,18 +237,13 @@ namespace Votify.Tests.Services
 
             _mockVotacionRepository.Setup(x => x.ObtenerAsync(votacionId)).ReturnsAsync(votacion);
             _mockVotacionRepository.Setup(x => x.ObtenerEventoIdAsync(votacionId)).ReturnsAsync(eventoId);
-            _mockVotoRepository.Setup(x => x.ContarVotosPorUsuarioYVotacionAsync(votacionId, string.Empty)).ReturnsAsync(0);
+            _mockEstandarStrategy.Setup(x => x.ProcesarVotoAsync(It.IsAny<Votacion>(), It.IsAny<VotarDto>())).Returns(Task.CompletedTask);
 
-            // Act & Assert - Anonymous voters (null VotanteId) are now handled gracefully
-            // instead of crashing with ArgumentNullException from Guid.Parse(null)
-            try
-            {
-                await _votoService.VotarAsync(dto);
-            }
-            catch (InvalidOperationException)
-            {
-                // Expected: the service correctly rejects organizer votes or other invalid operations
-            }
+            // Act
+            await _votoService.VotarAsync(dto);
+
+            // Assert
+            _mockEstandarStrategy.Verify(x => x.ProcesarVotoAsync(votacion, dto), Times.Once);
         }
 
         #endregion

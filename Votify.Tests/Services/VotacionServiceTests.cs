@@ -2,7 +2,9 @@ using Moq;
 using Xunit;
 using Votify.Application.DTOs;
 using Votify.Application.Services;
+using Votify.Application.Services.Estrategia;
 using Votify.Domain.Entities;
+using Votify.Application.Interfaces;
 using Votify.Domain.Interfaces;
 using System;
 
@@ -15,6 +17,8 @@ namespace Votify.Tests.Services
         private readonly Mock<IProyectoRepository> _mockProyectoRepository;
         private readonly Mock<IEventoRepository> _mockEventoRepository;
         private readonly Mock<IEquipoRepository> _mockEquipoRepository;
+        private readonly Mock<IVotacionStrategy> _mockEstandarStrategy;
+        private readonly VotacionStrategyResolver _strategyResolver;
         private readonly VotacionService _votacionService;
 
         public VotacionServiceTests()
@@ -24,13 +28,18 @@ namespace Votify.Tests.Services
             _mockProyectoRepository = new Mock<IProyectoRepository>();
             _mockEventoRepository = new Mock<IEventoRepository>();
             _mockEquipoRepository = new Mock<IEquipoRepository>();
+            _mockEstandarStrategy = new Mock<IVotacionStrategy>();
+            _mockEstandarStrategy.Setup(s => s.Tipo).Returns("ESTANDAR");
+
+            _strategyResolver = new VotacionStrategyResolver(new[] { _mockEstandarStrategy.Object });
 
             _votacionService = new VotacionService(
                 _mockVotacionRepository.Object,
                 _mockVotoRepository.Object,
                 _mockProyectoRepository.Object,
                 _mockEventoRepository.Object,
-                _mockEquipoRepository.Object
+                _mockEquipoRepository.Object,
+                _strategyResolver
             );
         }
 

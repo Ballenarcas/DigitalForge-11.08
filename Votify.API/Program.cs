@@ -89,6 +89,12 @@ builder.Services.AddScoped<IComentarioRepository, ComentarioRepository>();
 builder.Services.AddScoped<IComentarioService, ComentarioService>();
 builder.Services.AddScoped<ICriterioRepository, CriterioRepository>();
 builder.Services.AddScoped<IValoracionCriterioRepository, ValoracionCriterioRepository>();
+
+// Patrón Strategy para tipos de votación
+builder.Services.AddScoped<Votify.Application.Interfaces.IVotacionStrategy, Votify.Application.Services.Estrategia.VotacionEstandarStrategy>();
+builder.Services.AddScoped<Votify.Application.Interfaces.IVotacionStrategy, Votify.Application.Services.Estrategia.VotacionMulticriterioStrategy>();
+builder.Services.AddScoped<Votify.Application.Interfaces.IVotacionStrategy, Votify.Application.Services.Estrategia.VotacionMulticriterioPublicoStrategy>();
+builder.Services.AddScoped<Votify.Application.Services.Estrategia.VotacionStrategyResolver>();
 builder.Services.AddScoped<Votify.Domain.Interfaces.IEventoRepository, Votify.Infrastructure.Repositories.EventoRepository>();
 builder.Services.AddScoped<Votify.Domain.Interfaces.IParticipanteEventoRepository, Votify.Infrastructure.Repositories.ParticipanteEventoRepository>();
 builder.Services.AddScoped<Votify.Application.Interfaces.IEventoService, Votify.Application.Services.EventoService>();

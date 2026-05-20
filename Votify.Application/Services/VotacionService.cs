@@ -1,5 +1,6 @@
 using Votify.Application.DTOs;
 using Votify.Application.Interfaces;
+using Votify.Application.Services.Estrategia;
 using Votify.Domain.Entities;
 using Votify.Domain.Factory;
 using Votify.Domain.Interfaces;
@@ -15,6 +16,7 @@ namespace Votify.Application.Services
         private readonly ICriterioRepository? _criterioRepo;
         private readonly IValoracionCriterioRepository? _valoracionCriterioRepo;
         private readonly IEquipoRepository _equipoRepo;
+        private readonly VotacionStrategyResolver _strategyResolver;
 
         public VotacionService(
             IVotacionRepository repo,
@@ -22,6 +24,7 @@ namespace Votify.Application.Services
             IProyectoRepository proyectoRepo,
             IEventoRepository eventoRepo,
             IEquipoRepository equipoRepo,
+            VotacionStrategyResolver strategyResolver,
             ICriterioRepository? criterioRepo = null,
             IValoracionCriterioRepository? valoracionCriterioRepo = null)
         {
@@ -30,6 +33,7 @@ namespace Votify.Application.Services
             _proyectoRepo = proyectoRepo;
             _eventoRepo = eventoRepo;
             _equipoRepo = equipoRepo;
+            _strategyResolver = strategyResolver;
             _criterioRepo = criterioRepo;
             _valoracionCriterioRepo = valoracionCriterioRepo;
         }
@@ -143,110 +147,21 @@ namespace Votify.Application.Services
         public async Task<List<ResultadoProyectoDto>> ObtenerResultadosAsync(string votacionId)
         {
             var votacion = await _repo.ObtenerAsync(votacionId);
-            var equipos = await _equipoRepo.ObtenerTodosAsync();
-            var equipoDict = equipos.ToDictionary(e => e.Id.ToString(), e => e.Nombre);
-
-            if (votacion is not null && EsMulticriterio(votacion.Tipo) && _valoracionCriterioRepo is not null)
-            {
-                var ponderados = await _valoracionCriterioRepo.ObtenerResultadosPonderadosAsync(votacionId);
-                var proyectosMulti = await _proyectoRepo.ObtenerPorVotacionAsync(votacionId);
-                var proyectoMultiDict = proyectosMulti.ToDictionary(p => p.Id);
-
-                return ponderados.Select((resultado, index) => new ResultadoProyectoDto
-                {
-                    Id = resultado.ProyectoId,
-                    Nombre = proyectoMultiDict.ContainsKey(resultado.ProyectoId) ? proyectoMultiDict[resultado.ProyectoId].Nombre : "Proyecto desconocido",
-                    Equipo = proyectoMultiDict.ContainsKey(resultado.ProyectoId) && proyectoMultiDict[resultado.ProyectoId].Equipo_Id != null && equipoDict.ContainsKey(proyectoMultiDict[resultado.ProyectoId].Equipo_Id!) 
-                        ? equipoDict[proyectoMultiDict[resultado.ProyectoId].Equipo_Id!] 
-                        : "Sin equipo",
-                    TotalVotos = resultado.Evaluaciones,
-                    PuntajeFinal = Math.Round(resultado.Puntaje, 2),
-                    Evaluaciones = resultado.Evaluaciones,
-                    Posicion = index + 1
-                }).ToList();
-            }
-
-            var votosporProyecto = await _votoRepo.ObtenerVotosPorVotacionAsync(votacionId);
-
-            if (votosporProyecto.Count == 0)
+            if (votacion is null)
                 return new List<ResultadoProyectoDto>();
 
-            var proyectos = await _proyectoRepo.ObtenerPorVotacionAsync(votacionId);
-            var proyectoDict = proyectos.ToDictionary(p => p.Id);
-
-            var resultados = votosporProyecto
-                .Select((vp, index) => new ResultadoProyectoDto
-                {
-                    Id = vp.ProyectoId,
-                    Nombre = proyectoDict.ContainsKey(vp.ProyectoId) ? proyectoDict[vp.ProyectoId].Nombre : "Proyecto desconocido",
-                    Equipo = proyectoDict.ContainsKey(vp.ProyectoId) && proyectoDict[vp.ProyectoId].Equipo_Id != null && equipoDict.ContainsKey(proyectoDict[vp.ProyectoId].Equipo_Id!) 
-                        ? equipoDict[proyectoDict[vp.ProyectoId].Equipo_Id!] 
-                        : "Sin equipo",
-                    TotalVotos = vp.Votos,
-                    Posicion = index + 1
-                })
-                .ToList();
-
-            return resultados;
+            var strategy = _strategyResolver.Resolver(votacion.Tipo);
+            return await strategy.CalcularResultadosAsync(votacionId);
         }
 
         public async Task<List<ResultadoMulticriterioDto>> ObtenerResultadosMulticriterioAsync(string votacionId)
         {
             var votacion = await _repo.ObtenerAsync(votacionId);
-            if (votacion is null || !EsMulticriterio(votacion.Tipo))
+            if (votacion is null)
                 return new List<ResultadoMulticriterioDto>();
 
-            if (_valoracionCriterioRepo is null || _criterioRepo is null)
-                return new List<ResultadoMulticriterioDto>();
-
-            var equipos = await _equipoRepo.ObtenerTodosAsync();
-            var equipoDict = equipos.ToDictionary(e => e.Id.ToString(), e => e.Nombre);
-
-            // Get overall ponderados
-            var ponderados = await _valoracionCriterioRepo.ObtenerResultadosPonderadosAsync(votacionId);
-            // Get per-criterion details
-            var detalles = await _valoracionCriterioRepo.ObtenerDetallesPorCriterioAsync(votacionId);
-            // Get criterios (names/weights)
-            var criterios = await _criterioRepo.ObtenerPorVotacionAsync(votacionId);
-            var criterioDict = criterios.ToDictionary(c => c.Id.ToString(), c => c);
-            // Get projects
-            var proyectos = await _proyectoRepo.ObtenerPorVotacionAsync(votacionId);
-            var proyectoDict = proyectos.ToDictionary(p => p.Id);
-
-            return ponderados.Select((resultado, index) =>
-            {
-                var detallesProyecto = detalles
-                    .Where(d => d.ProyectoId == resultado.ProyectoId)
-                    .Select(d =>
-                    {
-                        var criterio = criterioDict.ContainsKey(d.CriterioId.ToString())
-                            ? criterioDict[d.CriterioId.ToString()]
-                            : null;
-                        return new DetalleCriterioResultadoDto
-                        {
-                            CriterioId = d.CriterioId.ToString(),
-                            CriterioNombre = criterio?.Nombre ?? "Criterio desconocido",
-                            Peso = criterio?.Peso ?? 0,
-                            PromedioValoracion = Math.Round(d.PromedioValoracion, 2),
-                            PuntajePonderado = Math.Round(d.PromedioValoracion * (double)(criterio?.Peso ?? 0) / 100.0, 2)
-                        };
-                    })
-                    .OrderByDescending(d => d.PuntajePonderado)
-                    .ToList();
-
-                return new ResultadoMulticriterioDto
-                {
-                    Id = resultado.ProyectoId,
-                    Nombre = proyectoDict.ContainsKey(resultado.ProyectoId) ? proyectoDict[resultado.ProyectoId].Nombre : "Proyecto desconocido",
-                    Equipo = proyectoDict.ContainsKey(resultado.ProyectoId) && proyectoDict[resultado.ProyectoId].Equipo_Id != null && equipoDict.ContainsKey(proyectoDict[resultado.ProyectoId].Equipo_Id!) 
-                        ? equipoDict[proyectoDict[resultado.ProyectoId].Equipo_Id!] 
-                        : "Sin equipo",
-                    PuntajeFinal = Math.Round(resultado.Puntaje, 2),
-                    Evaluaciones = resultado.Evaluaciones,
-                    Posicion = index + 1,
-                    DetallesCriterios = detallesProyecto
-                };
-            }).ToList();
+            var strategy = _strategyResolver.Resolver(votacion.Tipo);
+            return await strategy.CalcularResultadosMulticriterioAsync(votacionId);
         }
 
         public async Task PausarVotacionAsync(string id)
