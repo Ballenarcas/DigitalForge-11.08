@@ -9,7 +9,6 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build-client
 WORKDIR /src
 
 COPY Votify.Client/Votify.Client.csproj Votify.Client/
-COPY Votify.Client/NuGet.config Votify.Client/ 2>/dev/null || true
 
 # Restore solo el cliente
 RUN dotnet restore Votify.Client/Votify.Client.csproj
