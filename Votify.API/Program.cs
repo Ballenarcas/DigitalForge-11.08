@@ -191,7 +191,10 @@ var app = builder.Build();
 
 app.UseCors("AllowBlazor");
 app.UseStaticFiles();
-app.UseHttpsRedirection();
+if (app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseAuthentication();
 app.UseAuthorization();
