@@ -1,0 +1,212 @@
+/* ==========================================
+   VOTE CELEBRATION - Animacion Maximalista
+   Experiencia inolvidable al votar
+   ========================================== */
+
+/* --- Boton de votar EPICO --- */
+.btn-votar-proyecto {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    background: linear-gradient(135deg, #9333ea 0%, #7c3aed 50%, #db2777 100%);
+    background-size: 200% 200%;
+    color: white;
+    border: none;
+    border-radius: 16px;
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 6px 20px rgba(147, 51, 234, 0.3);
+    letter-spacing: -0.01em;
+    position: relative;
+    overflow: hidden;
+    animation: gradient-shift 3s ease infinite;
+}
+
+@keyframes gradient-shift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.btn-votar-proyecto:hover:not(:disabled) {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 10px 40px rgba(147, 51, 234, 0.5), 0 0 60px rgba(219, 39, 119, 0.2);
+    filter: brightness(1.1);
+}
+
+.btn-votar-proyecto:disabled {
+    background: #dbc2e2;
+    color: white;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+    animation: none;
+}
+
+/* --- Estado: VOTANDO (shake + glow pulse) --- */
+.btn-votar-proyecto.votando-anim {
+    animation: vote-shake 0.5s ease-in-out infinite, gradient-shift 3s ease infinite;
+    box-shadow: 0 0 30px rgba(147, 51, 234, 0.6);
+}
+
+@keyframes vote-shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-3px); }
+    75% { transform: translateX(3px); }
+}
+
+/* --- Estado: EXITO (transformacion epica) --- */
+.btn-votar-proyecto.voto-exito {
+    background: linear-gradient(135deg, #22c55e, #16a34a) !important;
+    animation: success-pulse 0.6s ease, gradient-shift 3s ease infinite;
+    box-shadow: 0 0 40px rgba(34, 197, 94, 0.5);
+}
+
+@keyframes success-pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+    100% { transform: scale(1); }
+}
+
+/* ==========================================
+   EXPLOSION DE PARTICULAS CSS PURAS
+   ========================================== */
+
+.vote-particles-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 10000;
+    overflow: hidden;
+}
+
+.particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+/* Generamos 20 particulas con delays y direcciones diferentes */
+.particle:nth-child(1) { background: #9333ea; animation: particle-1 1.2s ease-out forwards; }
+.particle:nth-child(2) { background: #db2777; animation: particle-2 1.2s ease-out forwards; animation-delay: 0.05s; }
+.particle:nth-child(3) { background: #f59e0b; animation: particle-3 1.2s ease-out forwards; animation-delay: 0.1s; }
+.particle:nth-child(4) { background: #22c55e; animation: particle-4 1.2s ease-out forwards; animation-delay: 0.15s; }
+.particle:nth-child(5) { background: #3b82f6; animation: particle-5 1.2s ease-out forwards; animation-delay: 0.2s; }
+.particle:nth-child(6) { background: #ef4444; animation: particle-6 1.2s ease-out forwards; animation-delay: 0.25s; }
+.particle:nth-child(7) { background: #14b8a6; animation: particle-7 1.2s ease-out forwards; animation-delay: 0.3s; }
+.particle:nth-child(8) { background: #f97316; animation: particle-8 1.2s ease-out forwards; animation-delay: 0.35s; }
+.particle:nth-child(9) { background: #8b5cf6; animation: particle-9 1.2s ease-out forwards; animation-delay: 0.4s; }
+.particle:nth-child(10) { background: #ec4899; animation: particle-10 1.2s ease-out forwards; animation-delay: 0.45s; }
+.particle:nth-child(11) { background: #06b6d4; animation: particle-11 1.2s ease-out forwards; animation-delay: 0.5s; }
+.particle:nth-child(12) { background: #84cc16; animation: particle-12 1.2s ease-out forwards; animation-delay: 0.55s; }
+.particle:nth-child(13) { background: #a855f7; animation: particle-13 1.2s ease-out forwards; animation-delay: 0.6s; }
+.particle:nth-child(14) { background: #f43f5e; animation: particle-14 1.2s ease-out forwards; animation-delay: 0.65s; }
+.particle:nth-child(15) { background: #10b981; animation: particle-15 1.2s ease-out forwards; animation-delay: 0.7s; }
+.particle:nth-child(16) { background: #eab308; animation: particle-16 1.2s ease-out forwards; animation-delay: 0.75s; }
+.particle:nth-child(17) { background: #6366f1; animation: particle-17 1.2s ease-out forwards; animation-delay: 0.8s; }
+.particle:nth-child(18) { background: #d946ef; animation: particle-18 1.2s ease-out forwards; animation-delay: 0.85s; }
+.particle:nth-child(19) { background: #22d3ee; animation: particle-19 1.2s ease-out forwards; animation-delay: 0.9s; }
+.particle:nth-child(20) { background: #fbbf24; animation: particle-20 1.2s ease-out forwards; animation-delay: 0.95s; }
+
+/* Keyframes de particulas - explosion radial */
+@keyframes particle-1 { 0% { transform: translate(0,0) scale(1); opacity:1; } 100% { transform: translate(-120px,-180px) scale(0); opacity:0; } }
+@keyframes particle-2 { 0% { transform: translate(0,0) scale(1); opacity:1; } 100% { transform: translate(100px,-200px) scale(0); opacity:0; } }
+@keyframes particle-3 { 0% { transform: translate(0,0) scale(1); opacity:1; } 100% { transform: translate(180px,-80px) scale(0); opacity:0; } }
+@keyframes particle-4 { 0% { transform: translate(0,0) scale(1); opacity:1; } 100% { transform: translate(200px,60px) scale(0); opacity:0; } }
+@keyframes particle-5 { 0% { transform: translate(0,0) scale(1); opacity:1; } 100% { transform: translate(140px,160px) scale(0); opacity:0; } }
+@keyframes particle-6 { 0% { transform: translate(0,0) scale(1); opacity:1; } 100% { transform: translate(20px,200px) scale(0); opacity:0; } }
+@keyframes particle-7 { 0% { transform: translate(0,0) scale(1); opacity:1; } 100% { transform: translate(-100px,180px) scale(0); opacity:0; } }
+@keyframes particle-8 { 0% { transform: translate(0,0) scale(1); opacity:1; } 100% { transform: translate(-180px,40px) scale(0); opacity:0; } }
+@keyframes particle-9 { 0% { transform: translate(0,0) scale(1); opacity:1; } 100% { transform: translate(-60px,-220px) scale(0); opacity:0; } }
+@keyframes particle-10 { 0% { transform: translate(0,0) scale(1); opacity:1; } 100% { transform: translate(80px,-160px) scale(0); opacity:0; } }
+@keyframes particle-11 { 0% { transform: translate(0,0) scale(1); opacity:1; } 100% { transform: translate(160px,-40px) scale(0); opacity:0; } }
+@keyframes particle-12 { 0% { transform: translate(0,0) scale(1); opacity:1; } 100% { transform: translate(160px,100px) scale(0); opacity:0; } }
+@keyframes particle-13 { 0% { transform: translate(0,0) scale(1); opacity:1; } 100% { transform: translate(60px,190px) scale(0); opacity:0; } }
+@keyframes particle-14 { 0% { transform: translate(0,0) scale(1); opacity:1; } 100% { transform: translate(-80px,170px) scale(0); opacity:0; } }
+@keyframes particle-15 { 0% { transform: translate(0,0) scale(1); opacity:1; } 100% { transform: translate(-160px,80px) scale(0); opacity:0; } }
+@keyframes particle-16 { 0% { transform: translate(0,0) scale(1); opacity:1; } 100% { transform: translate(-40px,-100px) scale(0); opacity:0; } }
+@keyframes particle-17 { 0% { transform: translate(0,0) scale(1); opacity:1; } 100% { transform: translate(40px,-120px) scale(0); opacity:0; } }
+@keyframes particle-18 { 0% { transform: translate(0,0) scale(1); opacity:1; } 100% { transform: translate(120px,-20px) scale(0); opacity:0; } }
+@keyframes particle-19 { 0% { transform: translate(0,0) scale(1); opacity:1; } 100% { transform: translate(100px,120px) scale(0); opacity:0; } }
+@keyframes particle-20 { 0% { transform: translate(0,0) scale(1); opacity:1; } 100% { transform: translate(-120px,100px) scale(0); opacity:0; } }
+
+/* ==========================================
+   FLASH DE EXITO (pantalla blanca momentanea)
+   ========================================== */
+
+.vote-success-flash {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: radial-gradient(circle at center, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 70%);
+    pointer-events: none;
+    z-index: 9998;
+    animation: flash-out 0.8s ease-out forwards;
+}
+
+@keyframes flash-out {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+/* ==========================================
+   TEXTO "VOTO REGISTRADO" animado
+   ========================================== */
+
+.vote-success-text {
+    animation: text-pop 0.5s ease;
+}
+
+@keyframes text-pop {
+    0% { transform: scale(0.5); opacity: 0; }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* ==========================================
+   ONDA DE CHOQUE (shockwave)
+   ========================================== */
+
+.shockwave {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 3px solid rgba(255, 255, 255, 0.6);
+    transform: translate(-50%, -50%) scale(1);
+    pointer-events: none;
+    animation: shockwave-anim 0.8s ease-out forwards;
+}
+
+@keyframes shockwave-anim {
+    0% { transform: translate(-50%, -50%) scale(1); opacity: 1; border-width: 4px; }
+    100% { transform: translate(-50%, -50%) scale(3); opacity: 0; border-width: 0px; }
+}
+
+/* ==========================================
+   CHECKMARK ANIMADO SVG
+   ========================================== */
+
+.checkmark-path {
+    stroke-dasharray: 48;
+    stroke-dashoffset: 48;
+    animation: draw-check 0.5s ease forwards 0.2s;
+}
+
+@keyframes draw-check {
+    to { stroke-dashoffset: 0; }
+}
