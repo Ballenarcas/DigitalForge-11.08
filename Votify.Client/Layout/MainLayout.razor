@@ -21,7 +21,14 @@
             <!-- Controles de autenticación con el botón de ayuda arriba -->
             <div class="auth-controls">
                 <div class="top-row">
-                    <a href="/ayuda" class="btn-ayuda">Ayuda</a>
+                    @if (IsInHelpPage())
+                    {
+                        <button class="btn-ayuda" disabled>Ayuda</button>
+                    }
+                    else
+                    {
+                        <a href="/ayuda" class="btn-ayuda">Ayuda</a>
+                    }
                 </div>
                 
                 <div class="bottom-row">
@@ -64,6 +71,11 @@
 
 @code {
     private bool showUserMenu = false;
+
+    private bool IsInHelpPage()
+    {
+        return NavManager.Uri.EndsWith("/ayuda", StringComparison.OrdinalIgnoreCase);
+    }
 
     private void ToggleUserMenu()
     {
