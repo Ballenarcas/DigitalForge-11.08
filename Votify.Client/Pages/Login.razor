@@ -261,13 +261,53 @@
     }
 
     .error-message {
-        background-color: #fed7d7;
-        color: #c53030;
-        padding: 10px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-        font-size: 14px;
-        animation: error-shake 0.4s ease-in-out;
+        background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+        color: #7f1d1d;
+        border: 1.5px solid #fca5a5;
+        border-left: 4px solid #ef4444;
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        margin-bottom: 1.5rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        animation: slideInAlert 0.4s cubic-bezier(0.22, 1, 0.36, 1) both, subtleShake 0.5s ease-out;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    .error-message::before {
+        content: '⚠';
+        flex-shrink: 0;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #ef4444;
+        color: white;
+        border-radius: 50%;
+        font-weight: 800;
+        font-size: 0.85rem;
+    }
+
+    @@keyframes slideInAlert {
+        from { 
+            opacity: 0; 
+            transform: translateX(-10px); 
+        }
+        to { 
+            opacity: 1; 
+            transform: translateX(0); 
+        }
+    }
+
+    @@keyframes subtleShake {
+        0%, 100% { transform: translateX(0); }
+        10%, 30%, 50%, 70%, 90% { transform: translateX(-1px); }
+        20%, 40%, 60%, 80% { transform: translateX(1px); }
     }
 
     @@keyframes error-shake {
@@ -275,6 +315,7 @@
         25% { transform: translateX(-6px); }
         50% { transform: translateX(6px); }
         75% { transform: translateX(-3px); }
+    }
     }
 </style>
 
