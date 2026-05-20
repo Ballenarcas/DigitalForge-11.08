@@ -190,6 +190,7 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 app.UseCors("AllowBlazor");
+app.UseDefaultFiles();
 app.UseStaticFiles();
 if (app.Environment.IsDevelopment())
 {
@@ -201,5 +202,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapHealthChecks("/healthz");
+app.MapFallbackToFile("index.html");
 
 app.Run();
