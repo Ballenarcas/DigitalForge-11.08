@@ -40,14 +40,13 @@
         else
         {
             <div class="votaciones-grid">
-                @{ int delayIndex = 0; }
                 @foreach (var e in listaEventos)
                 {
                     var ahora = DateTime.UtcNow;
                     var yaInicio  = ahora >= e.FechaInicio;
                     var yaFinalizo = ahora >= e.FechaFin;
 
-                    <div class="votacion-card @(yaFinalizo ? "card-ended" : yaInicio ? "card-active" : "card-pending")" style="animation-delay: @(delayIndex * 0.1)s;">
+                    <div class="votacion-card @(yaFinalizo ? "card-ended" : yaInicio ? "card-active" : "card-pending")">
                         <div class="card-cover">
                             <img src="@(string.IsNullOrEmpty(e.ImagenUrl) ? "images/evento-default.png" : e.ImagenUrl)" alt="@e.Nombre" />
                         </div>
@@ -130,7 +129,6 @@
                             </div>
                         </div>
                     </div>
-                    delayIndex++;
                 }
             </div>
         }

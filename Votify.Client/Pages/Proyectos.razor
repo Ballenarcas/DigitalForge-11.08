@@ -4,7 +4,6 @@
 @using Votify.Domain.Entities
 @inject ProyectosService ProyectosService
 @inject VotacionesService VotacionesService
-@inject EquiposService EquiposService
 @inject NavigationManager Nav
 @inject AuthenticationStateProvider AuthStateProvider
 
@@ -101,10 +100,9 @@
         else
         {
             <div class="votaciones-grid">
-                @{ int delayIndex = 0; }
                 @foreach (ProyectoDto p in listaProyectos)
                 {
-                    <div class="votacion-card card-active" style="animation-delay: @(delayIndex * 0.1)s;">
+                    <div class="votacion-card card-active">
                         <div class="card-cover">
                             <img src="@(string.IsNullOrEmpty(p.ImagenUrl) ? "images/Proyectos-default.jpg" : p.ImagenUrl)" alt="@p.Nombre" />
                         </div>
@@ -120,7 +118,7 @@
                             <div class="info-row" style="justify-content: flex-start;">
                                 <span class="stats" style="color: #64748b; font-weight: 600; font-size: 0.85rem; display: flex; align-items: center; gap: 0.4rem;">
                                     <svg viewBox="0 0 24 24" fill="none" width="16" height="16" xmlns="http://www.w3.org/2000/svg"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M23 21v-2a4 4 0 0 0-3-3.87" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                                    @ObtenerNombreEquipo(p.Equipo_Id)
+                                    @(string.IsNullOrEmpty(p.EquipoNombre) ? "Sin equipo" : p.EquipoNombre)
                                 </span>
                             </div>
 
@@ -146,7 +144,6 @@
                             </div>
                         </div>
                     </div>
-                    delayIndex++;
                 }
             </div>
         }
@@ -330,7 +327,82 @@
     .loader-container { text-align: center; padding: 4rem; color: #64748b; }
     .spinner { width: 35px; height: 35px; border: 4px solid #f3e8ff; border-top: 4px solid #9333ea; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem; }
     @@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    .empty-state { text-align: center; padding: 3rem; background: white; border-radius: 30px; border: 2px dashed #e2e8f0; width: 100%; }
+    .empty-state { text-align: center; padding: 3rem; background: white; border-radius: 30px; border: 2px dashed #e2e8f0; width: 100%; animation: fadeInScale 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+    /* Epic entrance animations */
+    @@keyframes fadeInScale {
+        from { opacity: 0; transform: scale(0.96) translateY(10px); }
+        to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    @@keyframes fadeInHeader {
+        from { opacity: 0; transform: translateY(-10px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    @@keyframes slideInLeft {
+        from { opacity: 0; transform: translateX(-20px); }
+        to   { opacity: 1; transform: translateX(0); }
+    }
+    @@keyframes slideInRight {
+        from { opacity: 0; transform: translateX(20px); }
+        to   { opacity: 1; transform: translateX(0); }
+    }
+    @@keyframes floaty {
+        0%, 100% { transform: translateY(0); }
+        50%      { transform: translateY(-5px); }
+    }
+    @@keyframes tiltIn {
+        from { opacity: 0; transform: perspective(600px) rotateX(8deg) translateY(-10px); }
+        to   { opacity: 1; transform: perspective(600px) rotateX(0) translateY(0); }
+    }
+    @@keyframes popIn {
+        0%   { transform: scale(0.9); opacity: 0; }
+        70%  { transform: scale(1.02); opacity: 1; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+    @@keyframes shimmerLoad {
+        0%   { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+    }
+
+    .header-principal { animation: fadeInHeader 0.4s cubic-bezier(0.22, 1, 0.36, 1) both; }
+    .page-title-row { animation: slideInLeft 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.05s both; }
+    .header-actions { animation: slideInRight 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both; }
+
+    .loader-container { animation: fadeInScale 0.4s ease both; }
+    .loader-container .spinner { animation: spin 1s linear infinite; }
+
+    .alert-state {
+        animation: tiltIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    .alert-success {
+        animation: popIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    .alert-danger {
+        animation: popIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    /* Stagger cards */
+    .votacion-card:nth-child(1)  { animation-delay: 0.05s; }
+    .votacion-card:nth-child(2)  { animation-delay: 0.10s; }
+    .votacion-card:nth-child(3)  { animation-delay: 0.15s; }
+    .votacion-card:nth-child(4)  { animation-delay: 0.20s; }
+    .votacion-card:nth-child(5)  { animation-delay: 0.25s; }
+    .votacion-card:nth-child(6)  { animation-delay: 0.30s; }
+    .votacion-card:nth-child(7)  { animation-delay: 0.35s; }
+    .votacion-card:nth-child(8)  { animation-delay: 0.40s; }
+    .votacion-card:nth-child(9)  { animation-delay: 0.45s; }
+    .votacion-card:nth-child(10) { animation-delay: 0.50s; }
+    .votacion-card:nth-child(11) { animation-delay: 0.55s; }
+    .votacion-card:nth-child(12) { animation-delay: 0.60s; }
+
+    /* Enhanced hover on card image */
+    .card-cover img {
+        transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.4s ease;
+    }
+    .votacion-card:hover .card-cover img {
+        transform: scale(1.08);
+        filter: brightness(1.05);
+    }
 </style>
 
 @code {
@@ -346,7 +418,6 @@
     private string? usuarioId;
      private VotacionDto? votacion;
     private bool EsMulti = false;
-    private Dictionary<string, string> mapaEquipos = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -376,17 +447,6 @@
             else
             {
                 listaProyectos = await ProyectosService.ObtenerProyectosAsync();
-            }
-
-            // Cargar nombres de equipos para el mapeo local
-            try
-            {
-                var todosEquipos = await EquiposService.ObtenerEquiposAsync();
-                mapaEquipos = todosEquipos?.ToDictionary(e => e.Id.ToString(), e => e.Nombre) ?? new();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error cargando nombres de equipos: {ex.Message}");
             }
         }
         catch (Exception ex)
@@ -457,10 +517,4 @@
     private bool estaFinalizada => votacion != null && (votacion.Estado == 2 || (votacion.Estado == 0 && DateTime.UtcNow >= votacion.FechaFin));
     private bool estaPausada => votacion != null && votacion.Estado == 1 && DateTime.UtcNow >= votacion.FechaInicio && DateTime.UtcNow < votacion.FechaFin;
     private bool noIniciada => votacion != null && DateTime.UtcNow < votacion.FechaInicio;
-
-    private string ObtenerNombreEquipo(string? equipoId)
-    {
-        if (string.IsNullOrEmpty(equipoId)) return "Sin equipo";
-        return mapaEquipos.TryGetValue(equipoId, out var nombre) ? nombre : "Cargando...";
-    }
 }

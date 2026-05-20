@@ -92,42 +92,57 @@ public class ProyectoService : IProyectoService
         {
             return null;
         }
+        return await MapToDtoAsync(proyecto);
+    }
+
+    public async Task<List<ProyectoDto>> ObtenerProyectosAsync()
+    {
+        var proyectos = await _proyectoRepository.ObtenerTodasAsync();
+        var equipos = await _equipoRepository.ObtenerTodosAsync();
+        var equipoDict = equipos.ToDictionary(e => e.Id.ToString(), e => e.Nombre);
+        return proyectos.Select(p => MapToDto(p, equipoDict)).ToList();
+    }
+
+    public async Task<List<ProyectoDto>> ObtenerProyectosPorVotacionAsync(string votacionId)
+    {
+        var proyectos = await _proyectoRepository.ObtenerPorVotacionAsync(votacionId);
+        var equipos = await _equipoRepository.ObtenerTodosAsync();
+        var equipoDict = equipos.ToDictionary(e => e.Id.ToString(), e => e.Nombre);
+        return proyectos.Select(p => MapToDto(p, equipoDict)).ToList();
+    }
+
+    private async Task<ProyectoDto> MapToDtoAsync(Proyecto proyecto)
+    {
+        string? equipoNombre = null;
+        if (!string.IsNullOrEmpty(proyecto.Equipo_Id) && Guid.TryParse(proyecto.Equipo_Id, out var equipoGuid))
+        {
+            var equipo = await _equipoRepository.ObtenerPorIdAsync(equipoGuid);
+            equipoNombre = equipo?.Nombre;
+        }
         return new ProyectoDto
         {
             Id = proyecto.Id,
             Nombre = proyecto.Nombre,
             Descripcion = proyecto.Descripcion,
             Equipo_Id = proyecto.Equipo_Id,
+            EquipoNombre = equipoNombre,
             VotacionId = proyecto.VotacionId,
             ImagenUrl = proyecto.ImagenUrl
         };
     }
 
-    public async Task<List<ProyectoDto>> ObtenerProyectosAsync()
+    private static ProyectoDto MapToDto(Proyecto proyecto, Dictionary<string, string> equipoDict)
     {
-        var proyectos = await _proyectoRepository.ObtenerTodasAsync();
-        return proyectos.Select(p => new ProyectoDto
+        equipoDict.TryGetValue(proyecto.Equipo_Id ?? string.Empty, out var equipoNombre);
+        return new ProyectoDto
         {
-            Id = p.Id,
-            Nombre = p.Nombre,
-            Descripcion = p.Descripcion,
-            Equipo_Id = p.Equipo_Id,
-            VotacionId = p.VotacionId,
-            ImagenUrl = p.ImagenUrl
-        }).ToList();
-    }
-
-    public async Task<List<ProyectoDto>> ObtenerProyectosPorVotacionAsync(string votacionId)
-    {
-        var proyectos = await _proyectoRepository.ObtenerPorVotacionAsync(votacionId);
-        return proyectos.Select(p => new ProyectoDto
-        {
-            Id = p.Id,
-            Nombre = p.Nombre,
-            Descripcion = p.Descripcion,
-            Equipo_Id = p.Equipo_Id,
-            VotacionId = p.VotacionId,
-            ImagenUrl = p.ImagenUrl
-        }).ToList();
+            Id = proyecto.Id,
+            Nombre = proyecto.Nombre,
+            Descripcion = proyecto.Descripcion,
+            Equipo_Id = proyecto.Equipo_Id,
+            EquipoNombre = equipoNombre,
+            VotacionId = proyecto.VotacionId,
+            ImagenUrl = proyecto.ImagenUrl
+        };
     }
 }

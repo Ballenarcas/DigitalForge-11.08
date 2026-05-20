@@ -109,7 +109,7 @@
                     var cardClass = noIniciada ? "card-pending" : estaActiva ? "card-active" : estaPausada ? "card-paused" : "card-ended";
                     var pillClass = noIniciada ? "pill-pending" : estaActiva ? "pill-active" : estaPausada ? "pill-paused" : "pill-ended";
 
-                    <div class="votacion-card @cardClass" style="animation-delay: 0s;">
+                    <div class="votacion-card @cardClass">
                         <div class="card-cover">
                             <img src="@(string.IsNullOrEmpty(v.ImagenUrl) ? "images/Votación-default.jpg" : v.ImagenUrl)" alt="@v.Nombre" onerror="this.src='images/Votación-default.jpg'" />
                         </div>

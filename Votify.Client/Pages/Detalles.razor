@@ -82,11 +82,11 @@
 
                 <h1 class="proyecto-titulo">@(proyecto?.Nombre ?? "Proyecto")</h1>
 
-                @if (!string.IsNullOrEmpty(proyecto?.Equipo_Id))
+                @if (!string.IsNullOrEmpty(proyecto?.EquipoNombre))
                 {
-                    <div class="equipo-row">
-                        <div class="equipo-avatar">@GetInitials(proyecto.Equipo_Id)</div>
-                        <span class="equipo-nombre">Equipo @proyecto.Equipo_Id</span>
+                    <div class="equipo-row" style="animation: fadeInLeft 0.6s ease both;">
+                        <div class="equipo-avatar">@GetInitials(proyecto.EquipoNombre)</div>
+                        <span class="equipo-nombre">@proyecto.EquipoNombre</span>
                     </div>
                 }
 
@@ -982,6 +982,172 @@
         background-color: #e0e7ff;
         color: #312e81;
         border: 1px solid #818cf8;
+    }
+
+    /* ==========================================
+       ANIMACIONES EPICAS
+       ========================================== */
+    @@keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    @@keyframes fadeInLeft {
+        from { opacity: 0; transform: translateX(-20px); }
+        to   { opacity: 1; transform: translateX(0); }
+    }
+    @@keyframes fadeInScale {
+        from { opacity: 0; transform: scale(0.92); }
+        to   { opacity: 1; transform: scale(1); }
+    }
+    @@keyframes slideInRight {
+        from { opacity: 0; transform: translateX(40px); }
+        to   { opacity: 1; transform: translateX(0); }
+    }
+    @@keyframes imageReveal {
+        from { opacity: 0; transform: scale(1.08); filter: blur(8px); }
+        to   { opacity: 1; transform: scale(1); filter: blur(0); }
+    }
+    @@keyframes shimmer {
+        0%   { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+    }
+    @@keyframes pulseGlow {
+        0%, 100% { box-shadow: 0 6px 20px rgba(147, 51, 234, 0.3); }
+        50%      { box-shadow: 0 6px 30px rgba(147, 51, 234, 0.55); }
+    }
+    @@keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50%      { transform: translateY(-6px); }
+    }
+    @@keyframes glowPulse {
+        0%, 100% { filter: brightness(1); }
+        50%      { filter: brightness(1.15); }
+    }
+    @@keyframes staggerFadeIn {
+        from { opacity: 0; transform: translateY(20px) scale(0.97); }
+        to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @@keyframes borderFlow {
+        0%   { background-position: 0% 50%; }
+        50%  { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    @@keyframes tiltIn {
+        from { opacity: 0; transform: perspective(600px) rotateX(10deg) translateY(20px); }
+        to   { opacity: 1; transform: perspective(600px) rotateX(0) translateY(0); }
+    }
+
+    /* Aplicar animaciones a elementos */
+    .detalles-layout {
+        animation: fadeInUp 0.5s ease both;
+    }
+    .proyecto-titulo {
+        animation: fadeInUp 0.55s ease 0.05s both;
+    }
+    .proyecto-imagen {
+        animation: imageReveal 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
+        overflow: hidden;
+        border-radius: 20px;
+    }
+    .proyecto-imagen img {
+        transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), filter 0.4s ease;
+    }
+    .proyecto-imagen:hover img {
+        transform: scale(1.05);
+        filter: brightness(1.05);
+    }
+    .descripcion-card {
+        animation: fadeInUp 0.6s ease 0.25s both;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .descripcion-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+    }
+    .col-sidebar {
+        animation: slideInRight 0.6s ease 0.2s both;
+    }
+    .sidebar-card {
+        animation: fadeInScale 0.5s ease both;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .sidebar-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 28px rgba(0,0,0,0.07);
+    }
+    .sidebar-card:nth-child(1) { animation-delay: 0.25s; }
+    .sidebar-card:nth-child(2) { animation-delay: 0.35s; }
+    .sidebar-card:nth-child(3) { animation-delay: 0.45s; }
+
+    .btn-votar-proyecto:not(:disabled) {
+        animation: pulseGlow 2.5s ease-in-out infinite;
+    }
+    .btn-votar-proyecto:not(:disabled):hover {
+        animation: none;
+    }
+
+    .alert-top {
+        animation: tiltIn 0.45s ease both;
+    }
+    .alert-top:nth-of-type(1) { animation-delay: 0.05s; }
+    .alert-top:nth-of-type(2) { animation-delay: 0.12s; }
+    .alert-top:nth-of-type(3) { animation-delay: 0.19s; }
+
+    .badge-abierta {
+        animation: glowPulse 2s ease-in-out infinite;
+    }
+
+    .btn-ver-comentarios {
+        transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .btn-ver-comentarios:hover {
+        transform: translateY(-2px) scale(1.02);
+    }
+
+    .btn-volver {
+        transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .btn-volver:hover {
+        transform: translateX(-3px);
+    }
+
+    .criterion-vote-row {
+        animation: staggerFadeIn 0.4s ease both;
+    }
+    .criterion-vote-row:nth-child(1) { animation-delay: 0.1s; }
+    .criterion-vote-row:nth-child(2) { animation-delay: 0.2s; }
+    .criterion-vote-row:nth-child(3) { animation-delay: 0.3s; }
+    .criterion-vote-row:nth-child(4) { animation-delay: 0.4s; }
+    .criterion-vote-row:nth-child(5) { animation-delay: 0.5s; }
+
+    .star-btn {
+        transition: color 0.15s ease, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .star-btn:hover:not(:disabled) {
+        transform: scale(1.35) rotate(-5deg);
+    }
+    .star-btn.star-active {
+        animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    @@keyframes popIn {
+        0%   { transform: scale(1); }
+        50%  { transform: scale(1.5); }
+        100% { transform: scale(1); }
+    }
+
+    .feedback-textarea {
+        transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+    }
+    .feedback-textarea:focus {
+        transform: translateY(-1px);
+    }
+
+    /* Shimmer skeleton loader */
+    .skeleton {
+        background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+        border-radius: 12px;
     }
 
     @@media (max-width: 900px) {
