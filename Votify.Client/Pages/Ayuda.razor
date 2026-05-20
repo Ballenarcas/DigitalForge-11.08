@@ -38,7 +38,7 @@
             <div class="accordion-content">
                 <div class="content-body">
                     <p>
-                        Votify es una plataforma digital de votación segura y transparente diseñada para facilitar la toma de decisiones en eventos, equipos y proyectos. Permite a los usuarios emitir sus votos de forma ágil, garantizando la confidencialidad y la integridad de los resultados en tiempo real.
+                        Votify es una plataforma de votación desarrollada para las asignaturas PSW y DDS en la UPV en el curso 25/26. Permite a los usuarios crear eventos de votación personalizados, gestionar participantes y obtener resultados de manera eficiente. Es ideal para organizaciones, comunidades o cualquier grupo que necesite realizar votaciones de forma segura y transparente. 
                     </p>
                 </div>
             </div>
@@ -48,16 +48,16 @@
         <div class="accordion-item @(isOpen2 ? "active" : "")">
             <button class="accordion-header" @onclick="Toggle2">
                 <span class="header-number">2</span>
-                <span class="header-text">¿Cómo funciona Votify?</span>
+                <span class="header-text">Componentes de Votify</span>
                 <span class="chevron-icon">▼</span>
             </button>
             <div class="accordion-content">
                 <div class="content-body">
-                    <p>El funcionamiento de Votify consta de tres pasos principales:</p>
+                    <p>Votify consta de tres componentes principales:</p>
                     <ul>
-                        <li><strong>Creación:</strong> Un organizador crea un evento de votación y define los proyectos, preguntas o propuestas a votar.</li>
-                        <li><strong>Participación:</strong> Los participantes autorizados reciben una invitación y acceden de forma segura a la plataforma para emitir su voto de manera simple y confidencial.</li>
-                        <li><strong>Resultados:</strong> Una vez concluido el período de votación, el sistema procesa los datos y muestra los resultados de forma clara mediante gráficos interactivos y resúmenes estadísticos.</li>
+                        <li><strong>Eventos:</strong> Un evento es una entidad que representa una competición, encuesta o proceso de toma de decisiones.</li>
+                        <li><strong>Votación:</strong> Una evento puede estar constituido por una o por más votaciones. Cada votación representa una parte / categoría del evento que son parte. Pueden ser de dos tipos: estándar (conteo de votos) o multicriterio (criterios ponderados con distintos pesos).</li>
+                        <li><strong>Proyectos:</strong> En cada votación participan distintos proyectos. Dichos proyectos son creados por equipos, que tienen la libertad de subir proyectos a cada votación siempre y cuando el organizador del evento lo acepte.</li>
                     </ul>
                 </div>
             </div>
@@ -67,16 +67,15 @@
         <div class="accordion-item @(isOpen3 ? "active" : "")">
             <button class="accordion-header" @onclick="Toggle3">
                 <span class="header-number">3</span>
-                <span class="header-text">Roles de un evento</span>
+                <span class="header-text">¿Cómo funciona Votify?</span>
                 <span class="chevron-icon">▼</span>
             </button>
             <div class="accordion-content">
                 <div class="content-body">
-                    <p>En Votify existen diferentes roles configurables para garantizar una correcta organización de cada evento de votación:</p>
+                    <p>Como usuario de la plataforma Votify podrás:</p>
                     <ul>
-                        <li><strong>Organizador / Administrador:</strong> Crea el evento, gestiona a los participantes, define las propuestas y configura las reglas de la votación.</li>
-                        <li><strong>Votante:</strong> Usuario registrado con derecho a voto que puede revisar las propuestas y emitir sus elecciones de forma segura.</li>
-                        <li><strong>Invitado / Observador:</strong> Puede visualizar el transcurso del evento o sus resultados finales si el organizador lo permite, pero no participa activamente emitiendo votos.</li>
+                        <li>Crear eventos y votaciones con las reglas que desees, gestionarlo, asignar roles a los participantes...</li>
+                        <li>Participar en eventos y poder votar en sus votaciones, subir proyectos con tu equipo para intentar hacerte con la victoria, consultar los resultados de las votaciones...</li>
                     </ul>
                 </div>
             </div>
@@ -86,6 +85,26 @@
         <div class="accordion-item @(isOpen4 ? "active" : "")">
             <button class="accordion-header" @onclick="Toggle4">
                 <span class="header-number">4</span>
+                <span class="header-text">Roles de un evento</span>
+                <span class="chevron-icon">▼</span>
+            </button>
+            <div class="accordion-content">
+                <div class="content-body">
+                    <p>En Votify existen diferentes roles configurables para garantizar una correcta organización de cada evento de votación:</p>
+                    <ul>
+                        <li><strong>Organizador / Administrador:</strong> Crea el evento, gestiona a los participantes, define las propuestas y configura las reglas de la votación.</li>
+                        <li><strong>Público:</strong> Usuario registrado en el evento con derecho a voto que puede revisar las propuestas y emitir sus elecciones de forma segura.</li>
+                        <li><strong>Juez:</strong> Usuario que tiene un rol superior a público, y que tiene acceso a votaciones profesionales en las que solo participan jueces profesionales.</li>
+                        <li><strong>Competidor:</strong> Usuario que tiene registrado algún proyecto en el evento y participa en la competición.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pregunta 5 -->
+        <div class="accordion-item @(isOpen5 ? "active" : "")">
+            <button class="accordion-header" @onclick="Toggle5">
+                <span class="header-number">5</span>
                 <span class="header-text">Resultados de una votación</span>
                 <span class="chevron-icon">▼</span>
             </button>
@@ -93,8 +112,8 @@
                 <div class="content-body">
                     <p>Tras la finalización del evento de votación, los resultados se publican de forma automatizada:</p>
                     <ul>
-                        <li><strong>Acceso:</strong> Todos los participantes autorizados pueden acceder a una pantalla de resultados desde el panel de control del evento.</li>
-                        <li><strong>Formatos:</strong> Los resultados se presentan con tablas detalladas y gráficos visuales (tarta, barras) para facilitar su interpretación.</li>
+                        <li><strong>Acceso:</strong> Todos los participantes autorizados pueden acceder a una pantalla de resultados desde el panel de control de la votación correspondiente.</li>
+                        <li><strong>Formatos:</strong> Los resultados se presentan con gráficos visuales para facilitar su interpretación.</li>
                         <li><strong>Sistemas de conteo:</strong> Soporta conteos de votaciones tradicionales y sistemas de votación multicriterio según la configuración seleccionada.</li>
                     </ul>
                 </div>
@@ -109,11 +128,13 @@
     private bool isOpen2 = false;
     private bool isOpen3 = false;
     private bool isOpen4 = false;
+    private bool isOpen5 = false;
 
     private void Toggle1() => isOpen1 = !isOpen1;
     private void Toggle2() => isOpen2 = !isOpen2;
     private void Toggle3() => isOpen3 = !isOpen3;
     private void Toggle4() => isOpen4 = !isOpen4;
+    private void Toggle5() => isOpen5 = !isOpen5;
 
     private async Task HandleVolver()
     {
