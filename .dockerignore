@@ -1,0 +1,55 @@
+# Docker
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# IDE
+.vs/
+.vscode/
+*.user
+*.suo
+.idea/
+
+# Build outputs
+bin/
+obj/
+out/
+publish/
+dist/
+
+# Tests (no necesarios en runtime)
+Votify.Tests/
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Local environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+
+# Misc
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Node (si hay)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Azure
+.azure/
