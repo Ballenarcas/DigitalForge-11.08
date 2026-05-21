@@ -2,6 +2,7 @@ using Moq;
 using Xunit;
 using Votify.Application.DTOs;
 using Votify.Application.Services.Estrategia;
+using Votify.Tests.Builders;
 using Votify.Domain.Entities;
 using Votify.Domain.Factory;
 using Votify.Application.Interfaces;

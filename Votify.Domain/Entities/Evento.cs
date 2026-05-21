@@ -9,7 +9,7 @@ namespace Votify.Domain.Entities
         public DateTime FechaFin { get; }
         public string? ImagenUrl { get; }
 
-        public Evento(string nombre, string descripcion, DateTime fechaInicio, DateTime fechaFin, string? imagenUrl = null, Guid? id = null)
+        internal Evento(string nombre, string descripcion, DateTime fechaInicio, DateTime fechaFin, string? imagenUrl = null, Guid? id = null)
         {
             Id = id ?? Guid.NewGuid();
             Nombre = nombre;
