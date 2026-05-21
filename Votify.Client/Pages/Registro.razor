@@ -6,19 +6,26 @@
 @if (showSuccess)
 {
     <div class="auth-success-overlay" id="registerSuccessOverlay">
-        <div class="success-checkmark">
+        @for (int i = 0; i < 3; i++)
+        {
+            <div class="glow-ring" style="animation-delay: @(i * 0.6)s;"></div>
+        }
+        <div class="success-circle">
             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M20 6L9 17l-5-5" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
         </div>
         <div class="success-text">¡Cuenta creada!</div>
         <div class="success-sub">Preparando todo para ti...</div>
-        @for (int i = 0; i < 20; i++)
+        @for (int i = 0; i < 30; i++)
         {
-            var tx = (i % 5 - 2) * 80 + "px";
-            var ty = (i % 3 - 1) * 80 + "px";
-            var delay = i * 0.05;
-            <div class="success-particle" style="--tx:@tx; --ty:@ty; animation: success-particle-blast 0.8s ease-out forwards @delay;s;"></div>
+            var tx = (i % 7 - 3) * 150;
+            var ty = (i % 5 - 2) * 150;
+            var delay = i * 0.03;
+            var colors = new[] { "#e94560", "#533483", "#0f3460", "#16213e", "#ffffff" };
+            var color = colors[i % colors.Length];
+            var size = 8 + (i % 8);
+            <div class="success-particle" style="--tx: @(tx)px; --ty: @(ty)px; animation-delay: @(delay)s; background: @color; width: @(size)px; height: @(size)px; box-shadow: 0 0 10px @color;"></div>
         }
     </div>
 }
@@ -95,6 +102,185 @@
         max-width: 480px;
         text-align: center;
         animation: card-fade-in 0.6s ease-out;
+    }
+
+    .auth-success-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 25%, #0f3460 50%, #533483 75%, #e94560 100%);
+        background-size: 400% 400%;
+        animation: gradient-shift 3s ease infinite;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        overflow: hidden;
+    }
+
+    @@keyframes gradient-shift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    .auth-success-overlay::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 50%);
+        animation: pulse-glow 2s ease-in-out infinite;
+    }
+
+    @@keyframes pulse-glow {
+        0%, 100% { transform: scale(1); opacity: 0.5; }
+        50% { transform: scale(1.1); opacity: 0.8; }
+    }
+
+    .success-circle {
+        width: 160px;
+        height: 160px;
+        border-radius: 50%;
+        background: linear-gradient(145deg, #ffffff 0%, #f0f0f0 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 
+            0 0 60px rgba(233, 69, 96, 0.5),
+            0 0 100px rgba(83, 52, 131, 0.3),
+            inset 0 -5px 20px rgba(0,0,0,0.1);
+        animation: epic-pop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        position: relative;
+        z-index: 2;
+    }
+
+    @@keyframes epic-pop {
+        0% { transform: scale(0) rotate(-180deg); opacity: 0; }
+        60% { transform: scale(1.3) rotate(10deg); }
+        80% { transform: scale(0.9) rotate(-5deg); }
+        100% { transform: scale(1) rotate(0deg); opacity: 1; }
+    }
+
+    .success-circle svg {
+        width: 80px;
+        height: 80px;
+        stroke: #e94560;
+        stroke-width: 4;
+        fill: none;
+        stroke-dasharray: 200;
+        stroke-dashoffset: 200;
+        animation: draw-check 0.8s ease-out 0.5s forwards;
+        filter: drop-shadow(0 4px 8px rgba(233, 69, 96, 0.5));
+    }
+
+    @@keyframes draw-check {
+        to { stroke-dashoffset: 0; }
+    }
+
+    .success-text {
+        color: white;
+        font-size: 42px;
+        font-weight: 900;
+        margin-top: 40px;
+        text-shadow: 
+            0 0 20px rgba(233, 69, 96, 0.8),
+            0 0 40px rgba(233, 69, 96, 0.5),
+            0 4px 8px rgba(0,0,0,0.3);
+        animation: text-bounce 0.6s ease-out 0.8s both;
+        letter-spacing: -1px;
+        position: relative;
+        z-index: 2;
+    }
+
+    @@keyframes text-bounce {
+        0% { opacity: 0; transform: scale(0.5) translateY(40px); }
+        60% { transform: scale(1.1) translateY(-10px); }
+        80% { transform: scale(0.95) translateY(5px); }
+        100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .success-sub {
+        color: rgba(255,255,255,0.9);
+        font-size: 20px;
+        margin-top: 12px;
+        font-weight: 500;
+        letter-spacing: 1px;
+        animation: fade-up 0.5s ease-out 1s both;
+        position: relative;
+        z-index: 2;
+    }
+
+    @@keyframes fade-up {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .success-particle {
+        position: absolute;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        animation: particle-explode 1.2s ease-out forwards;
+        top: 50%;
+        left: 50%;
+    }
+
+    @@keyframes particle-explode {
+        0% { 
+            transform: translate(-50%, -50%) scale(1); 
+            opacity: 1; 
+        }
+        100% { 
+            transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(0);
+            opacity: 0; 
+        }
+    }
+
+    .success-sparkle {
+        position: absolute;
+        width: 6px;
+        height: 6px;
+        background: white;
+        border-radius: 50%;
+        animation: sparkle 1.5s ease-in-out infinite;
+        box-shadow: 0 0 10px white, 0 0 20px white;
+    }
+
+    @@keyframes sparkle {
+        0%, 100% { opacity: 0; transform: scale(0); }
+        50% { opacity: 1; transform: scale(1); }
+    }
+
+    .confetti {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        animation: confetti-fall 3s ease-in-out infinite;
+    }
+
+    @@keyframes confetti-fall {
+        0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+        100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+
+    .glow-ring {
+        position: absolute;
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        border: 3px solid rgba(233, 69, 96, 0.3);
+        animation: ring-expand 2s ease-out infinite;
+    }
+
+    @@keyframes ring-expand {
+        0% { transform: scale(0.8); opacity: 1; }
+        100% { transform: scale(2); opacity: 0; }
     }
 
     @@keyframes card-fade-in {

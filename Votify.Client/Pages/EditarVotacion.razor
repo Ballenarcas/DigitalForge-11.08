@@ -516,14 +516,22 @@
     color: #1e293b;
     margin-bottom: 0.5rem;
     letter-spacing: -0.025em;
+    animation: fade-in-up 0.5s ease-out 0.2s forwards;
+    opacity: 0;
 }
 
 .subtitle {
     color: #64748b;
     font-size: 1.05rem;
     margin: 0;
+    animation: fade-in-up 0.5s ease-out 0.3s forwards;
+    opacity: 0;
 }
 
+@@keyframes fade-in-up {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
 
 .form-body {
     display: flex;
@@ -533,7 +541,18 @@
 
 .form-group {
     margin-bottom: 1.5rem;
+    animation: fade-in-up 0.4s ease-out forwards;
+    opacity: 0;
 }
+
+.form-group:nth-child(1) { animation-delay: 0.3s; }
+.form-group:nth-child(2) { animation-delay: 0.4s; }
+.form-group:nth-child(3) { animation-delay: 0.5s; }
+.form-group:nth-child(4) { animation-delay: 0.6s; }
+.form-group:nth-child(5) { animation-delay: 0.7s; }
+.form-group:nth-child(6) { animation-delay: 0.8s; }
+.form-group:nth-child(7) { animation-delay: 0.9s; }
+.form-group:nth-child(8) { animation-delay: 1s; }
 
 .form-group label {
     display: block;
@@ -846,19 +865,26 @@ input:checked + .slider:before {
     font-size: 1rem;
     font-weight: 700;
     cursor: pointer;
-    transition: transform 0.15s, opacity 0.2s, box-shadow 0.2s;
+    transition: transform 0.2s, opacity 0.2s, box-shadow 0.3s;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
     font-family: inherit;
     box-shadow: 0 4px 14px rgba(147, 51, 234, 0.3);
+    animation: btn-entrance 0.5s ease-out 1s forwards;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+@@keyframes btn-entrance {
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .btn-submit:hover:not(:disabled) {
     opacity: 0.92;
-    transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(147, 51, 234, 0.4);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(147, 51, 234, 0.4);
 }
 
 .btn-submit:active:not(:disabled) {

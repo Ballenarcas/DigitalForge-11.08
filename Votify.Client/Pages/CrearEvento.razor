@@ -158,6 +158,13 @@
     border-radius: 45px; 
     padding: 3.5rem;
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+    animation: card-entrance 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    opacity: 0;
+    transform: translateY(30px);
+}
+
+@@keyframes card-entrance {
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .title {
@@ -166,12 +173,28 @@
     color: #1e293b;
     margin-bottom: 0.5rem;
     letter-spacing: -0.025em;
+    animation: fade-in-up 0.5s ease-out 0.2s forwards;
+    opacity: 0;
 }
 
-.subtitle { color: #64748b; margin-bottom: 2.5rem; font-size: 1.1rem; }
+.subtitle { color: #64748b; margin-bottom: 2.5rem; font-size: 1.1rem; animation: fade-in-up 0.5s ease-out 0.3s forwards; opacity: 0; }
 .required-asterisk { color: #dc2626; font-weight: 800; font-size: 1.2rem; }
 
-.form-group { margin-bottom: 1.5rem; }
+@@keyframes fade-in-up {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.form-group { 
+    margin-bottom: 1.5rem; 
+    animation: fade-in-up 0.4s ease-out forwards;
+    opacity: 0;
+}
+.form-group:nth-child(1) { animation-delay: 0.3s; }
+.form-group:nth-child(2) { animation-delay: 0.4s; }
+.form-group:nth-child(3) { animation-delay: 0.5s; }
+.form-group:nth-child(4) { animation-delay: 0.6s; }
+.form-group:nth-child(5) { animation-delay: 0.7s; }
 .form-group label {
     display: flex;
     font-weight: 700;
@@ -276,15 +299,27 @@ input[type="datetime-local"].form-control::-webkit-datetime-edit {
     font-weight: 700;
     cursor: pointer;
     margin-top: 1.5rem;
-    transition: transform 0.1s, opacity 0.2s;
+    transition: transform 0.2s, opacity 0.2s, box-shadow 0.3s;
     margin-bottom: 1.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.75rem;
+    animation: btn-entrance 0.5s ease-out 1s forwards;
+    opacity: 0;
+    transform: translateY(20px);
 }
-.btn-submit:hover:not(:disabled) { opacity: 0.9; }
-.btn-submit:active:not(:disabled) { transform: scale(0.99); }
+
+@@keyframes btn-entrance {
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.btn-submit:hover:not(:disabled) { 
+    opacity: 0.9; 
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(168, 85, 247, 0.4);
+}
+.btn-submit:active:not(:disabled) { transform: scale(0.98); }
 .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .breadcrumb-link { color: #aa7ad7; font-weight: 700; text-decoration: none; }
