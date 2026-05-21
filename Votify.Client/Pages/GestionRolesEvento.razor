@@ -205,49 +205,19 @@
     .btn-volver {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
-        background: var(--surface-white);
-        border: 1px solid var(--border-light);
-        color: var(--text-secondary);
-        padding: 0.65rem 1.25rem;
-        border-radius: 8px;
-        font-weight: 500;
-        font-size: 0.9rem;
-        font-family: 'Inter', sans-serif;
+        gap: 0.3rem;
+        background: white;
+        border: 1px solid #e2e8f0;
+        color: #64748b;
+        padding: 0.4rem 0.8rem;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.85rem;
         cursor: pointer;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        position: relative;
-        overflow: hidden;
+        transition: all 0.2s;
     }
 
-    .btn-volver::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: rgba(168, 85, 247, 0.1);
-        transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        z-index: -1;
-    }
-
-    .btn-volver:hover {
-        border-color: var(--primary);
-        color: var(--primary);
-    }
-
-    .btn-volver:hover::before {
-        left: 0;
-    }
-
-    .btn-volver svg {
-        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .btn-volver:hover svg {
-        transform: translateX(-2px);
-    }
+    .btn-volver:hover { background: #f8f9fc; border-color: #ddd6fe; color: #7c3aed; }
 
     .roles-title-row {
         display: flex;

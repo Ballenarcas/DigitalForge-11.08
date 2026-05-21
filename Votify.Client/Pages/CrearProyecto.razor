@@ -13,15 +13,20 @@
 @inject NavigationManager Nav
 
 <div class="main-container">
-    <div class="top-nav">
-        <button class="btn-back" @onclick="HandleVolver">
-            <span class="icon-arrow">←</span> Volver
+    <div class="header-principal">
+        <button class="btn-volver" @onclick="HandleVolver">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="16" height="16">
+                <path d="M15 19L8 12L15 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Proyectos
         </button>
-        <div class="breadcrumbs">
-            <a href="/" class="breadcrumb-link">Eventos</a> <span class="separator">></span>
-            <a href="/votaciones" class="breadcrumb-link">Votaciones</a> <span class="separator">></span>
-            <span class="current-page">Subir Proyecto</span>
+    </div>
+
+    <div class="page-header-row">
+        <div class="logo-icon small">
+            <img src="images/proyectos-logo.png" alt="Logo Proyectos" class="proyectos-logo-img" style="height:22px;width:auto;object-fit:contain;" />
         </div>
+        <span class="brand-name">Subir proyecto</span>
     </div>
 
     <div class="card">
@@ -134,40 +139,63 @@
     font-family: 'Inter', 'Segoe UI', sans-serif;
 }
 
-.top-nav {
+.header-principal {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin-bottom: 1.25rem;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.btn-volver {
     display: flex;
     align-items: center;
-    gap: 1.5rem;
+    gap: 0.3rem;
+    background: white;
+    border: 1px solid #e2e8f0;
+    color: #64748b;
+    padding: 0.4rem 0.8rem;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-volver:hover { background: #f8f9fc; border-color: #ddd6fe; color: #7c3aed; }
+
+.page-header-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     margin-bottom: 2rem;
     max-width: 900px;
     margin-left: auto;
     margin-right: auto;
 }
 
-.btn-back {
-    background: white;
-    border: 1px solid #e2e8f0;
-    padding: 0.6rem 1.2rem;
-    border-radius: 12px;
-    color: #621d95;
-    font-weight: 700;
-    cursor: pointer;
+.logo-icon {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    transition: all 0.2s;
+    justify-content: center;
 }
 
-.btn-back:hover { background: #f1f5f9; }
+.logo-icon.small {
+    width: 24px;
+    height: 24px;
+}
 
-.breadcrumbs { color: #94a3b8; font-size: 0.9rem; }
-.current-page { color: #621d95; font-weight: 700; }
+.brand-name {
+    font-weight: 800; font-size: 1.2rem; color: #4c1d95; letter-spacing: -0.02em;
+}
 
 .card {
     background: white;
     max-width: 750px;
     margin: 0 auto;
-    border-radius: 45px;
+    border-radius: 45px; 
     padding: 3.5rem;
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
     animation: card-entrance 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;

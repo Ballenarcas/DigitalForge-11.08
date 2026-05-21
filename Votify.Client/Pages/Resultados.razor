@@ -6,15 +6,19 @@
 
 <div class="main-container">
     <div class="header-principal">
-        <button class="btn-back" @onclick="HandleVolver">
-            <span class="icon-arrow">←</span> Votaciones
+        <button class="btn-volver" @onclick="HandleVolver">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="16" height="16">
+                <path d="M15 19L8 12L15 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Votaciones
         </button>
-        <div class="logo-container">
-            <div class="logo-icon small">
-                <img src="images/ranking-logo.png" alt="Ranking logo" class="ranking-logo-img" style="width:30px;height:30px;margin-left:0.75rem;" />
-            </div>
-            <span class="brand-name">Ranking</span>
+    </div>
+
+    <div class="page-header-row">
+        <div class="logo-icon small">
+            <img src="images/ranking-logo.png" alt="Ranking logo" class="ranking-logo-img" style="width:28px;height:28px;" />
         </div>
+        <span class="brand-name">Ranking</span>
     </div>
 
     <div class="content-wrapper" style="position:relative; z-index:1;">
@@ -31,7 +35,6 @@
         </div>
 
         <div class="results-header">
-            <h1 class="results-title">Clasificación de proyectos</h1>
             <p class="results-subtitle">@(EsMulticriterio ? "Ranking por media ponderada multicriterio" : "Conteo de votos final") para los proyectos del evento: <strong>@(nombreVotacion ?? "...")</strong></p>
         </div>
 
@@ -149,30 +152,38 @@
         justify-content: flex-start; 
         align-items: center; 
         max-width: 1200px; 
-        margin: 0 auto 2rem;
-        gap: 1.5rem;
+        margin: 0 auto 1.25rem;
     }
 
-    .btn-back { 
-        background: white; 
-        border: 1px solid #e2e8f0; 
-        color: #64748b; 
-        padding: 0.5rem 1rem; 
-        border-radius: 10px; 
-        font-weight: 600; 
-        font-size: 0.85rem; 
-        cursor: pointer; 
-        transition: 0.2s; 
-        display: flex; 
-        align-items: center; 
+    .btn-volver {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        background: white;
+        border: 1px solid #e2e8f0;
+        color: #64748b;
+        padding: 0.4rem 0.8rem;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-volver:hover { background: #f8f9fc; border-color: #ddd6fe; color: #7c3aed; }
+
+    .page-header-row {
+        display: flex;
+        align-items: center;
         gap: 0.5rem;
-        flex-shrink: 0;
+        margin-bottom: 2rem;
+        max-width: 1200px;
+        margin-left: auto;
+        margin-right: auto;
     }
-    .btn-back:hover { background: #f8f9fc; border-color: #ddd6fe; color: #7c3aed; }
-    .icon-arrow { font-size: 1rem; }
 
-    .logo-container { display: flex; align-items: center; }
-    .logo-icon.small { display: flex; align-items: center; }
+    .logo-icon { display: flex; align-items: center; justify-content: center; }
+    .logo-icon.small { width: 24px; height: 24px; }
     .ranking-logo-img { object-fit: contain; }
     .brand-name { font-weight: 800; font-size: 1.2rem; color: #4c1d95; letter-spacing: -0.02em; margin-left: 0.75rem; }
     
@@ -185,13 +196,6 @@
     
     .results-header {
         margin-bottom: 2.5rem;
-    }
-    
-    .results-title {
-        font-size: 2rem;
-        font-weight: 800;
-        color: #1e293b;
-        margin: 0 0 0.5rem 0;
     }
     
     .results-subtitle {
