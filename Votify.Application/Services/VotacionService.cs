@@ -1,6 +1,7 @@
 using Votify.Application.DTOs;
 using Votify.Application.Interfaces;
 using Votify.Application.Services.Estrategia;
+using Votify.Domain.Builders;
 using Votify.Domain.Entities;
 using Votify.Domain.Factory;
 using Votify.Domain.Interfaces;
@@ -17,6 +18,7 @@ namespace Votify.Application.Services
         private readonly IValoracionCriterioRepository? _valoracionCriterioRepo;
         private readonly IEquipoRepository _equipoRepo;
         private readonly VotacionStrategyResolver _strategyResolver;
+        private readonly IVotacionObservable _votacionObservable;
 
         public VotacionService(
             IVotacionRepository repo,
@@ -25,6 +27,7 @@ namespace Votify.Application.Services
             IEventoRepository eventoRepo,
             IEquipoRepository equipoRepo,
             VotacionStrategyResolver strategyResolver,
+            IVotacionObservable votacionObservable,
             ICriterioRepository? criterioRepo = null,
             IValoracionCriterioRepository? valoracionCriterioRepo = null)
         {
@@ -34,6 +37,7 @@ namespace Votify.Application.Services
             _eventoRepo = eventoRepo;
             _equipoRepo = equipoRepo;
             _strategyResolver = strategyResolver;
+            _votacionObservable = votacionObservable;
             _criterioRepo = criterioRepo;
             _valoracionCriterioRepo = valoracionCriterioRepo;
         }
@@ -44,6 +48,7 @@ namespace Votify.Application.Services
             ValidarCriterios(dto);
             var votacion = CreateEntityFromDto(dto);
             await _repo.GuardarAsync(votacion);
+            await _votacionObservable.NotificarVotacionCreadaAsync(votacion);
             if (EsMulticriterio(dto.Tipo) && _criterioRepo is not null)
             {
                 await _criterioRepo.ReemplazarPorVotacionAsync(votacion.Id.ToString(), MapCriterios(dto.Criterios));
@@ -178,6 +183,7 @@ namespace Votify.Application.Services
             {
                 throw new KeyNotFoundException($"No se encontró la votación con id {id}.");
             }
+            await _votacionObservable.NotificarVotacionPausadaAsync(votacion);
         }
 
         public async Task DetenerVotacionAsync(string id)
@@ -194,6 +200,7 @@ namespace Votify.Application.Services
             {
                 throw new KeyNotFoundException($"No se encontró la votación con id {id}.");
             }
+            await _votacionObservable.NotificarVotacionDetenidaAsync(votacion);
         }
 
         public async Task AbrirVotacionAsync(string id)
@@ -216,6 +223,7 @@ namespace Votify.Application.Services
             {
                 throw new KeyNotFoundException($"No se encontró la votación con id {id}.");
             }
+            await _votacionObservable.NotificarVotacionAbiertaAsync(votacion);
         }
 
         private CrearVotacionResponse MapToResponse(Votacion e, List<CriterioDto>? criterios = null)
@@ -302,38 +310,23 @@ namespace Votify.Application.Services
                 throw new ArgumentException("La fecha de inicio debe ser menor a la fecha de fin.");
             }
 
-            VotacionFactory factory = dto.Tipo.ToUpper() switch
-            {
-                "ESTANDAR" => new VotacionEstandarFactory(),
-                "MULTICRITERIO" => new VotacionMulticriterioFactory(),
-                "MULTICRITERIO_PUBLICO" => new VotacionMulticriterioPublicoFactory(),
-                _ => throw new ArgumentException($"Tipo de votación no válido: {dto.Tipo}")
-            };
-
             if (!Guid.TryParse(dto.EventoId, out var eventoGuid))
             {
                 throw new ArgumentException("El ID del evento no es válido o no se ha proporcionado.");
             }
 
-            var votacion = factory.Crear(
-                dto.Nombre,
-                dto.FechaInicio,
-                dto.FechaFin,
-                dto.LimiteProy,
-                dto.Comentarios,
-                dto.ComentariosObligatorios,
-                eventoGuid,
-                dto.EsAnonima,
-                dto.ImagenUrl
-            );
+            var tipo = dto.Tipo.ToUpper();
+            var builder = new VotacionBuilder()
+                .ConNombre(dto.Nombre)
+                .ConPeriodo(dto.FechaInicio, dto.FechaFin)
+                .ConLimiteProyectos(dto.LimiteProy)
+                .ConComentarios(dto.Comentarios, dto.ComentariosObligatorios)
+                .EsAnonima(dto.EsAnonima)
+                .DelTipo(tipo)
+                .DelEvento(eventoGuid)
+                .ConImagen(dto.ImagenUrl);
 
-            // Inicializar pausada si la fecha de inicio es en el futuro
-            if (dto.FechaInicio > DateTime.UtcNow)
-            {
-                votacion.Pausar();
-            }
-
-            return votacion;
+            return builder.Build();
         }
         private async Task ValidarFechasContraEventoAsync(CrearVotacionDto dto)
         {

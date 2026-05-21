@@ -2,6 +2,7 @@ using Moq;
 using Xunit;
 using Votify.Application.DTOs;
 using Votify.Application.Services;
+using Votify.Tests.Builders;
 using Votify.Application.Services.Estrategia;
 using Votify.Domain.Entities;
 using Votify.Application.Interfaces;
@@ -18,6 +19,7 @@ namespace Votify.Tests.Services
         private readonly Mock<IEventoRepository> _mockEventoRepository;
         private readonly Mock<IEquipoRepository> _mockEquipoRepository;
         private readonly Mock<IVotacionStrategy> _mockEstandarStrategy;
+        private readonly Mock<IVotacionObservable> _mockVotacionObservable;
         private readonly VotacionStrategyResolver _strategyResolver;
         private readonly VotacionService _votacionService;
 
@@ -30,6 +32,7 @@ namespace Votify.Tests.Services
             _mockEquipoRepository = new Mock<IEquipoRepository>();
             _mockEstandarStrategy = new Mock<IVotacionStrategy>();
             _mockEstandarStrategy.Setup(s => s.Tipo).Returns("ESTANDAR");
+            _mockVotacionObservable = new Mock<IVotacionObservable>();
 
             _strategyResolver = new VotacionStrategyResolver(new[] { _mockEstandarStrategy.Object });
 
@@ -39,7 +42,8 @@ namespace Votify.Tests.Services
                 _mockProyectoRepository.Object,
                 _mockEventoRepository.Object,
                 _mockEquipoRepository.Object,
-                _strategyResolver
+                _strategyResolver,
+                _mockVotacionObservable.Object
             );
         }
 
@@ -94,7 +98,7 @@ namespace Votify.Tests.Services
                 .ReturnsAsync(evento);
 
             // Act & Assert
-            var exception = await Assert.ThrowsAsync<ArgumentException>(
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(
                 () => _votacionService.CrearVotacionAsync(dto)
             );
             Assert.Contains("Tipo de votación no válido", exception.Message);

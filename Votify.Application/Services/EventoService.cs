@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Votify.Application.DTOs;
 using Votify.Application.Interfaces;
+using Votify.Domain.Builders;
 using Votify.Domain.Entities;
 using Votify.Domain.Interfaces;
 
@@ -49,13 +50,12 @@ namespace Votify.Application.Services
 
         public async Task<EventoDto> CrearAsync(EventoDto dto, string creadorId)
         {
-            var e = new Evento(
-                dto.Nombre,
-                dto.Descripcion,
-                dto.FechaInicio,
-                dto.FechaFin,
-                dto.ImagenUrl
-            );
+            var e = new EventoBuilder()
+                .ConNombre(dto.Nombre)
+                .ConDescripcion(dto.Descripcion)
+                .ConFechas(dto.FechaInicio, dto.FechaFin)
+                .ConImagen(dto.ImagenUrl)
+                .Build();
 
             await _repo.GuardarAsync(e);
 

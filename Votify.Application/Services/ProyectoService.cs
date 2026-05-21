@@ -1,5 +1,6 @@
 using Votify.Application.DTOs;
 using Votify.Application.Interfaces;
+using Votify.Domain.Builders;
 using Votify.Domain.Interfaces;
 using Votify.Domain.Entities;
 
@@ -74,7 +75,13 @@ public class ProyectoService : IProyectoService
             throw new InvalidOperationException("Tu equipo ya ha registrado un proyecto en esta votación. No se permiten múltiples proyectos por equipo en la misma votación.");
         }
 
-        var proyecto = new Proyecto(dto.Nombre, dto.Descripcion, equipoIdStr, dto.VotacionId, dto.ImagenUrl);
+        var proyecto = new ProyectoBuilder()
+            .ConNombre(dto.Nombre)
+            .ConDescripcion(dto.Descripcion)
+            .DelEquipo(equipoIdStr)
+            .DeLaVotacion(dto.VotacionId)
+            .ConImagen(dto.ImagenUrl)
+            .Build();
         await _proyectoRepository.GuardarAsync(proyecto);
         return proyecto.Id;
     }

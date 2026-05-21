@@ -23,7 +23,7 @@ namespace Votify.Domain.Entities
             _ => new EstadoActiva()
         };
 
-        protected Votacion(string nombre, DateTime inicio, DateTime fin, int limite, bool comentarios, bool comentariosObligatorios, string tipo, bool esAnonima, Guid eventoId, string? imagenUrl = null)
+        protected internal Votacion(string nombre, DateTime inicio, DateTime fin, int limite, bool comentarios, bool comentariosObligatorios, string tipo, bool esAnonima, Guid eventoId, string? imagenUrl = null)
         {
             Id = Guid.NewGuid();
             Nombre = nombre;

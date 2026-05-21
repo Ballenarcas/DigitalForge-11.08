@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Votify.Application.Interfaces;
 using Votify.Application.Services;
 using Votify.Application.Services.Fachadas;
+using Votify.Application.Services.Observadores;
 using Votify.Infrastructure.Repositories;
 using Votify.Domain.Interfaces;
 using Votify.Infrastructure.Configuration;
@@ -95,6 +96,13 @@ builder.Services.AddScoped<Votify.Application.Interfaces.IVotacionStrategy, Voti
 builder.Services.AddScoped<Votify.Application.Interfaces.IVotacionStrategy, Votify.Application.Services.Estrategia.VotacionMulticriterioStrategy>();
 builder.Services.AddScoped<Votify.Application.Interfaces.IVotacionStrategy, Votify.Application.Services.Estrategia.VotacionMulticriterioPublicoStrategy>();
 builder.Services.AddScoped<Votify.Application.Services.Estrategia.VotacionStrategyResolver>();
+
+// Patrón Observer - Observadores de ciclo de vida de votaciones
+builder.Services.AddScoped<IVotacionObserver, NotificacionObserver>();
+builder.Services.AddScoped<IVotacionObserver, ScoringObserver>();
+builder.Services.AddScoped<IVotacionObserver, AnalyticsObserver>();
+builder.Services.AddScoped<IVotacionObservable, VotacionSubject>();
+
 builder.Services.AddScoped<Votify.Domain.Interfaces.IEventoRepository, Votify.Infrastructure.Repositories.EventoRepository>();
 builder.Services.AddScoped<Votify.Domain.Interfaces.IParticipanteEventoRepository, Votify.Infrastructure.Repositories.ParticipanteEventoRepository>();
 builder.Services.AddScoped<Votify.Application.Interfaces.IEventoService, Votify.Application.Services.EventoService>();
