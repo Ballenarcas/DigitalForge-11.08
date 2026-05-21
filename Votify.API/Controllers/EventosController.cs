@@ -60,6 +60,37 @@ namespace Votify.API.Controllers
             return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
         }
 
+        [HttpPut("{id}")]
+        [Microsoft.AspNetCore.Authorization.Authorize]
+        public async Task<IActionResult> Update(string id, [FromBody] EventoDto dto)
+        {
+            var usuarioId = ObtenerUsuarioId();
+            if (string.IsNullOrEmpty(usuarioId))
+            {
+                return Unauthorized(new { Message = "Usuario no autenticado." });
+            }
+
+            try
+            {
+                dto.Id = id;
+                var result = await _fachada.ActualizarEventoAsync(dto, usuarioId);
+                return Ok(result);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning("Intento no autorizado de actualizacion de evento. Evento: {EventoId}, Usuario: {UsuarioId}", id, usuarioId);
+                return StatusCode(StatusCodes.Status403Forbidden, new { Message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
+
         [HttpPost("{id}/participar")]
         [Microsoft.AspNetCore.Authorization.Authorize]
         public async Task<IActionResult> Participar(string id)
@@ -134,6 +165,32 @@ namespace Votify.API.Controllers
             {
                 _logger.LogWarning("Intento no autorizado de conteo de roles. Evento: {EventoId}, Usuario: {UsuarioId}", id, usuarioId);
                 return StatusCode(StatusCodes.Status403Forbidden, new { Message = ex.Message });
+            }
+        }
+
+        [HttpDelete("{id}")]
+        [Microsoft.AspNetCore.Authorization.Authorize]
+        public async Task<IActionResult> Delete(string id)
+        {
+            var usuarioId = ObtenerUsuarioId();
+            if (string.IsNullOrEmpty(usuarioId))
+            {
+                return Unauthorized(new { Message = "Usuario no autenticado." });
+            }
+
+            try
+            {
+                await _fachada.EliminarEventoAsync(id, usuarioId);
+                return Ok(new { Message = "Evento eliminado correctamente." });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning("Intento no autorizado de eliminacion de evento. Evento: {EventoId}, Usuario: {UsuarioId}", id, usuarioId);
+                return StatusCode(StatusCodes.Status403Forbidden, new { Message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { Message = ex.Message });
             }
         }
 

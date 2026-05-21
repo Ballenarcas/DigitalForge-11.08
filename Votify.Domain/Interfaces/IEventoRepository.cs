@@ -9,5 +9,7 @@ namespace Votify.Domain.Interfaces
         Task<Evento?> ObtenerPorIdAsync(string id);
         Task GuardarAsync(Evento evento);
         Task<bool> EliminarAsync(string id);
+        Task ActualizarAsync(Evento evento);
+        Task<bool> ActualizarEventoAsync(Guid eventoId, string nombre, string descripcion, DateTime fechaInicio, DateTime fechaFin, string? imagenUrl);
     }
 }

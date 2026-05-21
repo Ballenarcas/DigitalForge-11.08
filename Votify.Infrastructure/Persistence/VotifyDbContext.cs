@@ -18,6 +18,7 @@ public class VotifyDbContext : DbContext
     public DbSet<CriterioEntity> Criterios { get; set; }
     public DbSet<ValoracionCriterioEntity> ValoracionesCriterio { get; set; }
     public DbSet<EquipoEntity> Equipos { get; set; }
+    public DbSet<NotificacionEntity> Notificaciones { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -33,6 +34,9 @@ public class VotifyDbContext : DbContext
         modelBuilder.Entity<ProyectoEntity>()
             .HasIndex(p => new { p.VotacionId, p.Equipo_Id })
             .IsUnique();
+
+        modelBuilder.Entity<NotificacionEntity>()
+            .HasIndex(n => new { n.UsuarioId, n.Leida });
 
         // Seed data for events
         modelBuilder.Entity<EventoEntity>().HasData(

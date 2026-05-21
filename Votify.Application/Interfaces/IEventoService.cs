@@ -10,11 +10,13 @@ namespace Votify.Application.Interfaces
         Task<List<EventoDto>> ObtenerMisEventosAsync(string participanteId);
         Task<EventoDto?> ObtenerPorIdAsync(string id);
         Task<EventoDto> CrearAsync(EventoDto dto, string creadorId);
+        Task<EventoDto> ActualizarAsync(EventoDto dto, string solicitanteId);
         Task RegistrarParticipanteAsync(string eventoId, string participanteId);
         Task<string?> ObtenerRolEnEventoAsync(string eventoId, string participanteId);
         Task<List<ParticipanteRolDto>> ObtenerParticipantesPorEventoAsync(string eventoId, string solicitanteId, string? search = null);
         Task<RoleStatisticsDto> ObtenerEstadisticasRolesAsync(string eventoId, string solicitanteId);
         Task CambiarRolParticipanteAsync(string eventoId, string participanteId, string solicitanteId, string rol);
         Task EliminarParticipacionAsync(string eventoId, string participanteId, string solicitanteId);
+        Task EliminarEventoAsync(string eventoId, string solicitanteId);
     }
 }

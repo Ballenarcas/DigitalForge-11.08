@@ -36,6 +36,13 @@ namespace Votify.Client.Services
             return (await resp.Content.ReadFromJsonAsync<EventoDto>())!;
         }
 
+        public async Task<EventoDto> ActualizarEvento(string id, EventoDto evento)
+        {
+            var resp = await _http.PutAsJsonAsync($"api/eventos/{id}", evento);
+            resp.EnsureSuccessStatusCode();
+            return (await resp.Content.ReadFromJsonAsync<EventoDto>())!;
+        }
+
         public async Task ParticiparEnEvento(string eventoId)
         {
             var resp = await _http.PostAsync($"api/eventos/{eventoId}/participar", null);
@@ -94,6 +101,12 @@ namespace Votify.Client.Services
         public async Task EliminarParticipanteDeEvento(string eventoId, string participanteId)
         {
             var response = await _http.DeleteAsync($"api/eventos/{eventoId}/participantes/{participanteId}");
+            await EnsureSuccessWithMessage(response);
+        }
+
+        public async Task EliminarEvento(string eventoId)
+        {
+            var response = await _http.DeleteAsync($"api/eventos/{eventoId}");
             await EnsureSuccessWithMessage(response);
         }
 

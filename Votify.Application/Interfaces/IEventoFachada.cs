@@ -5,6 +5,7 @@ namespace Votify.Application.Interfaces
     public interface IEventoFachada
     {
         Task<EventoDto> CrearEventoAsync(EventoDto dto, string creadorId);
+        Task<EventoDto> ActualizarEventoAsync(EventoDto dto, string solicitanteId);
         Task<EventoDto?> ObtenerEventoAsync(string id);
         Task<List<EventoDto>> ObtenerTodosAsync();
         Task<List<EventoDto>> ObtenerMisEventosAsync(string participanteId);
@@ -14,5 +15,6 @@ namespace Votify.Application.Interfaces
         Task<RoleStatisticsDto> ObtenerEstadisticasRolesAsync(string eventoId, string solicitanteId);
         Task CambiarRolAsync(string eventoId, string participanteId, string solicitanteId, string rol);
         Task EliminarParticipacionAsync(string eventoId, string participanteId, string solicitanteId);
+        Task EliminarEventoAsync(string eventoId, string solicitanteId);
     }
 }

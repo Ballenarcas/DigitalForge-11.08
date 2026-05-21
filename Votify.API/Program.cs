@@ -97,11 +97,19 @@ builder.Services.AddScoped<Votify.Application.Interfaces.IVotacionStrategy, Voti
 builder.Services.AddScoped<Votify.Application.Interfaces.IVotacionStrategy, Votify.Application.Services.Estrategia.VotacionMulticriterioPublicoStrategy>();
 builder.Services.AddScoped<Votify.Application.Services.Estrategia.VotacionStrategyResolver>();
 
-// Patrón Observer - Observadores de ciclo de vida de votaciones
+// Notificaciones - observer para equipos/proyectos
+builder.Services.AddScoped<INotificacionObserver, NotificacionObserver>();
+builder.Services.AddScoped<INotificacionObservable, NotificacionSubject>();
+
+// Observer para ciclo de vida de votaciones
 builder.Services.AddScoped<IVotacionObserver, NotificacionObserver>();
 builder.Services.AddScoped<IVotacionObserver, ScoringObserver>();
 builder.Services.AddScoped<IVotacionObserver, AnalyticsObserver>();
 builder.Services.AddScoped<IVotacionObservable, VotacionSubject>();
+
+// Notificaciones
+builder.Services.AddScoped<INotificacionRepository, NotificacionRepository>();
+builder.Services.AddScoped<INotificacionService, NotificacionService>();
 
 builder.Services.AddScoped<Votify.Domain.Interfaces.IEventoRepository, Votify.Infrastructure.Repositories.EventoRepository>();
 builder.Services.AddScoped<Votify.Domain.Interfaces.IParticipanteEventoRepository, Votify.Infrastructure.Repositories.ParticipanteEventoRepository>();

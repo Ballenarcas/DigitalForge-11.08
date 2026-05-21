@@ -13,6 +13,7 @@ builder.Services.AddScoped<ProyectosService>();
 builder.Services.AddScoped<EventosService>();
 builder.Services.AddScoped<EquiposService>();
 builder.Services.AddScoped<ParticipantesService>();
+builder.Services.AddScoped<NotificacionesService>();
 builder.Services.AddScoped<AppState>();
 
 // Servicios de Autenticación

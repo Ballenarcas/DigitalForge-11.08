@@ -15,7 +15,10 @@ namespace Votify.Application.Services
         private readonly IParticipanteRepository _participanteRepository;
         private readonly IParticipanteEventoRepository _participanteEventoRepository;
 
-        public EquipoService(IEquipoRepository equipoRepository, IParticipanteRepository participanteRepository, IParticipanteEventoRepository participanteEventoRepository)
+        public EquipoService(
+            IEquipoRepository equipoRepository,
+            IParticipanteRepository participanteRepository,
+            IParticipanteEventoRepository participanteEventoRepository)
         {
             _equipoRepository = equipoRepository;
             _participanteRepository = participanteRepository;

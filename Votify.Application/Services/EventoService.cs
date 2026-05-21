@@ -69,6 +69,31 @@ namespace Votify.Application.Services
             return dto;
         }
 
+        public async Task<EventoDto> ActualizarAsync(EventoDto dto, string solicitanteId)
+        {
+            if (!Guid.TryParse(dto.Id, out var eventoId))
+            {
+                throw new ArgumentException("ID de evento invalido");
+            }
+
+            if (!Guid.TryParse(solicitanteId, out var solicitanteGuid))
+            {
+                throw new UnauthorizedAccessException("Usuario no autenticado");
+            }
+
+            await ValidarOrganizadorAsync(eventoId, solicitanteGuid);
+
+            var actualizado = await _repo.ActualizarEventoAsync(eventoId, dto.Nombre, dto.Descripcion, dto.FechaInicio, dto.FechaFin, dto.ImagenUrl);
+            if (!actualizado)
+            {
+                throw new InvalidOperationException("Evento no encontrado");
+            }
+
+            dto.FechaInicio = dto.FechaInicio;
+            dto.FechaFin = dto.FechaFin;
+            return dto;
+        }
+
         public async Task RegistrarParticipanteAsync(string eventoId, string participanteId)
         {
             if (Guid.TryParse(eventoId, out var eId) && Guid.TryParse(participanteId, out var pId))
@@ -161,6 +186,22 @@ namespace Votify.Application.Services
                 {
                     throw new InvalidOperationException("No se pudo quitar al participante del evento.");
                 }
+            }
+        }
+
+        public async Task EliminarEventoAsync(string eventoId, string solicitanteId)
+        {
+            if (!Guid.TryParse(eventoId, out var eId) || !Guid.TryParse(solicitanteId, out var solicitanteGuid))
+            {
+                throw new ArgumentException("ID de evento invalido");
+            }
+
+            await ValidarOrganizadorAsync(eId, solicitanteGuid);
+
+            var eliminado = await _repo.EliminarAsync(eventoId);
+            if (!eliminado)
+            {
+                throw new InvalidOperationException("No se pudo eliminar el evento.");
             }
         }
 

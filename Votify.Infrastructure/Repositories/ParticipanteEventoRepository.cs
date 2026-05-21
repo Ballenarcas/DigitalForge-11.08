@@ -111,5 +111,13 @@ namespace Votify.Infrastructure.Repositories
             await _db.SaveChangesAsync();
             return true;
         }
+
+        public async Task<List<Guid>> ObtenerOrganizadoresIdsAsync(Guid eventoId)
+        {
+            return await _db.ParticipantesEventos
+                .Where(pe => pe.EventoId == eventoId && pe.Rol == "ORGANIZADOR")
+                .Select(pe => pe.ParticipanteId)
+                .ToListAsync();
+        }
     }
 }

@@ -115,11 +115,32 @@
                             }
 
                             <div class="card-footer">
-                                <div class="footer-actions">
-                                    @if (yaFinalizo)
+<div class="footer-actions">
+                                    @if (EsOrganizador(e.Id!))
                                     {
-                                        <button class="btn-eliminar">
-                                            🗑 Eliminar
+                                        <button class="btn-editar" @onclick="() => AbrirEditor(e)">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                            </svg>
+                                            Editar
+                                        </button>
+                                        <button class="btn-eliminar-evento" @onclick="() => AbrirConfirmacionEliminar(e)">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <polyline points="3 6 5 6 21 6"/>
+                                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                            </svg>
+                                            Eliminar
+                                        </button>
+                                    }
+                                    else if (yaFinalizo)
+                                    {
+                                        <button class="btn-eliminar" @onclick="() => AbrirConfirmacionEliminar(e)">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <polyline points="3 6 5 6 21 6"/>
+                                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                            </svg>
+                                            Eliminar
                                         </button>
                                     }
                                     else
@@ -153,11 +174,141 @@
     </div>
 }
 
+@if (mostrarEditor && eventoEditando != null)
+{
+    <div class="edit-modal-overlay" @onclick="CerrarEditor">
+        <div class="edit-modal-content" @onclick:stopPropagation="true">
+            <div class="edit-modal-header">
+                <div class="edit-modal-title-row">
+                    <span class="edit-modal-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                    </span>
+                    <h2>Editar Evento</h2>
+                </div>
+                <button class="edit-modal-close" @onclick="CerrarEditor">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="edit-modal-body">
+                <div class="edit-field">
+                    <label>Nombre del evento</label>
+                    <input type="text" @bind="editNombre" placeholder="Nombre del evento" class="edit-input" />
+                </div>
+
+                <div class="edit-field">
+                    <label>Descripcion</label>
+                    <textarea @bind="editDescripcion" placeholder="Describe el evento..." class="edit-textarea" rows="3"></textarea>
+                </div>
+
+                <div class="edit-row-dates">
+                    <div class="edit-field">
+                        <label>Fecha de inicio</label>
+                        <input type="datetime-local" @bind="editFechaInicio" class="edit-input" />
+                    </div>
+                    <div class="edit-field">
+                        <label>Fecha de fin</label>
+                        <input type="datetime-local" @bind="editFechaFin" class="edit-input" />
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrEmpty(editError))
+                {
+                    <div class="edit-error">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                        </svg>
+                        @editError
+                    </div>
+                }
+            </div>
+
+            <div class="edit-modal-footer">
+                <button class="btn-modal-cancel" @onclick="CerrarEditor" disabled="@editCargando">Cancelar</button>
+                <button class="btn-modal-save" @onclick="GuardarEvento" disabled="@editCargando">
+                    @if (editCargando)
+                    {
+                        <span class="btn-spinner"></span>
+                        <span>Guardando...</span>
+                    }
+                    else
+                    {
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                            <polyline points="17 21 17 13 7 13 7 21"/>
+                            <polyline points="7 3 7 8 15 8"/>
+                        </svg>
+                        <span>Guardar Cambios</span>
+                    }
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@if (mostrarConfirmacionEliminar && eventoEliminando != null)
+{
+    <div class="confirm-modal-overlay" @onclick="CerrarConfirmacionEliminar">
+        <div class="confirm-modal-content" @onclick:stopPropagation="true">
+            <div class="confirm-modal-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+            </div>
+            <h2>Eliminar Evento</h2>
+            <p>Esta a punto de eliminar el evento <strong>@eventoEliminando.Nombre</strong>. Esta accion no se puede deshacer.</p>
+
+            @if (!string.IsNullOrEmpty(errorEliminar))
+            {
+                <div class="confirm-error">@errorEliminar</div>
+            }
+
+            <div class="confirm-modal-actions">
+                <button class="btn-modal-cancel" @onclick="CerrarConfirmacionEliminar" disabled="@eliminandoEvento">Cancelar</button>
+                <button class="btn-modal-delete" @onclick="ConfirmarEliminarEvento" disabled="@eliminandoEvento">
+                    @if (eliminandoEvento)
+                    {
+                        <span class="btn-spinner"></span>
+                        <span>Eliminando...</span>
+                    }
+                    else
+                    {
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6"/>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                        </svg>
+                        <span>Si, eliminar</span>
+                    }
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
     private List<EventoDto>? listaEventos;
     private HashSet<string> misEventosIds = new();
     private Dictionary<string, string> misRolesPorEvento = new();
     private bool isAuthenticated = true;
+    private bool mostrarEditor = false;
+    private EventoDto? eventoEditando;
+    private string editNombre = "";
+    private string editDescripcion = "";
+    private DateTime editFechaInicio;
+    private DateTime editFechaFin;
+    private bool editCargando = false;
+    private string? editError;
+    private bool mostrarConfirmacionEliminar = false;
+    private EventoDto? eventoEliminando;
+    private bool eliminandoEvento = false;
+    private string? errorEliminar;
 
     protected override async Task OnInitializedAsync()
     {
@@ -240,6 +391,89 @@
         AppState.EventoNombre = evento.Nombre;
         AppState.EventoId = evento.Id;
         Nav.NavigateTo($"/votaciones?eventoId={evento.Id}&eventoNombre={Uri.EscapeDataString(evento.Nombre)}");
+    }
+
+    private void AbrirEditor(EventoDto evento)
+    {
+        eventoEditando = evento;
+        editNombre = evento.Nombre;
+        editDescripcion = evento.Descripcion;
+        editFechaInicio = evento.FechaInicio.ToLocalTime();
+        editFechaFin = evento.FechaFin.ToLocalTime();
+        editError = null;
+        mostrarEditor = true;
+    }
+
+    private void CerrarEditor()
+    {
+        mostrarEditor = false;
+        eventoEditando = null;
+        editError = null;
+    }
+
+    private async Task GuardarEvento()
+    {
+        if (eventoEditando?.Id == null) return;
+        editCargando = true;
+        editError = null;
+        try
+        {
+            var dto = new EventoDto
+            {
+                Id = eventoEditando.Id,
+                Nombre = editNombre,
+                Descripcion = editDescripcion,
+                FechaInicio = editFechaInicio.ToUniversalTime(),
+                FechaFin = editFechaFin.ToUniversalTime(),
+                ImagenUrl = eventoEditando.ImagenUrl
+            };
+            await EventosService.ActualizarEvento(eventoEditando.Id, dto);
+            await CargarEventos();
+            CerrarEditor();
+        }
+        catch (Exception ex)
+        {
+            editError = ErrorMessageParser.ExtractErrorMessage(ex.Message);
+        }
+        finally
+        {
+            editCargando = false;
+        }
+    }
+
+    private void AbrirConfirmacionEliminar(EventoDto evento)
+    {
+        eventoEliminando = evento;
+        errorEliminar = null;
+        mostrarConfirmacionEliminar = true;
+    }
+
+    private void CerrarConfirmacionEliminar()
+    {
+        mostrarConfirmacionEliminar = false;
+        eventoEliminando = null;
+        errorEliminar = null;
+    }
+
+    private async Task ConfirmarEliminarEvento()
+    {
+        if (eventoEliminando?.Id == null) return;
+        eliminandoEvento = true;
+        errorEliminar = null;
+        try
+        {
+            await EventosService.EliminarEvento(eventoEliminando.Id);
+            await CargarEventos();
+            CerrarConfirmacionEliminar();
+        }
+        catch (Exception ex)
+        {
+            errorEliminar = ErrorMessageParser.ExtractErrorMessage(ex.Message);
+        }
+        finally
+        {
+            eliminandoEvento = false;
+        }
     }
 }
 

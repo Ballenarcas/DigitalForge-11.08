@@ -70,6 +70,36 @@ namespace Votify.Infrastructure.Repositories
             return true;
         }
 
+        public async Task ActualizarAsync(Evento evento)
+        {
+            if (!Guid.TryParse(evento.Id.ToString(), out var guid)) return;
+            var entity = await _db.Eventos.FindAsync(guid);
+            if (entity is null) return;
+
+            entity.Nombre = evento.Nombre;
+            entity.Descripcion = evento.Descripcion;
+            entity.FechaInicio = evento.FechaInicio.ToUniversalTime();
+            entity.FechaFin = evento.FechaFin.ToUniversalTime();
+            entity.ImagenUrl = evento.ImagenUrl;
+
+            await _db.SaveChangesAsync();
+        }
+
+        public async Task<bool> ActualizarEventoAsync(Guid eventoId, string nombre, string descripcion, DateTime fechaInicio, DateTime fechaFin, string? imagenUrl)
+        {
+            var entity = await _db.Eventos.FindAsync(eventoId);
+            if (entity is null) return false;
+
+            entity.Nombre = nombre;
+            entity.Descripcion = descripcion;
+            entity.FechaInicio = fechaInicio.ToUniversalTime();
+            entity.FechaFin = fechaFin.ToUniversalTime();
+            entity.ImagenUrl = imagenUrl;
+
+            await _db.SaveChangesAsync();
+            return true;
+        }
+
         private static Evento MapToDomain(EventoEntity entity) =>
             new EventoBuilder()
                 .ConNombre(entity.Nombre)

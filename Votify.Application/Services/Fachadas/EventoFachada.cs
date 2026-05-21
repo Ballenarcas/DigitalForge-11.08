@@ -15,6 +15,9 @@ namespace Votify.Application.Services.Fachadas
         public Task<EventoDto> CrearEventoAsync(EventoDto dto, string creadorId)
             => _eventoService.CrearAsync(dto, creadorId);
 
+        public Task<EventoDto> ActualizarEventoAsync(EventoDto dto, string solicitanteId)
+            => _eventoService.ActualizarAsync(dto, solicitanteId);
+
         public Task<EventoDto?> ObtenerEventoAsync(string id)
             => _eventoService.ObtenerPorIdAsync(id);
 
@@ -41,5 +44,8 @@ namespace Votify.Application.Services.Fachadas
 
         public Task EliminarParticipacionAsync(string eventoId, string participanteId, string solicitanteId)
             => _eventoService.EliminarParticipacionAsync(eventoId, participanteId, solicitanteId);
+
+        public Task EliminarEventoAsync(string eventoId, string solicitanteId)
+            => _eventoService.EliminarEventoAsync(eventoId, solicitanteId);
     }
 }

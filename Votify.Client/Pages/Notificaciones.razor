@@ -1,0 +1,264 @@
+@page "/notificaciones"
+@inject Votify.Client.Services.NotificacionesService NotificacionesService
+@inject NavigationManager NavManager
+@using Votify.Client.DTOs
+
+<style>
+    .notificaciones-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .notificaciones-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .notificaciones-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #1a1a2e;
+    }
+
+    .badge-no-leidas {
+        background: #e94560;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .notificacion-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.25rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        transition: transform 0.2s, box-shadow 0.2s;
+        cursor: pointer;
+    }
+
+    .notificacion-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    }
+
+    .notificacion-card.no-leida {
+        border-left: 4px solid #e94560;
+        background: #fff5f7;
+    }
+
+    .notificacion-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+    }
+
+    .icon-votacion { background: #e9456015; color: #e94560; }
+    .icon-equipo { background: #16213e15; color: #16213e; }
+    .icon-proyecto { background: #0f346015; color: #0f3460; }
+
+    .notificacion-content {
+        flex: 1;
+    }
+
+    .notificacion-mensaje {
+        font-size: 1rem;
+        color: #1a1a2e;
+        margin-bottom: 0.5rem;
+        line-height: 1.4;
+    }
+
+    .notificacion-meta {
+        font-size: 0.85rem;
+        color: #888;
+    }
+
+    .notificacion-tipo {
+        display: inline-block;
+        padding: 0.2rem 0.6rem;
+        border-radius: 0.5rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .tipo-votacion { background: #e9456015; color: #e94560; }
+    .tipo-equipo { background: #16213e15; color: #16213e; }
+    .tipo-proyecto { background: #0f346015; color: #0f3460; }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #888;
+    }
+
+    .empty-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .btn-volver {
+        display: inline-block;
+        margin-top: 1rem;
+        padding: 0.75rem 1.5rem;
+        background: #e94560;
+        color: white;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .btn-volver:hover {
+        background: #d1364e;
+    }
+</style>
+
+<div class="notificaciones-container">
+    <div class="notificaciones-header">
+        <h1 class="notificaciones-title">Notificaciones</h1>
+        @if (noLeidasCount > 0)
+        {
+            <span class="badge-no-leidas">@noLeidasCount sin leer</span>
+        }
+    </div>
+
+    @if (cargando)
+    {
+        <p>Cargando notificaciones...</p>
+    }
+    else if (!string.IsNullOrEmpty(error))
+    {
+        <p style="color: red;">@error</p>
+        <a href="/" class="btn-volver">Volver al inicio</a>
+    }
+    else if (notificaciones.Count == 0)
+    {
+        <div class="empty-state">
+            <div class="empty-icon">🔔</div>
+            <h3>No tienes notificaciones</h3>
+            <p>Las notificaciones de tus eventos aparecerán aquí.</p>
+            <a href="/" class="btn-volver">Explorar eventos</a>
+        </div>
+    }
+    else
+    {
+        @foreach (var notificacion in notificaciones)
+        {
+            <div class="notificacion-card @(notificacion.Leida ? "" : "no-leida")" @onclick="() => MarcarLeida(notificacion)">
+                <div class="notificacion-icon @(GetIconClass(notificacion.Tipo))">
+                    @GetIconEmoji(notificacion.Tipo)
+                </div>
+                <div class="notificacion-content">
+                    <p class="notificacion-mensaje">@notificacion.Mensaje</p>
+                    <div class="notificacion-meta">
+                        <span class="notificacion-tipo @(GetTipoClass(notificacion.Tipo))">@notificacion.Tipo.Replace("_", " ")</span>
+                        <span> · </span>
+                        <span>@GetTiempoRelativo(notificacion.CreatedAt)</span>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@code {
+    private List<NotificacionDto> notificaciones = new();
+    private bool cargando = true;
+    private string? error;
+    private int noLeidasCount = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarNotificaciones();
+    }
+
+    private async Task CargarNotificaciones()
+    {
+        cargando = true;
+        error = null;
+        try
+        {
+            notificaciones = await NotificacionesService.ObtenerNotificacionesAsync();
+            noLeidasCount = await NotificacionesService.ObtenerNoLeidasCountAsync();
+        }
+        catch (Exception ex)
+        {
+            error = $"Error al cargar notificaciones: {ex.Message}";
+        }
+        finally
+        {
+            cargando = false;
+        }
+    }
+
+    private async Task MarcarLeida(NotificacionDto notificacion)
+    {
+        if (notificacion.Leida) return;
+
+        try
+        {
+            await NotificacionesService.MarcarComoLeidaAsync(notificacion.Id);
+            notificacion.Leida = true;
+            noLeidasCount--;
+            StateHasChanged();
+        }
+        catch { }
+    }
+
+    private string GetIconEmoji(string tipo)
+    {
+        return tipo switch
+        {
+            "VOTACION_CREADA" or "VOTACION_PAUSADA" or "VOTACION_DETENIDA" or "VOTACION_ABIERTA" => "🗳️",
+            "EQUIPO_CREADO" => "👥",
+            "PROYECTO_CREADO" => "📁",
+            _ => "🔔"
+        };
+    }
+
+    private string GetIconClass(string tipo)
+    {
+        return tipo switch
+        {
+            "VOTACION_CREADA" or "VOTACION_PAUSADA" or "VOTACION_DETENIDA" or "VOTACION_ABIERTA" => "icon-votacion",
+            "EQUIPO_CREADO" => "icon-equipo",
+            "PROYECTO_CREADO" => "icon-proyecto",
+            _ => ""
+        };
+    }
+
+    private string GetTipoClass(string tipo)
+    {
+        return tipo switch
+        {
+            "VOTACION_CREADA" or "VOTACION_PAUSADA" or "VOTACION_DETENIDA" or "VOTACION_ABIERTA" => "tipo-votacion",
+            "EQUIPO_CREADO" => "tipo-equipo",
+            "PROYECTO_CREADO" => "tipo-proyecto",
+            _ => ""
+        };
+    }
+
+    private string GetTiempoRelativo(DateTime fecha)
+    {
+        var diff = DateTime.UtcNow - fecha;
+        if (diff.TotalMinutes < 1) return "Hace un momento";
+        if (diff.TotalMinutes < 60) return $"Hace {(int)diff.TotalMinutes} min";
+        if (diff.TotalHours < 24) return $"Hace {(int)diff.TotalHours} h";
+        if (diff.TotalDays < 7) return $"Hace {(int)diff.TotalDays} d";
+        return fecha.ToString("dd/MM/yyyy HH:mm");
+    }
+}
