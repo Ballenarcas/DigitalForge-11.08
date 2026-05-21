@@ -47,7 +47,9 @@ namespace Votify.API.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error interno: {ex.Message} | StackTrace: {ex.StackTrace}");
+                var innerMsg = ex.InnerException?.Message ?? "No inner exception";
+                var innerStack = ex.InnerException?.StackTrace ?? "No inner stack";
+                return StatusCode(500, $"Error interno: {ex.Message} | Inner: {innerMsg} | StackTrace: {ex.StackTrace}");
             }
         }
 
@@ -62,6 +64,7 @@ namespace Votify.API.Controllers
             return Ok(proyecto);
         }
 
+        [HttpGet]
         public async Task<ActionResult<List<ProyectoDto>>> ObtenerProyectos()
         {
             var proyectos = await _fachada.ObtenerProyectosAsync();
