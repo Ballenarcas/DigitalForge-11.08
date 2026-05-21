@@ -98,6 +98,7 @@ builder.Services.AddScoped<Votify.Application.Interfaces.IVotacionStrategy, Voti
 builder.Services.AddScoped<Votify.Application.Services.Estrategia.VotacionStrategyResolver>();
 
 // Patrón Observer - Observadores de ciclo de vida de votaciones
+builder.Services.AddSingleton<INotificacionService, NotificacionService>();
 builder.Services.AddScoped<IVotacionObserver, NotificacionObserver>();
 builder.Services.AddScoped<IVotacionObserver, ScoringObserver>();
 builder.Services.AddScoped<IVotacionObserver, AnalyticsObserver>();

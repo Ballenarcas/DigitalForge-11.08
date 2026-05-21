@@ -12,10 +12,12 @@ namespace Votify.Application.Services.Observadores
     public class NotificacionObserver : IVotacionObserver
     {
         private readonly ILogger<NotificacionObserver> _logger;
+        private readonly INotificacionService _notificacionService;
 
-        public NotificacionObserver(ILogger<NotificacionObserver> logger)
+        public NotificacionObserver(ILogger<NotificacionObserver> logger, INotificacionService notificacionService)
         {
             _logger = logger;
+            _notificacionService = notificacionService;
         }
 
         public Task OnVotacionCreadaAsync(Votacion votacion)
@@ -24,8 +26,11 @@ namespace Votify.Application.Services.Observadores
                 "Votación creada: {VotacionId} - Nombre: {Nombre} - Tipo: {Tipo}",
                 votacion.Id, votacion.Nombre, votacion.Tipo);
 
-            // Aquí se puede implementar: enviar email, push notification, etc.
-            // await _notificacionService.EnviarNotificacionCreadaAsync(votacion);
+            _notificacionService.AgregarNotificacion(
+                $"Nueva votación '{votacion.Nombre}' del tipo {votacion.Tipo} ha sido creada.",
+                "Creada",
+                votacion
+            );
 
             return Task.CompletedTask;
         }
@@ -36,8 +41,11 @@ namespace Votify.Application.Services.Observadores
                 "Votación pausada: {VotacionId} - Nombre: {Nombre}",
                 votacion.Id, votacion.Nombre);
 
-            // Aquí se puede implementar: enviar notificación de pausa, etc.
-            // await _notificacionService.EnviarNotificacionPausaAsync(votacion);
+            _notificacionService.AgregarNotificacion(
+                $"La votación '{votacion.Nombre}' ha sido pausada temporalmente.",
+                "Pausada",
+                votacion
+            );
 
             return Task.CompletedTask;
         }
@@ -48,8 +56,11 @@ namespace Votify.Application.Services.Observadores
                 "Votación detenida: {VotacionId} - Nombre: {Nombre}",
                 votacion.Id, votacion.Nombre);
 
-            // Aquí se puede implementar: enviar notificación de detención, etc.
-            // await _notificacionService.EnviarNotificacionDetenciaAsync(votacion);
+            _notificacionService.AgregarNotificacion(
+                $"La votación '{votacion.Nombre}' ha sido finalizada/detenida.",
+                "Detenida",
+                votacion
+            );
 
             return Task.CompletedTask;
         }
@@ -60,8 +71,11 @@ namespace Votify.Application.Services.Observadores
                 "Votación reabierta/reanudada: {VotacionId} - Nombre: {Nombre}",
                 votacion.Id, votacion.Nombre);
 
-            // Aquí se puede implementar: enviar notificación de reapertura, etc.
-            // await _notificacionService.EnviarNotificacionAperturaAsync(votacion);
+            _notificacionService.AgregarNotificacion(
+                $"La votación '{votacion.Nombre}' se encuentra ahora abierta para recibir votos.",
+                "Abierta",
+                votacion
+            );
 
             return Task.CompletedTask;
         }
