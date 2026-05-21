@@ -171,6 +171,38 @@ namespace Votify.Client.Services
             }
         }
 
+        public async Task GuardarAsignacionManual(string votacionId, AsignacionManualVotosDto dto)
+        {
+            var response = await _http.PostAsJsonAsync($"api/votaciones/{votacionId}/resultados/asignar", dto);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Error al guardar asignación manual: {error}");
+            }
+        }
+
+        public async Task<List<ResultadoProyectoDto>?> ObtenerAsignacionesManuales(string votacionId)
+        {
+            return await _http.GetFromJsonAsync<List<ResultadoProyectoDto>>($"api/votaciones/{votacionId}/resultados/manuales");
+        }
+
+        public async Task GuardarJustificacion(string votacionId, GuardarJustificacionDto dto)
+        {
+            var response = await _http.PostAsJsonAsync($"api/votaciones/{votacionId}/resultados/justificacion", dto);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Error al guardar justificación: {error}");
+            }
+        }
+
+        public async Task<JustificacionDto?> ObtenerJustificacion(string votacionId, string proyectoId)
+        {
+            return await _http.GetFromJsonAsync<JustificacionDto>($"api/votaciones/{votacionId}/resultados/justificacion/{proyectoId}");
+        }
+
         public async Task<string> SubirImagen(MultipartFormDataContent content, string bucket = "Votaciones")
         {
             var resp = await _http.PostAsync($"api/files/upload?bucket={Uri.EscapeDataString(bucket)}", content);

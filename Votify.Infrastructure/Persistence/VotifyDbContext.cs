@@ -18,6 +18,7 @@ public class VotifyDbContext : DbContext
     public DbSet<CriterioEntity> Criterios { get; set; }
     public DbSet<ValoracionCriterioEntity> ValoracionesCriterio { get; set; }
     public DbSet<EquipoEntity> Equipos { get; set; }
+    public DbSet<ManualVotosAsignacionEntity> ManualVotosAsignaciones { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

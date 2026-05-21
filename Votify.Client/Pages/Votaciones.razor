@@ -170,6 +170,12 @@
                                             Resultados
                                         </button>
                                     }
+                                    @if (Rol == "ORGANIZADOR" && (estaActiva || estaPausada || estaFinalizada))
+                                    {
+                                        <button class="btn-ver" @onclick="() => IrAEditarVotos(v.Id)" title="Editar votos y asignaciones manuales">
+                                            Editar votos
+                                        </button>
+                                    }
                                     @if (Rol == "ORGANIZADOR")
                                     {
                                         @if (!estaFinalizada)
@@ -280,6 +286,7 @@
     private void IrACrearEquipo() => Nav.NavigateTo($"/nuevo-equipo?eventoId={AppState.EventoId}");
     private void IrAGestionRoles() => Nav.NavigateTo($"/evento/{AppState.EventoId}/roles");
     private void Gestionar(string id) => Nav.NavigateTo($"/votacion/{id}");
+    private void IrAEditarVotos(string id) => Nav.NavigateTo($"/votacion/{id}/editar-votos");
     private void VerResultados(string id)
     {
         var votacion = listaVotaciones?.FirstOrDefault(v => v.Id == id);
