@@ -1,0 +1,791 @@
+@page "/votacion/{VotacionId}/editar-votos"
+@using Votify.Client.DTOs
+@using Votify.Client.Utilities
+@inject Votify.Client.Services.VotacionesService VotacionesService
+@inject Votify.Client.Services.EventosService EventosService
+@inject NavigationManager Nav
+@inject Votify.Client.Services.AppState AppState
+@inject AuthenticationStateProvider AuthStateProvider
+
+<div class="main-container">
+    <div class="header-principal">
+        <button class="btn-volver" @onclick="VolverAVotaciones">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="16" height="16">
+                <path d="M15 19L8 12L15 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Volver
+        </button>
+    </div>
+
+    <div class="page-header-row">
+        <div class="logo-icon small">
+            <span style="font-size: 1.5rem;">📊</span>
+        </div>
+        <span class="brand-name">Ranking</span>
+    </div>
+
+    <div class="content-wrapper">
+        @if (!isAuthorized)
+        {
+            <div class="error-message">
+                No tienes permisos para acceder a esta página. Solo los ORGANIZADORES pueden editar votos.
+            </div>
+        }
+        else if (listaResultados == null)
+        {
+            <div class="loader-container">
+                <div class="spinner"></div>
+                <p>Cargando resultados...</p>
+            </div>
+        }
+        else if (listaResultados.Count == 0)
+        {
+            <div class="empty-state">
+                <p>No hay resultados disponibles para esta votación.</p>
+            </div>
+        }
+        else
+        {
+            <div class="ranking-container">
+                <!-- Panel Izquierdo: Tabla de Resultados -->
+                <div class="ranking-panel resultado-actual">
+                    <h3>Resultado actual</h3>
+                    <p class="subtitle">Haz clic en un proyecto para editarlo</p>
+                    <div class="table-wrapper">
+                        <table class="ranking-table">
+                            <thead>
+                                <tr>
+                                    <th class="col-pos">POS.</th>
+                                    <th class="col-proyecto">PROYECTO</th>
+                                    <th class="col-equipo">EQUIPO</th>
+                                    <th class="col-votos">VOTOS</th>
+                                    <th class="col-manual">MANUAL</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var resultado in listaResultados.OrderBy(r => r.Posicion))
+                                {
+                                    <tr class="table-row @(selectedProyectoId == resultado.Id ? "selected" : "")" @onclick="() => SelectProyecto(resultado)">
+                                        <td class="col-pos">
+                                            <span class="pos-badge">@resultado.Posicion</span>
+                                        </td>
+                                        <td class="col-proyecto">@resultado.Nombre</td>
+                                        <td class="col-equipo">@resultado.Equipo</td>
+                                        <td class="col-votos">@resultado.TotalVotos</td>
+                                        <td class="col-manual">
+                                            <span class="badge @(resultado.IsManual ? "badge-manual" : "badge-auto")">
+                                                @(resultado.IsManual ? "Manual" : "Auto")
+                                            </span>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Panel Derecho: Formulario de Asignación -->
+                <div class="ranking-panel asignacion-manual">
+                    <h3>Asignar resultado manualmente</h3>
+
+                    @if (selectedProyectoId == null)
+                    {
+                        <div class="placeholder-text">
+                            <p>👈 Selecciona un proyecto de la tabla para empezar</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="proyecto-info">
+                            <h4>@selectedProyectoNombre</h4>
+                            <p class="equipo-info">@selectedProyectoEquipo</p>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="posicion">Posición final</label>
+                                <input type="number" id="posicion" class="form-control" @bind="posicionFinal" min="1" />
+                            </div>
+                            <div class="form-group">
+                                <label for="votos">Votos asignados</label>
+                                <input type="number" id="votos" class="form-control" @bind="votosAsignados" min="0" />
+                            </div>
+                        </div>
+
+                        <button class="btn-guardar" @onclick="GuardarAsignacion" disabled="@guardando">
+                            @if (guardando)
+                            {
+                                <span>Guardando...</span>
+                            }
+                            else
+                            {
+                                <span>Guardar asignación</span>
+                            }
+                        </button>
+
+                        @if (!string.IsNullOrEmpty(mensajeExito))
+                        {
+                            <div class="alert alert-success">
+                                ✓ @mensajeExito
+                            </div>
+                        }
+
+                        @if (!string.IsNullOrEmpty(mensajeError))
+                        {
+                            <div class="alert alert-error">
+                                ✗ @mensajeError
+                            </div>
+                        }
+
+                        <!-- Panel de Justificaciones -->
+                        <div class="justificaciones-panel">
+                            <h4>Justificación <span class="label-optional">(Comentario)</span></h4>
+
+                            @if (justificacionActual != null)
+                            {
+                                <div class="comentario-existente">
+                                    <div class="comentario-header">
+                                        <span class="comentario-usuario">@justificacionActual.UsuarioNombre</span>
+                                        <span class="comentario-rol">@justificacionActual.RolUsuario</span>
+                                        <span class="comentario-fecha">@justificacionActual.FechaJustificacion.ToString("dd/MM/yyyy HH:mm")</span>
+                                    </div>
+                                    <div class="comentario-texto">
+                                        @justificacionActual.TextoJustificacion
+                                    </div>
+                                    <p class="comentario-nota">Este comentario será reemplazado si agregas uno nuevo</p>
+                                </div>
+                            }
+
+                            <textarea id="justificacion" class="form-control" @bind="textoJustificacion" placeholder="Escribe la justificación de esta asignación manual..." />
+
+                            <button class="btn-guardar-justificacion" @onclick="GuardarJustificacion" disabled="@(string.IsNullOrEmpty(textoJustificacion?.Trim()) || guardandoJustificacion)">
+                                @if (guardandoJustificacion)
+                                {
+                                    <span>Guardando comentario...</span>
+                                }
+                                else
+                                {
+                                    <span>Guardar comentario</span>
+                                }
+                            </button>
+
+                            @if (!string.IsNullOrEmpty(mensajeJustificacion))
+                            {
+                                <div class="alert alert-success" style="margin-top: 0.5rem;">
+                                    ✓ @mensajeJustificacion
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .main-container {
+        background-color: #f4f4f8;
+        min-height: 100vh;
+        padding: 1.5rem;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .header-principal {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        max-width: 1400px;
+        margin: 0 auto 1.25rem;
+    }
+
+    .btn-volver {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        background: white;
+        border: 1px solid #e2e8f0;
+        color: #64748b;
+        padding: 0.4rem 0.8rem;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-volver:hover {
+        background: #f8f9fc;
+        border-color: #ddd6fe;
+        color: #7c3aed;
+    }
+
+    .page-header-row {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 2rem;
+        max-width: 1400px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .logo-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+    }
+
+    .brand-name {
+        font-weight: 800;
+        font-size: 1.5rem;
+        color: #4c1d95;
+        letter-spacing: -0.02em;
+    }
+
+    .content-wrapper {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .ranking-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        align-items: start;
+    }
+
+    .ranking-panel {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        border: 1px solid #f1f5f9;
+    }
+
+    .ranking-panel h3 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #1a1a1a;
+        margin: 0 0 0.5rem;
+    }
+
+    .subtitle {
+        font-size: 0.85rem;
+        color: #94a3b8;
+        margin: 0 0 1rem;
+    }
+
+    .placeholder-text {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: #94a3b8;
+        font-size: 1rem;
+    }
+
+    .proyecto-info {
+        background: linear-gradient(135deg, #f3e8ff 0%, #ede9fe 100%);
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+
+    .proyecto-info h4 {
+        margin: 0 0 0.25rem;
+        color: #6b21a8;
+        font-size: 1rem;
+    }
+
+    .equipo-info {
+        margin: 0;
+        color: #7c3aed;
+        font-size: 0.85rem;
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+    }
+
+    .ranking-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .ranking-table thead {
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .ranking-table th {
+        text-align: left;
+        padding: 0.75rem 0.5rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    .table-row {
+        border-bottom: 1px solid #f1f5f9;
+        transition: all 0.2s;
+        cursor: pointer;
+    }
+
+    .table-row:hover {
+        background-color: #f8fafc;
+    }
+
+    .table-row.selected {
+        background-color: #e0d7f6;
+    }
+
+    .ranking-table td {
+        padding: 0.75rem 0.5rem;
+        vertical-align: middle;
+        font-size: 0.9rem;
+    }
+
+    .col-pos {
+        width: 50px;
+    }
+
+    .col-proyecto {
+        flex: 1;
+        font-weight: 500;
+        color: #1e293b;
+    }
+
+    .col-equipo {
+        width: 100px;
+        color: #64748b;
+    }
+
+    .col-votos {
+        width: 60px;
+        text-align: center;
+        font-weight: 600;
+        color: #9333ea;
+    }
+
+    .col-manual {
+        width: 80px;
+    }
+
+    .pos-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        background: linear-gradient(135deg, #f3e8ff 0%, #ede9fe 100%);
+        color: #9333ea;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .badge-auto {
+        background: #f1f5f9;
+        color: #64748b;
+    }
+
+    .badge-manual {
+        background: #fce7f3;
+        color: #be185d;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: #1a1a1a;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-family: 'Inter', sans-serif;
+        transition: all 0.2s;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #a855f7;
+        box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
+    }
+
+    textarea.form-control {
+        resize: vertical;
+        min-height: 80px;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .btn-guardar {
+        width: 100%;
+        padding: 0.75rem;
+        background: linear-gradient(135deg, #a855f7 0%, #d946ef 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        margin-bottom: 1rem;
+    }
+
+    .btn-guardar:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(168, 85, 247, 0.3);
+    }
+
+    .btn-guardar:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .btn-guardar-justificacion {
+        width: 100%;
+        padding: 0.6rem;
+        background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+    }
+
+    .btn-guardar-justificacion:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(15, 118, 110, 0.3);
+    }
+
+    .btn-guardar-justificacion:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .alert {
+        padding: 0.75rem;
+        border-radius: 8px;
+        margin-top: 0.75rem;
+        font-size: 0.85rem;
+    }
+
+    .alert-success {
+        background: #ecfdf5;
+        color: #047857;
+        border: 1px solid #a7f3d0;
+    }
+
+    .alert-error {
+        background: #fef2f2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+    }
+
+    .justificaciones-panel {
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #f1f5f9;
+    }
+
+    .justificaciones-panel h4 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #1a1a1a;
+        margin: 0 0 1rem;
+    }
+
+    .label-optional {
+        font-size: 0.8rem;
+        color: #94a3b8;
+        font-weight: 400;
+    }
+
+    .comentario-existente {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .comentario-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+        font-size: 0.85rem;
+    }
+
+    .comentario-usuario {
+        font-weight: 600;
+        color: #1e293b;
+    }
+
+    .comentario-rol {
+        background: #e0d7f6;
+        color: #6b21a8;
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .comentario-fecha {
+        color: #94a3b8;
+        font-size: 0.8rem;
+    }
+
+    .comentario-texto {
+        color: #475569;
+        font-size: 0.9rem;
+        line-height: 1.4;
+        margin-bottom: 0.5rem;
+        word-break: break-word;
+    }
+
+    .comentario-nota {
+        font-size: 0.75rem;
+        color: #94a3b8;
+        margin: 0;
+        font-style: italic;
+    }
+
+    .error-message,
+    .empty-state {
+        background: white;
+        padding: 3rem;
+        border-radius: 16px;
+        text-align: center;
+        color: #64748b;
+    }
+
+    .loader-container {
+        text-align: center;
+        padding: 4rem;
+        color: #64748b;
+    }
+
+    .spinner {
+        width: 35px;
+        height: 35px;
+        border: 4px solid #f3e8ff;
+        border-top: 4px solid #9333ea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1rem;
+    }
+
+    @@keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    @@media (max-width: 1024px) {
+        .ranking-container {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+@code {
+    [Parameter]
+    public string VotacionId { get; set; } = string.Empty;
+
+    private List<ResultadoProyectoDto>? listaResultados;
+    private bool isAuthorized = false;
+    private bool guardando = false;
+    private bool guardandoJustificacion = false;
+    private string? selectedProyectoId = null;
+    private string? selectedProyectoNombre = null;
+    private string? selectedProyectoEquipo = null;
+    private int posicionFinal = 1;
+    private int votosAsignados = 0;
+    private string? textoJustificacion = null;
+    private JustificacionDto? justificacionActual = null;
+    private string? mensajeExito = null;
+    private string? mensajeError = null;
+    private string? mensajeJustificacion = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (string.IsNullOrEmpty(VotacionId))
+            return;
+
+        try
+        {
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            if (!authState.User.Identity?.IsAuthenticated ?? false)
+                return;
+
+            var votacion = await VotacionesService.ObtenerVotacion(VotacionId);
+            if (votacion == null)
+                return;
+
+            var rol = await EventosService.ObtenerRolEnEvento(votacion.EventoId);
+            isAuthorized = EsOrganizador(rol);
+
+            if (!isAuthorized)
+                return;
+
+            await CargarResultados();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+        }
+    }
+
+    private async Task CargarResultados()
+    {
+        try
+        {
+            listaResultados = await VotacionesService.ObtenerResultados(VotacionId);
+        }
+        catch (Exception ex)
+        {
+            var errorMsg = ErrorMessageParser.ExtractErrorMessage(ex.Message);
+            Console.WriteLine($"Error cargando resultados: {errorMsg}");
+            listaResultados = new List<ResultadoProyectoDto>();
+        }
+    }
+
+    private async Task SelectProyecto(ResultadoProyectoDto resultado)
+    {
+        selectedProyectoId = resultado.Id;
+        selectedProyectoNombre = resultado.Nombre;
+        selectedProyectoEquipo = resultado.Equipo;
+        posicionFinal = resultado.Posicion;
+        votosAsignados = resultado.TotalVotos;
+        textoJustificacion = null;
+        mensajeExito = null;
+        mensajeError = null;
+        mensajeJustificacion = null;
+
+        // Cargar justificación existente
+        try
+        {
+            justificacionActual = await VotacionesService.ObtenerJustificacion(VotacionId, resultado.Id);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error cargando justificación: {ex.Message}");
+            justificacionActual = null;
+        }
+    }
+
+    private async Task GuardarAsignacion()
+    {
+        if (string.IsNullOrEmpty(selectedProyectoId))
+        {
+            mensajeError = "Debes seleccionar un proyecto";
+            return;
+        }
+
+        if (posicionFinal <= 0)
+        {
+            mensajeError = "La posición debe ser mayor a 0";
+            return;
+        }
+
+        guardando = true;
+        mensajeExito = null;
+        mensajeError = null;
+
+        try
+        {
+            var dto = new AsignacionManualVotosDto
+            {
+                ProyectoId = selectedProyectoId,
+                PosicionFinal = posicionFinal,
+                VotosAsignados = votosAsignados,
+                Justificacion = null
+            };
+
+            await VotacionesService.GuardarAsignacionManual(VotacionId, dto);
+            mensajeExito = "Asignación manual guardada correctamente.";
+            await CargarResultados();
+        }
+        catch (Exception ex)
+        {
+            mensajeError = ErrorMessageParser.ExtractErrorMessage(ex.Message);
+        }
+        finally
+        {
+            guardando = false;
+        }
+    }
+
+    private async Task GuardarJustificacion()
+    {
+        if (string.IsNullOrEmpty(selectedProyectoId) || string.IsNullOrEmpty(textoJustificacion?.Trim()))
+        {
+            mensajeError = "Debes escribir una justificación";
+            return;
+        }
+
+        guardandoJustificacion = true;
+        mensajeJustificacion = null;
+
+        try
+        {
+            var dto = new GuardarJustificacionDto
+            {
+                ProyectoId = selectedProyectoId,
+                TextoJustificacion = textoJustificacion.Trim()
+            };
+
+            await VotacionesService.GuardarJustificacion(VotacionId, dto);
+            mensajeJustificacion = "Comentario guardado correctamente.";
+            textoJustificacion = null;
+
+            // Recargar justificación
+            justificacionActual = await VotacionesService.ObtenerJustificacion(VotacionId, selectedProyectoId);
+        }
+        catch (Exception ex)
+        {
+            mensajeError = ErrorMessageParser.ExtractErrorMessage(ex.Message);
+        }
+        finally
+        {
+            guardandoJustificacion = false;
+        }
+    }
+
+    private void VolverAVotaciones()
+    {
+        Nav.NavigateTo($"/votaciones?eventoId={AppState.EventoId}");
+    }
+
+    private static bool EsOrganizador(string? rol)
+    {
+        return string.Equals(rol?.Trim(), "ORGANIZADOR", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(rol?.Trim(), "Organizador", StringComparison.OrdinalIgnoreCase);
+    }
+}

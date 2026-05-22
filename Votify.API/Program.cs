@@ -90,6 +90,8 @@ builder.Services.AddScoped<IComentarioRepository, ComentarioRepository>();
 builder.Services.AddScoped<IComentarioService, ComentarioService>();
 builder.Services.AddScoped<ICriterioRepository, CriterioRepository>();
 builder.Services.AddScoped<IValoracionCriterioRepository, ValoracionCriterioRepository>();
+builder.Services.AddScoped<IManualVotosAsignacionRepository, ManualVotosAsignacionRepository>();
+builder.Services.AddScoped<IManualVotosService, ManualVotosService>();
 
 // Patrón Strategy para tipos de votación
 builder.Services.AddScoped<Votify.Application.Interfaces.IVotacionStrategy, Votify.Application.Services.Estrategia.VotacionEstandarStrategy>();

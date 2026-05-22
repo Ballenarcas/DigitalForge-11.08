@@ -9,5 +9,7 @@ namespace Votify.Application.DTOs
         public double? PuntajeFinal { get; set; }
         public int Evaluaciones { get; set; }
         public int Posicion { get; set; }
+        public bool IsManual { get; set; }
+        public string? Justificacion { get; set; }
     }
 }
