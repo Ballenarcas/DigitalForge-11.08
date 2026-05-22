@@ -1,35 +1,38 @@
 using Votify.Domain.Entities;
 
-public class EstadoActiva : IEstadoVotacion
+namespace Votify.Domain.Estado
 {
-    public void IniciarVotacion(Votacion votacion)
+    public class EstadoActiva : IEstadoVotacion
     {
-        throw new InvalidOperationException("La votación ya está activa.");
-    }
+        public string Nombre => "Activa";
 
-    public void FinalizarVotacion(Votacion votacion)
-    {
-       votacion.Estado = EstadoVotacion.Detenida;
-    }
+        public void IniciarVotacion(Votacion votacion)
+        {
+            throw new InvalidOperationException("La votacion ya esta activa.");
+        }
 
-    public void PausarVotacion(Votacion votacion)
-    {
-       votacion.Estado = EstadoVotacion.Pausada;
-    }
+        public void FinalizarVotacion(Votacion votacion)
+        {
+            votacion.CambiarEstado(new EstadoFinalizada());
+        }
 
-    public void ReanudarVotacion(Votacion votacion)
-    {
-       throw new InvalidOperationException("No se puede reanudar una votación Activa.");
-    }
+        public void PausarVotacion(Votacion votacion)
+        {
+            votacion.CambiarEstado(new EstadoPausada());
+        }
 
-    public void ValidarVoto(Votacion votacion)
-    {
-        // En estado activa se permite votar, no lanzamos excepción
-    }
+        public void ReanudarVotacion(Votacion votacion)
+        {
+            throw new InvalidOperationException("No se puede reanudar una votacion activa.");
+        }
 
-    public string ObtenerResultados()
-    {
-        // Lógica para obtener los resultados
-        return string.Empty;
+        public void ValidarVoto(Votacion votacion)
+        {
+        }
+
+        public string ObtenerResultados()
+        {
+            return string.Empty;
+        }
     }
 }

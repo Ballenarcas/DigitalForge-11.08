@@ -37,7 +37,7 @@ namespace Votify.Tests.Domain
 
             // Act & Assert
             var exception = Assert.Throws<InvalidOperationException>((Action)(() => votacion.ValidarVoto()));
-            Assert.Contains("La votación no está dentro del período permitido", exception.Message);
+            Assert.Contains("periodo permitido", exception.Message);
         }
 
         [Fact]
@@ -53,7 +53,7 @@ namespace Votify.Tests.Domain
 
             // Act & Assert
             var exception = Assert.Throws<InvalidOperationException>((Action)(() => votacion.ValidarVoto()));
-            Assert.Contains("La votación no está dentro del período permitido", exception.Message);
+            Assert.Contains("periodo permitido", exception.Message);
         }
 
         #endregion
@@ -114,7 +114,7 @@ namespace Votify.Tests.Domain
                 .Build();
 
             // Assert
-            Assert.Equal(EstadoVotacion.Abierta, votacion.Estado);
+            Assert.Equal("Activa", votacion.Estado.Nombre);
         }
 
         #endregion

@@ -32,7 +32,9 @@ namespace Votify.Infrastructure.Repositories
                 ComentariosObligatorios = votacion.ComentariosObligatorios,
                 EsAnonima = votacion.EsAnonima,
                 EventoId = votacion.EventoId,
-                Estado = (int)votacion.Estado,
+                Estado = votacion.Estado is Domain.Estado.EstadoActiva ? 0
+                   : votacion.Estado is Domain.Estado.EstadoPausada ? 1
+                   : 2,
                 ImagenUrl = votacion.ImagenUrl
             };
 
@@ -78,7 +80,9 @@ namespace Votify.Infrastructure.Repositories
             entity.ComentariosObligatorios = votacion.ComentariosObligatorios;
             entity.EsAnonima = votacion.EsAnonima;
             entity.EventoId = votacion.EventoId;
-            entity.Estado = (int)votacion.Estado;
+            entity.Estado = votacion.Estado is Domain.Estado.EstadoActiva ? 0
+                         : votacion.Estado is Domain.Estado.EstadoPausada ? 1
+                         : 2;
             entity.ImagenUrl = votacion.ImagenUrl;
 
             await _db.SaveChangesAsync();
@@ -161,7 +165,16 @@ namespace Votify.Infrastructure.Repositories
                 entity.ImagenUrl
             );
             domain.Id = entity.Id;
-            domain.Estado = (Domain.Entities.EstadoVotacion)entity.Estado;
+
+            var estadoInicial = entity.Estado switch
+            {
+                0 => (Domain.Estado.IEstadoVotacion)new Domain.Estado.EstadoActiva(),
+                1 => new Domain.Estado.EstadoPausada(),
+                2 => new Domain.Estado.EstadoFinalizada(),
+                _ => (Domain.Estado.IEstadoVotacion)new Domain.Estado.EstadoActiva()
+            };
+            domain.CambiarEstado(estadoInicial);
+
             return domain;
         }
 
@@ -174,7 +187,13 @@ namespace Votify.Infrastructure.Repositories
             if (entity is null)
                 throw new KeyNotFoundException($"No se encontró la votación con id {id}.");
 
-            entity.Estado = (int)estado;
+            entity.Estado = estado switch
+            {
+                Domain.Entities.EstadoVotacion.Abierta => 0,
+                Domain.Entities.EstadoVotacion.Pausada => 1,
+                Domain.Entities.EstadoVotacion.Detenida => 2,
+                _ => 0
+            };
             await _db.SaveChangesAsync();
         }
 

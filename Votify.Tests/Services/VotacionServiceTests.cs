@@ -7,6 +7,7 @@ using Votify.Application.Services.Estrategia;
 using Votify.Domain.Entities;
 using Votify.Application.Interfaces;
 using Votify.Domain.Interfaces;
+using DomainEstado = Votify.Domain.Estado;
 using System;
 
 namespace Votify.Tests.Services
@@ -140,7 +141,7 @@ namespace Votify.Tests.Services
                 false,
                 Guid.NewGuid(),
                 false);
-            votacion.Estado = EstadoVotacion.Pausada;
+            votacion.CambiarEstado(new DomainEstado.EstadoPausada());
 
             _mockVotacionRepository
                 .Setup(x => x.ObtenerAsync(votacionId))
@@ -169,7 +170,7 @@ namespace Votify.Tests.Services
                 false,
                 Guid.NewGuid(),
                 false);
-            votacion.Estado = EstadoVotacion.Detenida;
+            votacion.CambiarEstado(new DomainEstado.EstadoFinalizada());
 
             _mockVotacionRepository
                 .Setup(x => x.ObtenerAsync(votacionId))

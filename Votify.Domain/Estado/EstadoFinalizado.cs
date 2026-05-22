@@ -1,36 +1,39 @@
-using Microsoft.VisualBasic;
 using Votify.Domain.Entities;
-public class EstadoFinalizada : IEstadoVotacion
+
+namespace Votify.Domain.Estado
 {
-    
-    public void IniciarVotacion(Votacion votacion)
+    public class EstadoFinalizada : IEstadoVotacion
     {
-        throw new InvalidOperationException("No se puede reanudar una votación finalizada.");
-    }
+        public string Nombre => "Finalizada";
 
-    public void FinalizarVotacion(Votacion votacion)
-    {
-       throw new InvalidOperationException("La votación ya está finalizada.");
-    }
+        public void IniciarVotacion(Votacion votacion)
+        {
+            throw new InvalidOperationException("No se puede reabrir una votacion finalizada.");
+        }
 
-    public void PausarVotacion(Votacion votacion)
-    {
-       throw new InvalidOperationException("No se puede pausar una votación finalizada.");
-    }
+        public void FinalizarVotacion(Votacion votacion)
+        {
+            throw new InvalidOperationException("La votacion ya esta finalizada.");
+        }
 
-    public void ReanudarVotacion(Votacion votacion)
-    {
-       throw new InvalidOperationException("No se puede reanudar una votación finalizada.");
-    }
+        public void PausarVotacion(Votacion votacion)
+        {
+            throw new InvalidOperationException("No se puede pausar una votacion finalizada.");
+        }
 
-    public void ValidarVoto(Votacion votacion)
-    {
-        throw new InvalidOperationException("No se pueden emitir votos en una votación finalizada.");
-    }
+        public void ReanudarVotacion(Votacion votacion)
+        {
+            throw new InvalidOperationException("No se puede reanudar una votacion finalizada.");
+        }
 
-    public string ObtenerResultados()
-    {
-        // Lógica para obtener los resultados
-        return string.Empty;
+        public void ValidarVoto(Votacion votacion)
+        {
+            throw new InvalidOperationException("No se pueden emitir votos en una votacion finalizada.");
+        }
+
+        public string ObtenerResultados()
+        {
+            return string.Empty;
+        }
     }
 }

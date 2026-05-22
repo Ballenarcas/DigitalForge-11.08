@@ -5,6 +5,10 @@ using Votify.Domain.Builders;
 using Votify.Domain.Entities;
 using Votify.Domain.Factory;
 using Votify.Domain.Interfaces;
+using Votify.Domain.Estado;
+using EstadoActiva = Votify.Domain.Estado.EstadoActiva;
+using EstadoPausada = Votify.Domain.Estado.EstadoPausada;
+using EstadoFinalizada = Votify.Domain.Estado.EstadoFinalizada;
 
 namespace Votify.Application.Services
 {
@@ -91,11 +95,11 @@ namespace Votify.Application.Services
 
             // Actualizar estado automáticamente según fechas SOLO si nunca fue pausada manualmente
             // Si está pausada, respetamos la decisión del usuario
-            if (e.Estado != EstadoVotacion.Pausada)
+            if (e.Estado is not EstadoPausada)
             {
                 var estadoAnterior = e.Estado;
                 ActualizarEstadoAutomatico(e);
-                if (e.Estado != estadoAnterior)
+                if (!ReferenceEquals(e.Estado, estadoAnterior))
                 {
                     await _repo.ActualizarAsync(id, e);
                 }
@@ -287,7 +291,7 @@ namespace Votify.Application.Services
                 ComentariosObligatorios = e.ComentariosObligatorios,
                 EsAnonima = e.EsAnonima,
                 EventoId = e.EventoId.ToString(),
-                Estado = (int)e.Estado,
+                Estado = e.Estado is EstadoActiva ? 0 : e.Estado is EstadoPausada ? 1 : 2,
                 ImagenUrl = e.ImagenUrl,
                 Criterios = criterios ?? new List<CriterioDto>()
             };
@@ -307,15 +311,11 @@ namespace Votify.Application.Services
             var ahora = DateTime.UtcNow;
             
             // Si aún no ha llegado la fecha de inicio, la votación debería estar pausada
-            if (ahora < votacion.FechaInicio && votacion.Estado == EstadoVotacion.Abierta)
+            if (ahora < votacion.FechaInicio && votacion.Estado is EstadoActiva)
             {
                 votacion.Pausar();
             }
-            // NO reabrimos automáticamente votaciones pausadas manualmente
-            // La pausa es una acción deliberada del usuario que debe respetarse
-            // Si ya pasó la fecha final, solo detener la votación si seguía activa
-            // IMPORTANTE: No finalizamos votaciones pausadas - respetamos el estado manual
-            else if (ahora >= votacion.FechaFin && votacion.Estado == EstadoVotacion.Abierta)
+            else if (ahora >= votacion.FechaFin && votacion.Estado is EstadoActiva)
             {
                 votacion.Detener();
             }
@@ -330,13 +330,13 @@ namespace Votify.Application.Services
 
             foreach (var votacion in votaciones)
             {
-                if (votacion.Estado == EstadoVotacion.Pausada)
+                if (votacion.Estado is EstadoPausada)
                     continue;
 
                 var estadoAnterior = votacion.Estado;
                 ActualizarEstadoAutomatico(votacion);
 
-                if (estadoAnterior != votacion.Estado)
+                if (!ReferenceEquals(votacion.Estado, estadoAnterior))
                 {
                     votacionesActualizadas.Add((votacion, true));
                 }
@@ -346,9 +346,9 @@ namespace Votify.Application.Services
             {
                 await _repo.ActualizarAsync(votacion.Id.ToString(), votacion);
 
-                if (votacion.Estado == EstadoVotacion.Pausada)
+                if (votacion.Estado is EstadoPausada)
                     await _votacionObservable.NotificarVotacionPausadaAsync(votacion);
-                else if (votacion.Estado == EstadoVotacion.Detenida)
+                else if (votacion.Estado is EstadoFinalizada)
                     await _votacionObservable.NotificarVotacionDetenidaAsync(votacion);
             }
         }

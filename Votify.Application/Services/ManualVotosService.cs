@@ -2,6 +2,7 @@ using Votify.Application.DTOs;
 using Votify.Application.Interfaces;
 using Votify.Domain.Entities;
 using Votify.Domain.Interfaces;
+using EstadoFinalizada = Votify.Domain.Estado.EstadoFinalizada;
 
 namespace Votify.Application.Services
 {
@@ -36,7 +37,7 @@ namespace Votify.Application.Services
             if (votacion == null)
                 throw new KeyNotFoundException("Votación no encontrada");
 
-            if (votacion.Estado == EstadoVotacion.Detenida)
+            if (votacion.Estado is EstadoFinalizada)
                 throw new InvalidOperationException("No se pueden asignar votos manuales a votaciones finalizadas");
 
             var existente = await _repo.ObtenerPorVotacionAsync(Guid.Parse(votacionId));

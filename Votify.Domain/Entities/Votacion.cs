@@ -1,5 +1,7 @@
 namespace Votify.Domain.Entities
 {
+    using Votify.Domain.Estado;
+
     public abstract class Votacion
     {
         public Guid Id { get; set; }
@@ -12,18 +14,12 @@ namespace Votify.Domain.Entities
         public string Tipo { get; }
         public bool EsAnonima { get; }
         public Guid EventoId { get; set; }
-        public EstadoVotacion Estado { get; set; }
         public string? ImagenUrl { get; set; }
-        
-        private IEstadoVotacion _estado => Estado switch
-        {
-            EstadoVotacion.Abierta => new EstadoActiva(),
-            EstadoVotacion.Pausada => new EstadoPausada(),
-            EstadoVotacion.Detenida => new EstadoFinalizada(),
-            _ => new EstadoActiva()
-        };
 
-        protected internal Votacion(string nombre, DateTime inicio, DateTime fin, int limite, bool comentarios, bool comentariosObligatorios, string tipo, bool esAnonima, Guid eventoId, string? imagenUrl = null)
+        private IEstadoVotacion _estado;
+        public IEstadoVotacion Estado => _estado;
+
+        protected internal Votacion(string nombre, DateTime inicio, DateTime fin, int limite, bool comentarios, bool comentariosObligatorios, string tipo, bool esAnonima, Guid eventoId, string? imagenUrl = null, IEstadoVotacion? estadoInicial = null)
         {
             Id = Guid.NewGuid();
             Nombre = nombre;
@@ -35,35 +31,24 @@ namespace Votify.Domain.Entities
             Tipo = tipo;
             EsAnonima = esAnonima;
             EventoId = eventoId;
-            Estado = EstadoVotacion.Abierta;
             ImagenUrl = imagenUrl;
+            _estado = estadoInicial ?? new EstadoActiva();
         }
 
-        public void Pausar()
+        public void CambiarEstado(IEstadoVotacion nuevoEstado)
         {
-            _estado.PausarVotacion(this);
+            _estado = nuevoEstado ?? throw new ArgumentNullException(nameof(nuevoEstado));
         }
 
-        public void Detener()
-        {
-            _estado.FinalizarVotacion(this);
-        }
-
-        public void Abrir()
-        {
-            _estado.IniciarVotacion(this);
-        }
-        public void Reanudar()
-        {
-            _estado.ReanudarVotacion(this);
-        }
+        public void Pausar() => _estado.PausarVotacion(this);
+        public void Detener() => _estado.FinalizarVotacion(this);
+        public void Abrir() => _estado.IniciarVotacion(this);
+        public void Reanudar() => _estado.ReanudarVotacion(this);
 
         public void ValidarVoto()
         {
             if (DateTime.UtcNow < FechaInicio || DateTime.UtcNow > FechaFin)
-            {
-                throw new InvalidOperationException("La votación no está dentro del período permitido.");
-            }
+                throw new InvalidOperationException("La votacion no esta dentro del periodo permitido.");
             _estado.ValidarVoto(this);
         }
     }

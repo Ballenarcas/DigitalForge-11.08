@@ -1,11 +1,15 @@
 using Votify.Domain.Entities;
 
-public interface IEstadoVotacion
+namespace Votify.Domain.Estado
 {
-    void IniciarVotacion(Votacion votacion);
-    void FinalizarVotacion(Votacion votacion);
-    void PausarVotacion(Votacion votacion);
-    void ReanudarVotacion(Votacion votacion);
-    void ValidarVoto(Votacion votacion);
-    string ObtenerResultados();
+    public interface IEstadoVotacion
+    {
+        string Nombre { get; }
+        void IniciarVotacion(Votacion votacion);
+        void FinalizarVotacion(Votacion votacion);
+        void PausarVotacion(Votacion votacion);
+        void ReanudarVotacion(Votacion votacion);
+        void ValidarVoto(Votacion votacion);
+        string ObtenerResultados();
+    }
 }

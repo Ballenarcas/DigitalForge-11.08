@@ -1,34 +1,39 @@
 using Votify.Domain.Entities;
-public class EstadoPausada : IEstadoVotacion
+
+namespace Votify.Domain.Estado
 {
-    public void IniciarVotacion(Votacion votacion)
+    public class EstadoPausada : IEstadoVotacion
     {
-        votacion.Estado = EstadoVotacion.Abierta;
-    }
+        public string Nombre => "Pausada";
 
-    public void FinalizarVotacion(Votacion votacion)
-    {
-       votacion.Estado = EstadoVotacion.Detenida;
-    }
+        public void IniciarVotacion(Votacion votacion)
+        {
+            votacion.CambiarEstado(new EstadoActiva());
+        }
 
-    public void PausarVotacion(Votacion votacion)
-    {
-       throw new InvalidOperationException("La votación ya está pausada.");
-    }
+        public void FinalizarVotacion(Votacion votacion)
+        {
+            votacion.CambiarEstado(new EstadoFinalizada());
+        }
 
-    public void ReanudarVotacion(Votacion votacion)
-    {
-       votacion.Estado = EstadoVotacion.Abierta;
-    }
+        public void PausarVotacion(Votacion votacion)
+        {
+            throw new InvalidOperationException("La votacion ya esta pausada.");
+        }
 
-    public void ValidarVoto(Votacion votacion)
-    {
-        throw new InvalidOperationException("No se pueden emitir votos en una votación pausada.");
-    }
+        public void ReanudarVotacion(Votacion votacion)
+        {
+            votacion.CambiarEstado(new EstadoActiva());
+        }
 
-    public string ObtenerResultados()
-    {
-        // Lógica para obtener los resultados
-        return string.Empty;
+        public void ValidarVoto(Votacion votacion)
+        {
+            throw new InvalidOperationException("No se pueden emitir votos en una votacion pausada.");
+        }
+
+        public string ObtenerResultados()
+        {
+            return string.Empty;
+        }
     }
 }
