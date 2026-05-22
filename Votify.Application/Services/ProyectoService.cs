@@ -86,12 +86,6 @@ public class ProyectoService : IProyectoService
         return proyecto.Id;
     }
 
-    private static bool EsOrganizador(string? rol)
-    {
-        return string.Equals(rol?.Trim(), "ORGANIZADOR", StringComparison.OrdinalIgnoreCase)
-            || string.Equals(rol?.Trim(), "Organizador", StringComparison.OrdinalIgnoreCase);
-    }
-
     public async Task<ProyectoDto?> ObtenerProyectoAsync(string id)
     {
         var proyecto = await _proyectoRepository.ObtenerAsync(id);
@@ -152,4 +146,8 @@ public class ProyectoService : IProyectoService
             ImagenUrl = proyecto.ImagenUrl
         };
     }
+
+    private static bool EsOrganizador(string? rol) =>
+        string.Equals(rol?.Trim(), "ORGANIZADOR", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(rol?.Trim(), "Organizador", StringComparison.OrdinalIgnoreCase);
 }

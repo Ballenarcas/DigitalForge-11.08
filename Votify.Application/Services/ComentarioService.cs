@@ -119,10 +119,8 @@ namespace Votify.Application.Services
             return EsOrganizador(rol);
         }
 
-        private static bool EsOrganizador(string? rol)
-        {
-            return string.Equals(rol?.Trim(), "ORGANIZADOR", StringComparison.OrdinalIgnoreCase)
-                || string.Equals(rol?.Trim(), "Organizador", StringComparison.OrdinalIgnoreCase);
-        }
+        private static bool EsOrganizador(string? rol) =>
+            string.Equals(rol?.Trim(), "ORGANIZADOR", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(rol?.Trim(), "Organizador", StringComparison.OrdinalIgnoreCase);
     }
 }

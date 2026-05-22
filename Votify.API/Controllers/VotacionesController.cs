@@ -25,7 +25,7 @@ namespace Votify.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CrearVotacionn([FromBody] CrearVotacionDto dto)
+        public async Task<IActionResult> CrearVotacion([FromBody] CrearVotacionDto dto)
         {
             try
             {

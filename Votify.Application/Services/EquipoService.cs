@@ -78,12 +78,6 @@ namespace Votify.Application.Services
             return solicitante?.EquipoId == equipoId;
         }
 
-        private static bool EsOrganizador(string? rol)
-        {
-            return string.Equals(rol?.Trim(), "ORGANIZADOR", StringComparison.OrdinalIgnoreCase)
-                || string.Equals(rol?.Trim(), "Organizador", StringComparison.OrdinalIgnoreCase);
-        }
-
         public async Task<List<EquipoDto>> ObtenerTodosLosEquiposAsync()
         {
             var equipos = await _equipoRepository.ObtenerTodosAsync();
@@ -98,6 +92,10 @@ namespace Votify.Application.Services
             var equipo = await _equipoRepository.ObtenerPorIdAsync(participante.EquipoId.Value);
             return equipo != null ? MapToDto(equipo) : null;
         }
+
+        private static bool EsOrganizador(string? rol) =>
+            string.Equals(rol?.Trim(), "ORGANIZADOR", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(rol?.Trim(), "Organizador", StringComparison.OrdinalIgnoreCase);
 
         private static EquipoDto MapToDto(Equipo equipo) => new EquipoDto
         {
