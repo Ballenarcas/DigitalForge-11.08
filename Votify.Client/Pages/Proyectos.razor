@@ -101,7 +101,7 @@
         else
         {
             <div class="votaciones-grid">
-                @foreach (ProyectoDto p in listaProyectos)
+                @foreach (ProyectoDto p in listaProyectos.OrderBy(p => p.Nombre))
                 {
                     <div class="votacion-card card-active">
                         <div class="card-cover">

@@ -1,7 +1,6 @@
 using Votify.Application.DTOs;
 using Votify.Application.Interfaces;
 using Votify.Application.Services.Estrategia;
-using Votify.Domain.Builders;
 using Votify.Domain.Entities;
 using Votify.Domain.Factory;
 using Votify.Domain.Interfaces;
@@ -366,17 +365,50 @@ namespace Votify.Application.Services
             }
 
             var tipo = dto.Tipo.ToUpper();
-            var builder = new VotacionBuilder()
-                .ConNombre(dto.Nombre)
-                .ConPeriodo(dto.FechaInicio, dto.FechaFin)
-                .ConLimiteProyectos(dto.LimiteProy)
-                .ConComentarios(dto.Comentarios, dto.ComentariosObligatorios)
-                .EsAnonima(dto.EsAnonima)
-                .DelTipo(tipo)
-                .DelEvento(eventoGuid)
-                .ConImagen(dto.ImagenUrl);
+            Votacion votacion = tipo switch
+            {
+                "ESTANDAR" => new VotacionEstandar(
+                    dto.Nombre,
+                    dto.FechaInicio,
+                    dto.FechaFin,
+                    dto.LimiteProy,
+                    dto.Comentarios,
+                    dto.ComentariosObligatorios,
+                    eventoGuid,
+                    dto.EsAnonima,
+                    dto.ImagenUrl),
 
-            return builder.Build();
+                "MULTICRITERIO" => new VotacionMulticriterio(
+                    dto.Nombre,
+                    dto.FechaInicio,
+                    dto.FechaFin,
+                    dto.LimiteProy,
+                    dto.Comentarios,
+                    dto.ComentariosObligatorios,
+                    eventoGuid,
+                    dto.EsAnonima,
+                    dto.ImagenUrl),
+
+                "MULTICRITERIO_PUBLICO" => new VotacionMulticriterioPublico(
+                    dto.Nombre,
+                    dto.FechaInicio,
+                    dto.FechaFin,
+                    dto.LimiteProy,
+                    dto.Comentarios,
+                    dto.ComentariosObligatorios,
+                    eventoGuid,
+                    dto.EsAnonima,
+                    dto.ImagenUrl),
+
+                _ => throw new ArgumentException($"Tipo de votación no válido: {tipo}. Use 'ESTANDAR', 'MULTICRITERIO' o 'MULTICRITERIO_PUBLICO'.")
+            };
+
+            if (dto.FechaInicio > DateTime.UtcNow)
+            {
+                votacion.Pausar();
+            }
+
+            return votacion;
         }
         private async Task ValidarFechasContraEventoAsync(CrearVotacionDto dto)
         {

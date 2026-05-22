@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Votify.Domain.Builders;
 using Votify.Domain.Entities;
 using Votify.Domain.Interfaces;
 using Votify.Infrastructure.Persistence;
@@ -101,12 +100,12 @@ namespace Votify.Infrastructure.Repositories
         }
 
         private static Evento MapToDomain(EventoEntity entity) =>
-            new EventoBuilder()
-                .ConNombre(entity.Nombre)
-                .ConDescripcion(entity.Descripcion)
-                .ConFechas(entity.FechaInicio, entity.FechaFin)
-                .ConImagen(entity.ImagenUrl)
-                .ConId(entity.Id)
-                .Build();
+            new Evento(
+                entity.Nombre,
+                entity.Descripcion,
+                entity.FechaInicio,
+                entity.FechaFin,
+                entity.ImagenUrl,
+                entity.Id);
     }
 }

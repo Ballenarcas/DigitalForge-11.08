@@ -94,7 +94,7 @@
         else
         {
             <div class="votaciones-grid">
-                @foreach (var v in listaVotaciones)
+                @foreach (var v in listaVotaciones.OrderBy(v => v.Nombre))
                 {
                     var ahora = DateTime.UtcNow;
                     var diasFaltantes = (v.FechaInicio - ahora).TotalDays;

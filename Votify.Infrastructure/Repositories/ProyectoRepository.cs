@@ -1,7 +1,5 @@
 using Votify.Domain.Entities;
 using Votify.Domain.Interfaces;
-using Votify.Domain.Factory;
-using Votify.Domain.Builders;
 using Votify.Infrastructure.Persistence;
 using Votify.Infrastructure.Persistence.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -46,27 +44,25 @@ namespace Votify.Infrastructure.Repositories
             {
                 return null;
             }
-            return new ProyectoBuilder()
-                .ConNombre(entity.Nombre)
-                .ConDescripcion(entity.Descripcion)
-                .DelEquipo(entity.Equipo_Id.ToString())
-                .DeLaVotacion(entity.VotacionId)
-                .ConImagen(entity.ImagenUrl)
-                .ConId(entity.Id.ToString())
-                .Build();
+            return new Proyecto(
+                entity.Nombre,
+                entity.Descripcion,
+                entity.Equipo_Id.ToString(),
+                entity.VotacionId,
+                entity.ImagenUrl,
+                entity.Id.ToString());
         }
 
         public async Task<List<Proyecto>> ObtenerTodasAsync()
         {
             var entities = await _context.Proyectos.ToListAsync();
-            return entities.Select(p => new ProyectoBuilder()
-                .ConNombre(p.Nombre)
-                .ConDescripcion(p.Descripcion)
-                .DelEquipo(p.Equipo_Id.ToString())
-                .DeLaVotacion(p.VotacionId)
-                .ConImagen(p.ImagenUrl)
-                .ConId(p.Id.ToString())
-                .Build()).ToList();
+            return entities.Select(p => new Proyecto(
+                p.Nombre,
+                p.Descripcion,
+                p.Equipo_Id.ToString(),
+                p.VotacionId,
+                p.ImagenUrl,
+                p.Id.ToString())).ToList();
         }
 
         public async Task<List<Proyecto>> ObtenerPorVotacionAsync(string votacionId)
@@ -77,15 +73,14 @@ namespace Votify.Infrastructure.Repositories
             var entities = await _context.Proyectos
                 .Where(p => p.VotacionId == votacionGuid)
                 .ToListAsync();
-            
-            return entities.Select(p => new ProyectoBuilder()
-                .ConNombre(p.Nombre)
-                .ConDescripcion(p.Descripcion)
-                .DelEquipo(p.Equipo_Id.ToString())
-                .DeLaVotacion(p.VotacionId)
-                .ConImagen(p.ImagenUrl)
-                .ConId(p.Id.ToString())
-                .Build()).ToList();
+
+            return entities.Select(p => new Proyecto(
+                p.Nombre,
+                p.Descripcion,
+                p.Equipo_Id.ToString(),
+                p.VotacionId,
+                p.ImagenUrl,
+                p.Id.ToString())).ToList();
         }
     }
 }

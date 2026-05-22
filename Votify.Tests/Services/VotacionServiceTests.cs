@@ -2,7 +2,6 @@ using Moq;
 using Xunit;
 using Votify.Application.DTOs;
 using Votify.Application.Services;
-using Votify.Tests.Builders;
 using Votify.Application.Services.Estrategia;
 using Votify.Domain.Entities;
 using Votify.Application.Interfaces;
@@ -104,7 +103,7 @@ namespace Votify.Tests.Services
                 .ReturnsAsync(evento);
 
             // Act & Assert
-            var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            var exception = await Assert.ThrowsAsync<ArgumentException>(
                 () => _votacionService.CrearVotacionAsync(dto)
             );
             Assert.Contains("Tipo de votación no válido", exception.Message);

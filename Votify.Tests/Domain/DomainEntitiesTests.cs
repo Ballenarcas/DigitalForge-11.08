@@ -1,6 +1,5 @@
 using Xunit;
 using Votify.Domain.Entities;
-using Votify.Tests.Builders;
 using System;
 
 namespace Votify.Tests.Domain
@@ -13,12 +12,14 @@ namespace Votify.Tests.Domain
         public void ValidarVoto_WithinTimeRange_ShouldNotThrow()
         {
             // Arrange
-            var votacion = new VotacionTestBuilder()
-                .ConNombre("Votación Test")
-                .ConFechaInicio(DateTime.UtcNow.AddHours(-1))
-                .ConFechaFin(DateTime.UtcNow.AddHours(1))
-                .ConLimiteProy(3)
-                .Build();
+            var votacion = new VotacionEstandar(
+                "Votación Test",
+                DateTime.UtcNow.AddHours(-1),
+                DateTime.UtcNow.AddHours(1),
+                3,
+                false,
+                false,
+                Guid.NewGuid());
 
             // Act & Assert - Should not throw
             votacion.ValidarVoto();
@@ -28,12 +29,14 @@ namespace Votify.Tests.Domain
         public void ValidarVoto_BeforeStartDate_ShouldThrowException()
         {
             // Arrange
-            var votacion = new VotacionTestBuilder()
-                .ConNombre("Votación Test")
-                .ConFechaInicio(DateTime.UtcNow.AddHours(1))
-                .ConFechaFin(DateTime.UtcNow.AddHours(2))
-                .ConLimiteProy(3)
-                .Build();
+            var votacion = new VotacionEstandar(
+                "Votación Test",
+                DateTime.UtcNow.AddHours(1),
+                DateTime.UtcNow.AddHours(2),
+                3,
+                false,
+                false,
+                Guid.NewGuid());
 
             // Act & Assert
             var exception = Assert.Throws<InvalidOperationException>((Action)(() => votacion.ValidarVoto()));
@@ -44,12 +47,14 @@ namespace Votify.Tests.Domain
         public void ValidarVoto_AfterEndDate_ShouldThrowException()
         {
             // Arrange
-            var votacion = new VotacionTestBuilder()
-                .ConNombre("Votación Test")
-                .ConFechaInicio(DateTime.UtcNow.AddHours(-2))
-                .ConFechaFin(DateTime.UtcNow.AddHours(-1))
-                .ConLimiteProy(3)
-                .Build();
+            var votacion = new VotacionEstandar(
+                "Votación Test",
+                DateTime.UtcNow.AddHours(-2),
+                DateTime.UtcNow.AddHours(-1),
+                3,
+                false,
+                false,
+                Guid.NewGuid());
 
             // Act & Assert
             var exception = Assert.Throws<InvalidOperationException>((Action)(() => votacion.ValidarVoto()));
@@ -74,16 +79,14 @@ namespace Votify.Tests.Domain
             var eventoId = Guid.NewGuid();
 
             // Act
-            var votacion = new VotacionTestBuilder()
-                .ConNombre(nombre)
-                .ConFechaInicio(inicio)
-                .ConFechaFin(fin)
-                .ConLimiteProy(limite)
-                .ConComentarios(comentarios)
-                .ConComentariosObligatorios(comentariosObligatorios)
-                .ConEsAnonima(esAnonima)
-                .ConEventoId(eventoId)
-                .Build();
+            var votacion = new VotacionEstandar(
+                nombre,
+                inicio,
+                fin,
+                limite,
+                comentarios,
+                comentariosObligatorios,
+                eventoId);
 
             // Assert
             Assert.Equal(nombre, votacion.Nombre);
@@ -106,12 +109,14 @@ namespace Votify.Tests.Domain
         public void NewVotacion_ShouldHaveOpenStatus()
         {
             // Arrange & Act
-            var votacion = new VotacionTestBuilder()
-                .ConNombre("Votación Test")
-                .ConFechaInicio(DateTime.UtcNow)
-                .ConFechaFin(DateTime.UtcNow.AddHours(1))
-                .ConLimiteProy(3)
-                .Build();
+            var votacion = new VotacionEstandar(
+                "Votación Test",
+                DateTime.UtcNow,
+                DateTime.UtcNow.AddHours(1),
+                3,
+                false,
+                false,
+                Guid.NewGuid());
 
             // Assert
             Assert.Equal("Activa", votacion.Estado.Nombre);

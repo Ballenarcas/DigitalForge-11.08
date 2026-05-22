@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Moq;
-using Votify.Tests.Builders;
 using Xunit;
 using Votify.Application.DTOs;
 using Votify.Application.Services;

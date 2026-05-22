@@ -41,7 +41,7 @@
         else
         {
             <div class="votaciones-grid">
-                @foreach (var e in listaEventos)
+                @foreach (var e in listaEventos.OrderBy(e => e.Nombre))
                 {
                     var ahora = DateTime.UtcNow;
                     var yaInicio  = ahora >= e.FechaInicio;
