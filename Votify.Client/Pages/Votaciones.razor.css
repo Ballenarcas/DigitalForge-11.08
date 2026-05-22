@@ -251,30 +251,83 @@
     50% { opacity: 0.4; transform: scale(0.8); }
 }
 
-/* ── Enhanced Animations Suite ── */
-@@keyframes buttonPulse {
+/* ── EPIC CARD ANIMATIONS (VOTACIONES - less exaggerated) ── */
+.card-entering {
+    animation: cardVoteEnter 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+
+@keyframes cardVoteEnter {
+    0% {
+        opacity: 0;
+        transform: translateY(25px) scale(0.9);
+        filter: blur(4px);
+    }
+    50% {
+        opacity: 1;
+        filter: blur(0px);
+    }
+    70% {
+        transform: translateY(-4px) scale(1.01);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0px);
+    }
+}
+
+.card-leaving {
+    animation: cardVoteExit 0.45s cubic-bezier(0.7, 0, 0.84, 0) forwards !important;
+    pointer-events: none;
+}
+
+@keyframes cardVoteExit {
+    0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: brightness(1);
+    }
+    30% {
+        transform: translateY(-6px) scale(1.03);
+        filter: brightness(1.2);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.7);
+        filter: brightness(1.5) blur(4px);
+    }
+}
+
+.card-updating {
+    animation: cardVotePulse 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+
+@keyframes cardVotePulse {
+    0%   { transform: scale(1); box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
+    25%  { transform: scale(0.97); box-shadow: 0 0 0 3px rgba(147,51,234,0.25); }
+    50%  { transform: scale(1.015); box-shadow: 0 0 0 6px rgba(147,51,234,0.12); }
+    75%  { transform: scale(0.995); box-shadow: 0 0 0 3px rgba(147,51,234,0.08); }
+    100% { transform: scale(1); box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
+}
+
+/* Delete button pulse animation */
+@keyframes deletePulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.5); }
+    50% { box-shadow: 0 0 0 6px rgba(220, 38, 38, 0); }
+}
+
+.btn-eliminar {
+    animation: deletePulse 1.5s ease-in-out infinite;
+}
+
+.btn-ver {
+    animation: deletePulse 1.5s ease-in-out infinite;
+    animation-name: buttonPulseVotacion;
+}
+
+@keyframes buttonPulseVotacion {
     0%, 100% { box-shadow: 0 0 0 0 rgba(147, 51, 234, 0.4); }
-    50% { box-shadow: 0 0 0 8px rgba(147, 51, 234, 0); }
-}
-
-@@keyframes slideInButton {
-    from { opacity: 0; transform: translateX(-5px); }
-    to { opacity: 1; transform: translateX(0); }
-}
-
-@@keyframes breathe {
-    0%, 100% { opacity: 0.6; transform: scale(1); }
-    50% { opacity: 1; transform: scale(1.05); }
-}
-
-@@keyframes shimmerText {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
-}
-
-@@keyframes cardGlow {
-    0%, 100% { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02); }
-    50% { box-shadow: 0 8px 24px rgba(147, 51, 234, 0.08); }
+    50% { box-shadow: 0 0 0 5px rgba(147, 51, 234, 0); }
 }
 
 .description-container {

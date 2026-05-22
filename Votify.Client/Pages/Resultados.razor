@@ -456,11 +456,33 @@
     {
         if (!string.IsNullOrEmpty(VotacionId))
         {
+            await CargarDatosAsync();
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (!string.IsNullOrEmpty(VotacionId))
+        {
+            await CargarDatosAsync();
+        }
+    }
+
+    private async Task CargarDatosAsync()
+    {
+        try
+        {
             var votacion = await VotacionesService.ObtenerVotacion(VotacionId);
             nombreVotacion = votacion?.Nombre;
             eventoId = votacion?.EventoId;
             EsMulticriterio = votacion?.Tipo?.ToUpper() == "MULTICRITERIO" || votacion?.Tipo?.ToUpper() == "MULTICRITERIO_PUBLICO";
-            await CargarResultados();
+            listaResultados = await VotacionesService.ObtenerResultados(VotacionId!) ?? new List<ResultadoProyectoDto>();
+        }
+        catch (Exception ex)
+        {
+            var errorMsg = ErrorMessageParser.ExtractErrorMessage(ex.Message);
+            Console.WriteLine($"Error cargando resultados: {errorMsg}");
+            listaResultados = new List<ResultadoProyectoDto>();
         }
     }
 

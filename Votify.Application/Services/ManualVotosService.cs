@@ -32,17 +32,47 @@ namespace Votify.Application.Services
             if (dto.PosicionFinal <= 0 || dto.VotosAsignados < 0)
                 throw new ArgumentException("Posición y votos deben ser válidos");
 
-            var asignacion = new ManualVotosAsignacion
-            {
-                VotacionId = Guid.Parse(votacionId),
-                ProyectoId = Guid.Parse(dto.ProyectoId),
-                PosicionFinal = dto.PosicionFinal,
-                VotosAsignados = dto.VotosAsignados,
-                CreadoPor = participanteId,
-                FechaCreacion = DateTime.UtcNow
-            };
+            var votacion = await _votacionRepo.ObtenerAsync(votacionId);
+            if (votacion == null)
+                throw new KeyNotFoundException("Votación no encontrada");
 
-            await _repo.GuardarAsync(asignacion);
+            if (votacion.Estado == EstadoVotacion.Detenida)
+                throw new InvalidOperationException("No se pueden asignar votos manuales a votaciones finalizadas");
+
+            var existente = await _repo.ObtenerPorVotacionAsync(Guid.Parse(votacionId));
+            var asignacionExistente = existente.FirstOrDefault(a => a.ProyectoId == Guid.Parse(dto.ProyectoId));
+
+            if (asignacionExistente != null)
+            {
+                asignacionExistente.PosicionFinal = dto.PosicionFinal;
+                asignacionExistente.VotosAsignados = dto.VotosAsignados;
+                asignacionExistente.FechaCreacion = DateTime.UtcNow;
+                if (!string.IsNullOrEmpty(dto.Justificacion))
+                {
+                    asignacionExistente.TextoJustificacion = dto.Justificacion;
+                    asignacionExistente.UsuarioJustificacion = participanteId;
+                    asignacionExistente.RolUsuarioJustificacion = "ORGANIZADOR";
+                    asignacionExistente.FechaJustificacion = DateTime.UtcNow;
+                }
+                await _repo.GuardarAsync(asignacionExistente);
+            }
+            else
+            {
+                var asignacion = new ManualVotosAsignacion
+                {
+                    VotacionId = Guid.Parse(votacionId),
+                    ProyectoId = Guid.Parse(dto.ProyectoId),
+                    PosicionFinal = dto.PosicionFinal,
+                    VotosAsignados = dto.VotosAsignados,
+                    CreadoPor = participanteId,
+                    FechaCreacion = DateTime.UtcNow,
+                    TextoJustificacion = dto.Justificacion,
+                    UsuarioJustificacion = !string.IsNullOrEmpty(dto.Justificacion) ? participanteId : null,
+                    RolUsuarioJustificacion = !string.IsNullOrEmpty(dto.Justificacion) ? "ORGANIZADOR" : null,
+                    FechaJustificacion = !string.IsNullOrEmpty(dto.Justificacion) ? DateTime.UtcNow : null
+                };
+                await _repo.GuardarAsync(asignacion);
+            }
         }
 
         public async Task<List<ResultadoProyectoDto>> ObtenerAsignacionesManualesAsync(string votacionId)

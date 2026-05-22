@@ -28,46 +28,24 @@ public class AdaptadorClienteIA : IResumidorComentariosIA
         List<ComentarioResumenItem> comentarios,
         string proyectoNombre)
     {
-        if (!_options.Enabled || comentarios.Count == 0)
-        {
-            return CrearResultadoFallback(comentarios, proyectoNombre);
-        }
+        if (!_options.Enabled)
+            throw new InvalidOperationException("Resumidor IA deshabilitado");
 
-        try
-        {
-            var prompt = ConstruirPrompt(comentarios, proyectoNombre);
-            var requestBody = ConstruirCuerpoRequest(prompt);
-            var response = await EnviarRequestAsync(requestBody);
-            var summaryText = ParsearRespuesta(response);
+        if (comentarios.Count == 0)
+            throw new ArgumentException("No hay comentarios para resumir");
 
-            return new ResumenComentario
-            {
-                Resumen = summaryText,
-                TotalComentarios = comentarios.Count,
-                GeneradoPorIA = true,
-                FechaGeneracion = DateTime.UtcNow
-            };
-        }
-        catch (HttpRequestException hex) when (hex.StatusCode == System.Net.HttpStatusCode.NotFound)
+        var prompt = ConstruirPrompt(comentarios, proyectoNombre);
+        var requestBody = ConstruirCuerpoRequest(prompt);
+        var response = await EnviarRequestAsync(requestBody);
+        var summaryText = ParsearRespuesta(response);
+
+        return new ResumenComentario
         {
-            _logger.LogError("Modelo IA no encontrado (404). Modelo='{Model}'. Cambialo a gemini-2.0-flash en .env", _options.Model);
-            return CrearResultadoFallback(comentarios, proyectoNombre);
-        }
-        catch (HttpRequestException hex) when (hex.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
-        {
-            _logger.LogError("Rate limit de Google AI Studio alcanzado (429). Espera 1 minuto o usa otra API key. Limite gratis: 15 req/min, 1000 req/dia.");
-            return CrearResultadoFallback(comentarios, proyectoNombre);
-        }
-        catch (HttpRequestException hex) when (hex.StatusCode == System.Net.HttpStatusCode.Unauthorized || hex.StatusCode == System.Net.HttpStatusCode.Forbidden)
-        {
-            _logger.LogError("API key de IA invalida ({Status}). Revisa AI_SUMMARIZER_API_KEY en .env", (int)hex.StatusCode);
-            return CrearResultadoFallback(comentarios, proyectoNombre);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error generando resumen IA para '{Proyecto}'.", proyectoNombre);
-            return CrearResultadoFallback(comentarios, proyectoNombre);
-        }
+            Resumen = summaryText,
+            TotalComentarios = comentarios.Count,
+            GeneradoPorIA = true,
+            FechaGeneracion = DateTime.UtcNow
+        };
     }
 
     public async Task<bool> EstaDisponibleAsync()

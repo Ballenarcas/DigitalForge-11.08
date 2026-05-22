@@ -10,10 +10,12 @@ namespace Votify.Infrastructure.Repositories
     public class VotacionRepository : IVotacionRepository
     {
         private readonly VotifyDbContext _db;
+        private readonly IStorageService _storageService;
 
-        public VotacionRepository(VotifyDbContext db)
+        public VotacionRepository(VotifyDbContext db, IStorageService storageService)
         {
             _db = db;
+            _storageService = storageService;
         }
 
         public async Task GuardarAsync(Votacion votacion)
@@ -90,21 +92,40 @@ namespace Votify.Infrastructure.Repositories
             var entity = await _db.Votaciones.FindAsync(guid);
             if (entity is null) return false;
 
-            // Eliminar votos asociados a la votación
+            if (!string.IsNullOrEmpty(entity.ImagenUrl))
+            {
+                try { await _storageService.EliminarArchivoAsync("Eventos", entity.ImagenUrl); }
+                catch { }
+            }
+
             var votos = await _db.Votos.Where(v => v.VotacionId == guid).ToListAsync();
             if (votos.Any())
             {
                 _db.Votos.RemoveRange(votos);
             }
 
-            // Eliminar proyectos asociados a la votación
             var proyectos = await _db.Proyectos.Where(p => p.VotacionId == guid).ToListAsync();
+
+            foreach (var proyecto in proyectos)
+            {
+                var comentarios = await _db.Comentarios.Where(c => c.Proyecto_Id == proyecto.Id).ToListAsync();
+                if (comentarios.Any())
+                    _db.Comentarios.RemoveRange(comentarios);
+
+                var asignaciones = await _db.ManualVotosAsignaciones.Where(a => a.ProyectoId == proyecto.Id && a.VotacionId == guid).ToListAsync();
+                if (asignaciones.Any())
+                    _db.ManualVotosAsignaciones.RemoveRange(asignaciones);
+            }
+
             if (proyectos.Any())
             {
                 _db.Proyectos.RemoveRange(proyectos);
             }
 
-            // Finalmente, eliminar la votación
+            var asignacionesSueltas = await _db.ManualVotosAsignaciones.Where(a => a.VotacionId == guid).ToListAsync();
+            if (asignacionesSueltas.Any())
+                _db.ManualVotosAsignaciones.RemoveRange(asignacionesSueltas);
+
             _db.Votaciones.Remove(entity);
             await _db.SaveChangesAsync();
             return true;

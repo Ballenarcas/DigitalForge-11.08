@@ -129,8 +129,19 @@ namespace Votify.Domain.Builders
                     _esAnonima,
                     _imagenUrl),
 
+                "MULTICRITERIO_PUBLICO" => new VotacionMulticriterioPublico(
+                    _nombre,
+                    _inicio,
+                    _fin,
+                    _limiteProy,
+                    _comentarios,
+                    _comentariosObligatorios,
+                    _eventoId,
+                    _esAnonima,
+                    _imagenUrl),
+
                 _ => throw new InvalidOperationException(
-                    $"Tipo de votación no válido: {_tipo}. Use 'ESTANDAR' o 'MULTICRITERIO'.")
+                    $"Tipo de votación no válido: {_tipo}. Use 'ESTANDAR', 'MULTICRITERIO' o 'MULTICRITERIO_PUBLICO'.")
             };
 
             // Auto-pausar si la votación comienza en el futuro

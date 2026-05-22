@@ -5,13 +5,13 @@ namespace Votify.Infrastructure.Adapters;
 
 public class ResumidorComentariosResiliente : IResumidorComentariosIA
 {
-    private readonly AdaptadorClienteIA _primary;
-    private readonly ResumidorComentariosFallback _fallback;
+    private readonly IResumidorComentariosIA _primary;
+    private readonly IResumidorComentariosIA _fallback;
     private readonly ILogger<ResumidorComentariosResiliente> _logger;
 
     public ResumidorComentariosResiliente(
-        AdaptadorClienteIA primary,
-        ResumidorComentariosFallback fallback,
+        IResumidorComentariosIA primary,
+        IResumidorComentariosIA fallback,
         ILogger<ResumidorComentariosResiliente> logger)
     {
         _primary = primary;

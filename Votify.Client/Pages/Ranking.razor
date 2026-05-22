@@ -681,21 +681,34 @@
         selectedProyectoId = resultado.Id;
         selectedProyectoNombre = resultado.Nombre;
         selectedProyectoEquipo = resultado.Equipo;
-        posicionFinal = resultado.Posicion;
-        votosAsignados = resultado.TotalVotos;
         textoJustificacion = null;
         mensajeExito = null;
         mensajeError = null;
         mensajeJustificacion = null;
 
-        // Cargar justificación existente
         try
         {
+            var asignacionesManuales = await VotacionesService.ObtenerAsignacionesManuales(VotacionId);
+            var asignacionExistente = asignacionesManuales?.FirstOrDefault(a => a.Id == resultado.Id);
+
+            if (asignacionExistente != null)
+            {
+                posicionFinal = asignacionExistente.Posicion;
+                votosAsignados = asignacionExistente.TotalVotos;
+            }
+            else
+            {
+                posicionFinal = resultado.Posicion;
+                votosAsignados = resultado.TotalVotos;
+            }
+
             justificacionActual = await VotacionesService.ObtenerJustificacion(VotacionId, resultado.Id);
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error cargando justificación: {ex.Message}");
+            posicionFinal = resultado.Posicion;
+            votosAsignados = resultado.TotalVotos;
+            Console.WriteLine($"Error cargando datos del proyecto: {ex.Message}");
             justificacionActual = null;
         }
     }
@@ -725,7 +738,7 @@
                 ProyectoId = selectedProyectoId,
                 PosicionFinal = posicionFinal,
                 VotosAsignados = votosAsignados,
-                Justificacion = null
+                Justificacion = textoJustificacion?.Trim()
             };
 
             await VotacionesService.GuardarAsignacionManual(VotacionId, dto);

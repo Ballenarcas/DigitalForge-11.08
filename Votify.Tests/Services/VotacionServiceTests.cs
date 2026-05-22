@@ -20,6 +20,7 @@ namespace Votify.Tests.Services
         private readonly Mock<IEquipoRepository> _mockEquipoRepository;
         private readonly Mock<IVotacionStrategy> _mockEstandarStrategy;
         private readonly Mock<IVotacionObservable> _mockVotacionObservable;
+        private readonly Mock<IManualVotosService> _mockManualVotosService;
         private readonly VotacionStrategyResolver _strategyResolver;
         private readonly VotacionService _votacionService;
 
@@ -33,6 +34,9 @@ namespace Votify.Tests.Services
             _mockEstandarStrategy = new Mock<IVotacionStrategy>();
             _mockEstandarStrategy.Setup(s => s.Tipo).Returns("ESTANDAR");
             _mockVotacionObservable = new Mock<IVotacionObservable>();
+            _mockManualVotosService = new Mock<IManualVotosService>();
+            _mockManualVotosService.Setup(s => s.ObtenerAsignacionesManualesAsync(It.IsAny<string>()))
+                .ReturnsAsync(new List<ResultadoProyectoDto>());
 
             _strategyResolver = new VotacionStrategyResolver(new[] { _mockEstandarStrategy.Object });
 
@@ -43,7 +47,8 @@ namespace Votify.Tests.Services
                 _mockEventoRepository.Object,
                 _mockEquipoRepository.Object,
                 _strategyResolver,
-                _mockVotacionObservable.Object
+                _mockVotacionObservable.Object,
+                _mockManualVotosService.Object
             );
         }
 

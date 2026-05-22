@@ -110,7 +110,7 @@
                     var cardClass = noIniciada ? "card-pending" : estaActiva ? "card-active" : estaPausada ? "card-paused" : "card-ended";
                     var pillClass = noIniciada ? "pill-pending" : estaActiva ? "pill-active" : estaPausada ? "pill-paused" : "pill-ended";
 
-                    <div class="votacion-card @cardClass">
+                    <div class="votacion-card @cardClass @(enteringIds.Contains(v.Id!) ? "card-entering" : "") @(leavingIds.Contains(v.Id!) ? "card-leaving" : "") @(updatingIds.Contains(v.Id!) ? "card-updating" : "")">
                         <div class="card-cover">
                             <img src="@(string.IsNullOrEmpty(v.ImagenUrl) ? "images/Votación-default.jpg" : v.ImagenUrl)" alt="@v.Nombre" onerror="this.src='images/Votación-default.jpg'" />
                         </div>
@@ -216,6 +216,9 @@
     private string? Rol = null;
     private Dictionary<string, bool> operacionesEnProgreso = new();
     private Dictionary<string, string?> mensajesErrores = new();
+    private HashSet<string> enteringIds = new();
+    private HashSet<string> leavingIds = new();
+    private HashSet<string> updatingIds = new();
 
 
     protected override async Task OnInitializedAsync()
@@ -325,15 +328,31 @@
     {
         if (votacionAEliminar?.Id == null) return;
 
+        var id = votacionAEliminar.Id;
+        await ConfirmarEliminarPorId(id);
+    }
+
+    private async Task ConfirmarEliminarPorId(string id)
+    {
         eliminando = true;
+        leavingIds.Add(id);
+        StateHasChanged();
+
         try
         {
-            await VotacionesService.EliminarVotacion(votacionAEliminar.Id);
+            await Task.Delay(450);
+            await VotacionesService.EliminarVotacion(id);
+            leavingIds.Remove(id);
             await CargarVotaciones();
+            enteringIds.Add(id);
+            StateHasChanged();
+            await Task.Delay(500);
+            enteringIds.Remove(id);
             CerrarModal();
         }
         catch (Exception ex)
         {
+            leavingIds.Remove(id);
             var errorMsg = ErrorMessageParser.ExtractErrorMessage(ex.Message);
             Console.WriteLine($"Error eliminando votación: {errorMsg}");
         }

@@ -53,5 +53,24 @@ namespace Votify.Infrastructure.Storage
 
             return $"{_supabaseUrl}/storage/v1/object/public/{bucket}/{nombreArchivo}";
         }
+
+        public async Task EliminarArchivoAsync(string bucket, string rutaArchivo)
+        {
+            var nombreArchivo = Path.GetFileName(new Uri(rutaArchivo).LocalPath);
+
+            var url = $"{_supabaseUrl}/storage/v1/object/{bucket}/{nombreArchivo}";
+
+            using var request = new HttpRequestMessage(HttpMethod.Delete, url);
+            request.Headers.Add("apikey", _supabaseKey);
+            request.Headers.Add("Authorization", $"Bearer {_supabaseKey}");
+
+            var response = await _httpClient.SendAsync(request);
+
+            if (!response.IsSuccessStatusCode && response.StatusCode != System.Net.HttpStatusCode.NotFound)
+            {
+                var errorBody = await response.Content.ReadAsStringAsync();
+                _logger.LogError("Error eliminando archivo de Supabase Storage. Status={Status}, Body={Body}", (int)response.StatusCode, errorBody);
+            }
+        }
     }
 }

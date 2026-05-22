@@ -19,6 +19,7 @@ namespace Votify.Application.Services
         private readonly IEquipoRepository _equipoRepo;
         private readonly VotacionStrategyResolver _strategyResolver;
         private readonly IVotacionObservable _votacionObservable;
+        private readonly IManualVotosService _manualVotosService;
 
         public VotacionService(
             IVotacionRepository repo,
@@ -28,6 +29,7 @@ namespace Votify.Application.Services
             IEquipoRepository equipoRepo,
             VotacionStrategyResolver strategyResolver,
             IVotacionObservable votacionObservable,
+            IManualVotosService manualVotosService,
             ICriterioRepository? criterioRepo = null,
             IValoracionCriterioRepository? valoracionCriterioRepo = null)
         {
@@ -38,6 +40,7 @@ namespace Votify.Application.Services
             _equipoRepo = equipoRepo;
             _strategyResolver = strategyResolver;
             _votacionObservable = votacionObservable;
+            _manualVotosService = manualVotosService;
             _criterioRepo = criterioRepo;
             _valoracionCriterioRepo = valoracionCriterioRepo;
         }
@@ -107,10 +110,21 @@ namespace Votify.Application.Services
             var votacion = CreateEntityFromDto(dto);
             votacion.Id = Guid.Parse(id);
 
-            // Actualizar Estado si se proporciona
             if (dto.Estado.HasValue)
             {
-                votacion.Estado = (EstadoVotacion)dto.Estado.Value;
+                var targetState = (EstadoVotacion)dto.Estado.Value;
+                switch (targetState)
+                {
+                    case EstadoVotacion.Abierta:
+                        votacion.Abrir();
+                        break;
+                    case EstadoVotacion.Pausada:
+                        votacion.Pausar();
+                        break;
+                    case EstadoVotacion.Detenida:
+                        votacion.Detener();
+                        break;
+                }
             }
 
             var actualizado = await _repo.ActualizarAsync(id, votacion);
@@ -156,7 +170,40 @@ namespace Votify.Application.Services
                 return new List<ResultadoProyectoDto>();
 
             var strategy = _strategyResolver.Resolver(votacion.Tipo);
-            return await strategy.CalcularResultadosAsync(votacionId);
+            var resultados = await strategy.CalcularResultadosAsync(votacionId);
+
+            var asignacionesManuales = await _manualVotosService.ObtenerAsignacionesManualesAsync(votacionId);
+            var manualDict = asignacionesManuales.ToDictionary(m => m.Id, m => m);
+
+            var fusionados = new List<ResultadoProyectoDto>();
+
+            foreach (var resultado in resultados)
+            {
+                if (manualDict.TryGetValue(resultado.Id, out var manual))
+                {
+                    fusionados.Add(new ResultadoProyectoDto
+                    {
+                        Id = resultado.Id,
+                        Nombre = resultado.Nombre,
+                        Equipo = resultado.Equipo,
+                        TotalVotos = manual.TotalVotos,
+                        Posicion = manual.Posicion,
+                        IsManual = true,
+                        Justificacion = manual.Justificacion
+                    });
+                }
+                else
+                {
+                    fusionados.Add(resultado);
+                }
+            }
+
+            foreach (var manual in asignacionesManuales.Where(m => !fusionados.Any(f => f.Id == m.Id)))
+            {
+                fusionados.Add(manual);
+            }
+
+            return fusionados.OrderBy(r => r.Posicion).ToList();
         }
 
         public async Task<List<ResultadoMulticriterioDto>> ObtenerResultadosMulticriterioAsync(string votacionId)
@@ -280,26 +327,29 @@ namespace Votify.Application.Services
         private async Task ActualizarEstadosAutomaticosAsync(List<Votacion> votaciones)
         {
             var votacionesActualizadas = new List<(Votacion votacion, bool cambio)>();
-            
+
             foreach (var votacion in votaciones)
             {
-                // Respetar las pausas manuales - no auto-actualizar votaciones pausadas
                 if (votacion.Estado == EstadoVotacion.Pausada)
                     continue;
-                    
+
                 var estadoAnterior = votacion.Estado;
                 ActualizarEstadoAutomatico(votacion);
-                
+
                 if (estadoAnterior != votacion.Estado)
                 {
                     votacionesActualizadas.Add((votacion, true));
                 }
             }
-            
-            // Guardar los cambios en la base de datos
-            foreach (var (votacion, cambio) in votacionesActualizadas.Where(x => x.cambio))
+
+            foreach (var (votacion, _) in votacionesActualizadas)
             {
                 await _repo.ActualizarAsync(votacion.Id.ToString(), votacion);
+
+                if (votacion.Estado == EstadoVotacion.Pausada)
+                    await _votacionObservable.NotificarVotacionPausadaAsync(votacion);
+                else if (votacion.Estado == EstadoVotacion.Detenida)
+                    await _votacionObservable.NotificarVotacionDetenidaAsync(votacion);
             }
         }
 
