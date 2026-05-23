@@ -35,7 +35,7 @@
             <div class="form-group">
                 <label>Tipo de votación <span class="required-asterisk">*</span></label>
                 <div class="select-wrapper">
-                    <select class="form-control select-custom" @bind="Tipo">
+                    <select class="form-control select-custom" value="@Tipo" @onchange="OnTipoChanged">
                         <option value="ESTANDAR">Estándar</option>
                         <option value="MULTICRITERIO">Multicriterio (Jurado)</option>
                         <option value="MULTICRITERIO_PUBLICO">Multicriterio (Público)</option>
@@ -45,6 +45,47 @@
 
             @if (EsMulticriterio)
             {
+                <!-- Toggle modo plantilla / manual -->
+                <div class="criteria-mode-toggle">
+                    <button type="button"
+                            class="@(ModoCriterios == "plantilla" ? "mode-btn mode-btn-active" : "mode-btn")"
+                            @onclick='() => ModoCriterios = "plantilla"'>
+                        📋 Usar plantilla
+                    </button>
+                    <button type="button"
+                            class="@(ModoCriterios == "manual" ? "mode-btn mode-btn-active" : "mode-btn")"
+                            @onclick='() => { ModoCriterios = "manual"; PlantillaSeleccionada = null; }'>
+                        ✏️ Asignar manualmente
+                    </button>
+                </div>
+
+                <!-- Cards de plantillas (solo si modo = plantilla) -->
+                @if (ModoCriterios == "plantilla")
+                {
+                    <div class="plantillas-grid">
+                        @foreach (var plantilla in Plantillas)
+                        {
+                            <div class="@(PlantillaSeleccionada == plantilla.Id ? "plantilla-card plantilla-card-selected" : "plantilla-card")"
+                                 @onclick="() => AplicarPlantilla(plantilla)">
+                                <div class="plantilla-card-header">
+                                    <span class="plantilla-nombre">@plantilla.Nombre</span>
+                                    @if (PlantillaSeleccionada == plantilla.Id)
+                                    {
+                                        <span class="plantilla-check">✓</span>
+                                    }
+                                </div>
+                                <p class="plantilla-desc">@plantilla.Descripcion</p>
+                                <ul class="plantilla-criterios-preview">
+                                    @foreach (var c in plantilla.Criterios)
+                                    {
+                                        <li><span>@c.Nombre</span><span class="plantilla-peso">@c.Peso%</span></li>
+                                    }
+                                </ul>
+                            </div>
+                        }
+                    </div>
+                }
+
                 <div class="criteria-panel">
                     <div class="criteria-header">
                         <div>
@@ -752,6 +793,122 @@ input:checked + .slider:before {
     font-weight: 800;
     font-size: 0.85rem;
 }
+
+/* Estilos para modo de criterios */
+.criteria-mode-toggle {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.mode-btn {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: 2px solid #e9d5ff;
+    border-radius: 14px;
+    background: white;
+    color: #7c3aed;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.mode-btn:hover {
+    border-color: #a855f7;
+    background: #faf5ff;
+}
+
+.mode-btn-active {
+    background: #7c3aed;
+    color: white;
+    border-color: #7c3aed;
+}
+
+/* Grid de plantillas */
+.plantillas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.plantilla-card {
+    background: white;
+    border: 2px solid #e9d5ff;
+    border-radius: 16px;
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.plantilla-card:hover {
+    border-color: #a855f7;
+    box-shadow: 0 4px 12px rgba(168, 85, 247, 0.15);
+    transform: translateY(-2px);
+}
+
+.plantilla-card-selected {
+    border-color: #7c3aed;
+    background: #faf5ff;
+    box-shadow: 0 4px 16px rgba(124, 58, 237, 0.2);
+}
+
+.plantilla-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.4rem;
+}
+
+.plantilla-nombre {
+    font-weight: 800;
+    color: #4c1d95;
+    font-size: 0.95rem;
+}
+
+.plantilla-check {
+    background: #7c3aed;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 800;
+}
+
+.plantilla-desc {
+    font-size: 0.8rem;
+    color: #64748b;
+    margin: 0 0 0.75rem 0;
+}
+
+.plantilla-criterios-preview {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.plantilla-criterios-preview li {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.82rem;
+    color: #334155;
+    padding: 0.25rem 0.5rem;
+    background: #f5f3ff;
+    border-radius: 6px;
+}
+
+.plantilla-peso {
+    font-weight: 700;
+    color: #7c3aed;
+}
 </style>
 
 @code {
@@ -775,6 +932,49 @@ input:checked + .slider:before {
     {
         new CriterioDto { Nombre = "Innovación", Peso = 40 },
         new CriterioDto { Nombre = "Diseño", Peso = 60 }
+    };
+
+    // Plantillas de criterios
+    string ModoCriterios = "manual";
+    string? PlantillaSeleccionada = null;
+
+    record PlantillaCriterios(string Id, string Nombre, string Descripcion, List<CriterioDto> Criterios);
+
+    List<PlantillaCriterios> Plantillas = new()
+    {
+        new PlantillaCriterios(
+            "hackathon",
+            "Hackathon Estándar",
+            "Ideal para concursos de desarrollo rápido",
+            new List<CriterioDto>
+            {
+                new CriterioDto { Nombre = "Innovación", Peso = 40 },
+                new CriterioDto { Nombre = "Viabilidad", Peso = 30 },
+                new CriterioDto { Nombre = "Presentación", Peso = 30 }
+            }
+        ),
+        new PlantillaCriterios(
+            "inversores",
+            "Ronda de Inversores",
+            "Enfoque en impacto y sostenibilidad",
+            new List<CriterioDto>
+            {
+                new CriterioDto { Nombre = "Impacto Social", Peso = 50 },
+                new CriterioDto { Nombre = "Sostenibilidad", Peso = 25 },
+                new CriterioDto { Nombre = "Creatividad", Peso = 25 }
+            }
+        ),
+        new PlantillaCriterios(
+            "academico",
+            "Proyecto Académico",
+            "Evaluación técnica y metodológica",
+            new List<CriterioDto>
+            {
+                new CriterioDto { Nombre = "Rigor Metodológico", Peso = 40 },
+                new CriterioDto { Nombre = "Desarrollo / Implementación Técnica", Peso = 40 },
+                new CriterioDto { Nombre = "Documentación y Memoria", Peso = 20 }
+            }
+        )
     };
 
     bool EsMulticriterio => Tipo == "MULTICRITERIO" || Tipo == "MULTICRITERIO_PUBLICO";
@@ -804,6 +1004,25 @@ input:checked + .slider:before {
 
         FechaInicio = inicio;
         FechaFin    = fin;
+    }
+
+    void OnTipoChanged(ChangeEventArgs e)
+    {
+        Tipo = e.Value?.ToString() ?? "ESTANDAR";
+        if (!EsMulticriterio)
+        {
+            ModoCriterios = "manual";
+            PlantillaSeleccionada = null;
+        }
+    }
+
+    void AplicarPlantilla(PlantillaCriterios plantilla)
+    {
+        PlantillaSeleccionada = plantilla.Id;
+        // Deep copy de los criterios de la plantilla
+        Criterios = plantilla.Criterios
+            .Select(c => new CriterioDto { Nombre = c.Nombre, Peso = c.Peso })
+            .ToList();
     }
 
     async Task HandleCrearVotacion()
