@@ -40,12 +40,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("GitHubPagesPolicy", policy =>
-    {
-        policy.WithOrigins("https://Ballenarcas.io") 
-              .AllowAnyMethod()
-              .AllowAnyHeader();
-    });
+    options.AddPolicy("AllowBlazor",
+        policy =>
+        {
+            policy.AllowAnyOrigin()
+                  .AllowAnyMethod()
+                  .AllowAnyHeader();
+        });
 });
 
 var host = Environment.GetEnvironmentVariable("DB_HOST");
@@ -222,8 +223,6 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
-app.UseCors("GitHubPagesPolicy");
-
 app.UseCors("AllowBlazor");
 app.UseDefaultFiles();
 app.UseStaticFiles();

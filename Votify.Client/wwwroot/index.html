@@ -5,7 +5,18 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Votify</title>
-<base href="/DigitalForge-11.08/" />
+    <script>
+        (function() {
+            var pathSegments = window.location.pathname.split('/').filter(Boolean);
+            var baseHref = '/';
+            if (pathSegments.length > 0) {
+                baseHref = '/' + pathSegments[0] + '/';
+            }
+            var base = document.createElement('base');
+            base.href = baseHref;
+            document.head.appendChild(base);
+        })();
+    </script>
     <link rel="stylesheet" href="css/app.css" />
     <link rel="stylesheet" href="css/ripple.css" />
     <link rel="stylesheet" href="css/vote-celebration.css" />

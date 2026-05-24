@@ -23,8 +23,8 @@ builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>
 builder.Services.AddScoped<IAuthService, AuthService>();
 
 var apiUrl = builder.HostEnvironment.IsDevelopment()
-    ? "https://localhost:5154" // <-- Pon aquí el puerto local que usa tu API
-    : "https://votify.azurewebsites.net/"; // <-- Pon aquí la URL que te dio Azure
+    ? "http://localhost:5154"
+    : "https://votify.azurewebsites.net/";
 
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(apiUrl) });
 
