@@ -39,6 +39,30 @@
             </div>
 
             <div class="form-group">
+                <label>Categorías del evento</label>
+                <div class="category-input-row">
+                    <input type="text" class="form-control" @bind="NuevaCategoria" placeholder="Ej: Innovación, Sostenibilidad, UX" @onkeydown="HandleCategoriaKeyDown" />
+                    <button type="button" class="btn-add-category" @onclick="AgregarCategoria">Agregar</button>
+                </div>
+                @if (!string.IsNullOrEmpty(CategoriaMensaje))
+                {
+                    <p class="helper-text">@CategoriaMensaje</p>
+                }
+                @if (Categorias.Any())
+                {
+                    <div class="category-tags">
+                        @foreach (var categoria in Categorias)
+                        {
+                            <span class="category-chip">
+                                @categoria
+                                <button type="button" class="btn-remove-chip" @onclick="() => EliminarCategoria(categoria)">✕</button>
+                            </span>
+                        }
+                    </div>
+                }
+            </div>
+
+            <div class="form-group">
                 <label>Imagen de portada</label>
                 <div class="upload-container">
                     @if (!string.IsNullOrEmpty(ImagenUrl))
@@ -225,6 +249,61 @@
 .textarea-custom { resize: none; font-family: inherit; }
 
 .grid-dates { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+
+.category-input-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.btn-add-category {
+    background: #8b5cf6;
+    border: none;
+    color: white;
+    padding: 0.9rem 1.25rem;
+    border-radius: 14px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: background 0.2s;
+}
+
+.btn-add-category:hover {
+    background: #7c3aed;
+}
+
+.category-tags {
+    margin-top: 0.85rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+}
+
+.category-chip {
+    background: #eef2ff;
+    border: 1px solid #c7d2fe;
+    border-radius: 999px;
+    padding: 0.45rem 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-size: 0.95rem;
+    color: #3730a3;
+}
+
+.btn-remove-chip {
+    background: transparent;
+    border: none;
+    color: #4f46e5;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.helper-text {
+    color: #64748b;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
 
 input[type="datetime-local"].form-control {
     box-sizing: border-box;
@@ -422,6 +501,9 @@ input[type="datetime-local"].form-control::-webkit-datetime-edit {
 @code {
     string Nombre = "";
     string Descripcion = "";
+    string NuevaCategoria = "";
+    List<string> Categorias = new();
+    string? CategoriaMensaje;
     string? ImagenUrl;
     DateTime FechaInicio = DateTime.Now;
     DateTime FechaFin = DateTime.Now.AddDays(7);
@@ -484,7 +566,8 @@ input[type="datetime-local"].form-control::-webkit-datetime-edit {
                 Descripcion = Descripcion,
                 ImagenUrl = ImagenUrl,
                 FechaInicio = FechaInicio.ToUniversalTime(),
-                FechaFin = FechaFin.ToUniversalTime()
+                FechaFin = FechaFin.ToUniversalTime(),
+                Categorias = new List<string>(Categorias)
             };
 
             await EventosService.CrearEvento(dto);
@@ -503,6 +586,40 @@ input[type="datetime-local"].form-control::-webkit-datetime-edit {
         {
             creando = false;
             StateHasChanged();
+        }
+    }
+
+    private void AgregarCategoria()
+    {
+        CategoriaMensaje = null;
+        var nueva = (NuevaCategoria ?? string.Empty).Trim();
+        if (string.IsNullOrWhiteSpace(nueva))
+        {
+            CategoriaMensaje = "Ingresa el nombre de una categoría.";
+            return;
+        }
+
+        if (Categorias.Contains(nueva, StringComparer.OrdinalIgnoreCase))
+        {
+            CategoriaMensaje = "Esta categoría ya está agregada.";
+            NuevaCategoria = string.Empty;
+            return;
+        }
+
+        Categorias.Add(nueva);
+        NuevaCategoria = string.Empty;
+    }
+
+    private void EliminarCategoria(string categoria)
+    {
+        Categorias.RemoveAll(c => string.Equals(c, categoria, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private void HandleCategoriaKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            AgregarCategoria();
         }
     }
 

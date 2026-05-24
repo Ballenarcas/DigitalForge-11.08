@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Votify.Client.DTOs
 {
     public class EventoDto
@@ -8,5 +10,6 @@ namespace Votify.Client.DTOs
         public DateTime FechaInicio { get; set; }
         public DateTime FechaFin { get; set; }
         public string? ImagenUrl { get; set; }
+        public List<string> Categorias { get; set; } = new();
     }
 }
