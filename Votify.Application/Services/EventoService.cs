@@ -13,11 +13,13 @@ namespace Votify.Application.Services
     {
         private readonly IEventoRepository _repo;
         private readonly IParticipanteEventoRepository _participanteEventoRepo;
+        private readonly IVotacionService _votacionService;
 
-        public EventoService(IEventoRepository repo, IParticipanteEventoRepository participanteEventoRepo)
+        public EventoService(IEventoRepository repo, IParticipanteEventoRepository participanteEventoRepo, IVotacionService votacionService)
         {
             _repo = repo;
             _participanteEventoRepo = participanteEventoRepo;
+            _votacionService = votacionService;
         }
 
         public async Task<List<EventoDto>> ObtenerTodosAsync()
@@ -62,6 +64,34 @@ namespace Votify.Application.Services
             {
                 var pe = new ParticipanteEvento(participanteId, e.Id, "ORGANIZADOR");
                 await _participanteEventoRepo.GuardarAsync(pe);
+            }
+
+            if (dto.Categorias?.Any() == true)
+            {
+                var categoriasUnicas = dto.Categorias
+                    .Where(c => !string.IsNullOrWhiteSpace(c))
+                    .Select(c => c.Trim())
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
+                foreach (var categoria in categoriasUnicas)
+                {
+                    var votacionDto = new CrearVotacionDto
+                    {
+                        Nombre = categoria,
+                        Tipo = "ESTANDAR",
+                        FechaInicio = dto.FechaInicio,
+                        FechaFin = dto.FechaFin,
+                        LimiteProy = 1,
+                        Comentarios = false,
+                        ComentariosObligatorios = false,
+                        EsAnonima = false,
+                        EventoId = e.Id.ToString(),
+                        ImagenUrl = dto.ImagenUrl
+                    };
+
+                    await _votacionService.CrearVotacionAsync(votacionDto);
+                }
             }
 
             dto.Id = e.Id.ToString();
