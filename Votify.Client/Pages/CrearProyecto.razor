@@ -641,7 +641,7 @@
 
             StateHasChanged();
             await Task.Delay(1000);
-            Nav.NavigateTo($"/{VotacionId}/proyectos/");
+            Nav.NavigateTo($"{VotacionId}/proyectos/");
         }
          catch (Exception ex)
          {
@@ -654,5 +654,5 @@
         }
     }
 
-    private void HandleVolver() => Nav.NavigateTo($"/{VotacionId}/proyectos/");
+    private void HandleVolver() => Nav.NavigateTo($"{VotacionId}/proyectos/");
 }

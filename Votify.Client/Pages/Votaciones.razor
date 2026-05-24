@@ -40,7 +40,7 @@
         </div>
     }
     <div class="header-principal">
-        <button class="btn-volver" @onclick='() => Nav.NavigateTo("/")'>
+        <button class="btn-volver" @onclick='() => Nav.NavigateTo("votaciones")'>
             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="16" height="16">
                 <path d="M15 19L8 12L15 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
@@ -285,11 +285,11 @@
         }
     }
 
-    private void IrACrearVotacion() => Nav.NavigateTo($"/nueva-votacion?eventoId={AppState.EventoId}");
-    private void IrACrearEquipo() => Nav.NavigateTo($"/nuevo-equipo?eventoId={AppState.EventoId}");
-    private void IrAGestionRoles() => Nav.NavigateTo($"/evento/{AppState.EventoId}/roles");
-    private void Gestionar(string id) => Nav.NavigateTo($"/votacion/{id}");
-    private void IrAEditarVotos(string id) => Nav.NavigateTo($"/votacion/{id}/editar-votos");
+    private void IrACrearVotacion() => Nav.NavigateTo($"nueva-votacion?eventoId={AppState.EventoId}");
+    private void IrACrearEquipo() => Nav.NavigateTo($"nuevo-equipo?eventoId={AppState.EventoId}");
+    private void IrAGestionRoles() => Nav.NavigateTo($"evento/{AppState.EventoId}/roles");
+    private void Gestionar(string id) => Nav.NavigateTo($"votacion/{id}");
+    private void IrAEditarVotos(string id) => Nav.NavigateTo($"votacion/{id}/editar-votos");
     private void VerResultados(string id)
     {
         var votacion = listaVotaciones?.FirstOrDefault(v => v.Id == id);
@@ -298,15 +298,15 @@
             var tipo = votacion.Tipo?.ToUpper() ?? "";
             if (tipo == "MULTICRITERIO" || tipo == "MULTICRITERIO_PUBLICO")
             {
-                Nav.NavigateTo($"/{id}/resultados-multicriterio/");
+                Nav.NavigateTo($"{id}/resultados-multicriterio/");
             }
             else
             {
-                Nav.NavigateTo($"/{id}/resultados/");
+                Nav.NavigateTo($"{id}/resultados/");
             }
         }
     }
-    private void Votar(string id) => Nav.NavigateTo($"/{id}/proyectos/");
+    private void Votar(string id) => Nav.NavigateTo($"{id}/proyectos/");
 
     private void EliminarVotacion(string id)
     {

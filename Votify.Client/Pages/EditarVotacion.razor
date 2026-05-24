@@ -1585,7 +1585,7 @@ input:checked + .slider:before {
             Mensaje = "Votación actualizada correctamente.";
             StateHasChanged();
             await Task.Delay(800);
-            Nav.NavigateTo($"/votaciones?eventoId={EventoId}");
+            Nav.NavigateTo($"votaciones?eventoId={EventoId}");
         }
          catch (Exception ex)
          {
@@ -1613,7 +1613,7 @@ input:checked + .slider:before {
             Mensaje = "Votación eliminada correctamente.";
             StateHasChanged();
             await Task.Delay(800);
-            Nav.NavigateTo($"/votaciones?eventoId={EventoId}");
+            Nav.NavigateTo($"votaciones?eventoId={EventoId}");
         }
          catch (Exception ex)
          {
@@ -1724,7 +1724,7 @@ input:checked + .slider:before {
         }
     }
 
-    void HandleVolver() => Nav.NavigateTo($"/votaciones?eventoId={EventoId}");
+    void HandleVolver() => Nav.NavigateTo($"votaciones?eventoId={EventoId}");
 
     private async Task HandleFileSelected(InputFileChangeEventArgs e)
     {

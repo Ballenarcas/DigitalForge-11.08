@@ -577,7 +577,7 @@
             var loginDto = new Votify.Application.DTOs.LoginRequestDto { Email = dto.Email, Password = dto.Password };
             await AuthService.LoginAsync(loginDto);
             await Task.Delay(1800);
-            NavigationManager.NavigateTo("/");
+            NavigationManager.NavigateTo("");
         }
         else
         {

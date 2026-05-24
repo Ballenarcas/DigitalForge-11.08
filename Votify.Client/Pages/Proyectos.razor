@@ -562,13 +562,13 @@
         }
     }
 
-    private void Volver() => Nav.NavigateTo($"/votaciones?eventoId={votacion?.EventoId}");
+    private void Volver() => Nav.NavigateTo($"votaciones?eventoId={votacion?.EventoId}");
     
-    private void IrACrearProyecto() => Nav.NavigateTo($"/{VotacionId}/nuevo-proyecto");
+    private void IrACrearProyecto() => Nav.NavigateTo($"{VotacionId}/nuevo-proyecto");
     
     private void VerDetalles(string proyectoId)
     {
-        Nav.NavigateTo($"/{VotacionId}/proyectos/{proyectoId}");
+        Nav.NavigateTo($"{VotacionId}/proyectos/{proyectoId}");
     }
 
     private string GetRandomColor(string id)

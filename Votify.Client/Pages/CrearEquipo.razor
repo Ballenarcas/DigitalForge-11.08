@@ -685,9 +685,9 @@ em span {
     private void HandleVolver()
     {
         if (!string.IsNullOrEmpty(EventoId))
-            Nav.NavigateTo($"/votaciones?eventoId={EventoId}");
+            Nav.NavigateTo($"votaciones?eventoId={EventoId}");
         else
-            Nav.NavigateTo("/");
+            Nav.NavigateTo("");
     }
 
     // --- Crear equipo ---

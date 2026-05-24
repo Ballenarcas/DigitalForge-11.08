@@ -17,7 +17,7 @@
             <span class="brand-name">Eventos</span>
         </div>
         <div class="header-actions">
-            <button class="btn-crear" @onclick='() => Nav.NavigateTo("/nuevo-evento")'>
+            <button class="btn-crear" @onclick='() => Nav.NavigateTo("nuevo-evento")'>
                 <span>+</span> Nuevo Evento
             </button>
         </div>
@@ -167,8 +167,8 @@
             <p style="color: #64748b; margin-bottom: 2rem;">Para ver la lista de eventos y participar en ellos, necesitas iniciar sesión o crear una cuenta nueva.</p>
             
             <div style="display: flex; gap: 1rem; justify-content: center;">
-                <button class="btn-login-modal" @onclick='() => Nav.NavigateTo("/login")'>Iniciar Sesión</button>
-                <button class="btn-crear" @onclick='() => Nav.NavigateTo("/registro")'>Crear cuenta</button>
+                <button class="btn-login-modal" @onclick='() => Nav.NavigateTo("login")'>Iniciar Sesión</button>
+                <button class="btn-crear" @onclick='() => Nav.NavigateTo("registro")'>Crear cuenta</button>
             </div>
         </div>
     </div>
@@ -436,7 +436,7 @@
 
     private void IrADetalles(string id)
     {
-        Nav.NavigateTo($"/detalles-evento/{id}");
+        Nav.NavigateTo($"detalles-evento/{id}");
     }
 
     private bool EsOrganizador(string eventoId)
@@ -450,7 +450,7 @@
         if (AppState == null || evento == null || evento.Id == null) return;
         AppState.EventoNombre = evento.Nombre;
         AppState.EventoId = evento.Id;
-        Nav.NavigateTo($"/votaciones?eventoId={evento.Id}&eventoNombre={Uri.EscapeDataString(evento.Nombre)}");
+        Nav.NavigateTo($"votaciones?eventoId={evento.Id}&eventoNombre={Uri.EscapeDataString(evento.Nombre)}");
     }
 
     private void AbrirEditor(EventoDto evento)

@@ -263,7 +263,7 @@
         }
     }
 
-    private void Volver() => Nav.NavigateTo("/");
+    private void Volver() => Nav.NavigateTo("");
 
     private async Task Participar()
     {
@@ -293,6 +293,6 @@
             AppState.EventoNombre = evento.Nombre;
             AppState.EventoId = evento.Id!;
         }
-        Nav.NavigateTo($"/votaciones?eventoId={evento.Id}&eventoNombre={Uri.EscapeDataString(evento.Nombre)}");
+        Nav.NavigateTo($"votaciones?eventoId={evento.Id}&eventoNombre={Uri.EscapeDataString(evento.Nombre)}");
     }
 }

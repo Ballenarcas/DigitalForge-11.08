@@ -492,7 +492,7 @@ input[type="datetime-local"].form-control::-webkit-datetime-edit {
             
             StateHasChanged();
             await Task.Delay(1000);
-            Nav.NavigateTo("/");
+            Nav.NavigateTo("");
         }
         catch (Exception ex)
          {
@@ -506,5 +506,5 @@ input[type="datetime-local"].form-control::-webkit-datetime-edit {
         }
     }
 
-    private void HandleVolver() => Nav.NavigateTo("/");
+    private void HandleVolver() => Nav.NavigateTo("");
 }

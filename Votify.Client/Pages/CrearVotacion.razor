@@ -1089,7 +1089,7 @@ input:checked + .slider:before {
             StateHasChanged();
             await Task.Delay(400); 
             
-            Nav.NavigateTo($"/votaciones?eventoId={AppState.EventoId}");
+            Nav.NavigateTo($"votaciones?eventoId={AppState.EventoId}");
         } 
         catch (Exception ex) 
          { 
@@ -1141,5 +1141,5 @@ input:checked + .slider:before {
             Criterios.Remove(criterio);
         }
     }
-    private void HandleVolver() => Nav.NavigateTo($"/votaciones?eventoId={AppState.EventoId}");
+    private void HandleVolver() => Nav.NavigateTo($"votaciones?eventoId={AppState.EventoId}");
 }
