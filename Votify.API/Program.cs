@@ -43,7 +43,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowBlazor",
         policy =>
         {
-            policy.AllowAnyOrigin()
+            policy.SetIsOriginAllowed(_ => true)
                   .AllowAnyMethod()
                   .AllowAnyHeader();
         });
@@ -210,18 +210,8 @@ Console.WriteLine($"Supabase Storage => Url={supabaseUrl}, KeyPresente={!string.
 builder.Services.AddControllers();
 builder.Services.AddHealthChecks();
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowBlazor",
-        policy =>
-        {
-            policy.AllowAnyOrigin()
-                  .AllowAnyMethod()
-                  .AllowAnyHeader();
-        });
-});
-
 var app = builder.Build();
+app.UseCors("AllowBlazor");
 app.UseExceptionHandler(errorApp =>
 {
     errorApp.Run(async context =>
@@ -234,7 +224,6 @@ app.UseExceptionHandler(errorApp =>
         await context.Response.WriteAsync(System.Text.Json.JsonSerializer.Serialize(new { Message = msg, Detalle = inner ?? "" }));
     });
 });
-app.UseCors("AllowBlazor");
 app.UseDefaultFiles();
 app.UseStaticFiles();
 if (app.Environment.IsDevelopment())
