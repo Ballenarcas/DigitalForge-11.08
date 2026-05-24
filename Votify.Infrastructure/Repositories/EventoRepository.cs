@@ -64,6 +64,35 @@ namespace Votify.Infrastructure.Repositories
             var entity = await _db.Eventos.FindAsync(guid);
             if (entity is null) return false;
 
+            await _db.ParticipantesEventos.Where(pe => pe.EventoId == guid).ExecuteDeleteAsync();
+
+            var votaciones = await _db.Votaciones.Where(v => v.EventoId == guid).ToListAsync();
+            foreach (var v in votaciones)
+            {
+                var votacionId = v.Id;
+
+                await _db.Votos.Where(vt => vt.VotacionId == votacionId).ExecuteDeleteAsync();
+
+                var criterioIds = await _db.Criterios.Where(c => c.VotacionId == votacionId).Select(c => c.Id).ToListAsync();
+                if (criterioIds.Any())
+                    await _db.ValoracionesCriterio.Where(vc => criterioIds.Contains(vc.CriterioId)).ExecuteDeleteAsync();
+                await _db.Criterios.Where(c => c.VotacionId == votacionId).ExecuteDeleteAsync();
+
+                var proyectoIds = await _db.Proyectos.Where(p => p.VotacionId == votacionId).Select(p => p.Id).ToListAsync();
+                if (proyectoIds.Any())
+                {
+                    await _db.ValoracionesCriterio.Where(vc => proyectoIds.Contains(vc.ProyectoId)).ExecuteDeleteAsync();
+                    foreach (var pId in proyectoIds)
+                    {
+                        await _db.Comentarios.Where(c => c.Proyecto_Id == pId).ExecuteDeleteAsync();
+                    }
+                }
+                await _db.Proyectos.Where(p => p.VotacionId == votacionId).ExecuteDeleteAsync();
+
+                await _db.ManualVotosAsignaciones.Where(a => a.VotacionId == votacionId).ExecuteDeleteAsync();
+            }
+            await _db.Votaciones.Where(v => v.EventoId == guid).ExecuteDeleteAsync();
+
             _db.Eventos.Remove(entity);
             await _db.SaveChangesAsync();
             return true;
