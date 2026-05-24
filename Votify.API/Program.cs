@@ -38,6 +38,16 @@ if (envFile != null) Env.Load(envFile);
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("GitHubPagesPolicy", policy =>
+    {
+        policy.WithOrigins("https://Ballenarcas.io") 
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
 var host = Environment.GetEnvironmentVariable("DB_HOST");
 var db = Environment.GetEnvironmentVariable("DB_NAME");
 var user = Environment.GetEnvironmentVariable("DB_USER");
@@ -212,6 +222,7 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+app.UseCors("GitHubPagesPolicy");
 
 app.UseCors("AllowBlazor");
 app.UseDefaultFiles();
