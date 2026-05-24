@@ -1,40 +1,35 @@
-name: Build and Push to ACR
+name: Deploy Blazor to GitHub Pages
 
 on:
   push:
-    branches:
-      - main
-      - master
-  workflow_dispatch:
+    branches: [ main ]
+
+permissions:
+  contents: write
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Build and Push Docker image
-        env:
-          ACR_LOGIN: ${{ secrets.ACR_LOGIN_SERVER }}
-          ACR_USER: ${{ secrets.ACR_USERNAME }}
-          ACR_PASS: ${{ secrets.ACR_PASSWORD }}
+      - name: Setup .NET 9
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Build and Publish Blazor
+        # IMPORTANTE: Reemplaza esto con la ruta real de tu proyecto Blazor
+        run: dotnet publish "Votify.Client\Votify.Client.csproj" -c Release -o release --nologo
+
+      - name: Fix GitHub Pages routing
         run: |
-          if [ -z "$ACR_PASS" ]; then
-            echo "::error::El secreto ACR_PASSWORD esta vacio. Revisa que este creado como 'Repository secret' y no como 'Environment secret'."
-            exit 1
-          fi
-          if [ -z "$ACR_USER" ]; then
-            echo "::error::El secreto ACR_USERNAME esta vacio."
-            exit 1
-          fi
-          
-          echo "Iniciando sesion en docker ($ACR_LOGIN)..."
-          echo "$ACR_PASS" | docker login "$ACR_LOGIN" -u "$ACR_USER" --password-stdin
-          
-          echo "Construyendo imagen..."
-          docker build -t "$ACR_LOGIN/votify:latest" .
-          
-          echo "Subiendo imagen a ACR..."
-          docker push "$ACR_LOGIN/votify:latest"
+          touch release/wwwroot/.nojekyll
+          cp release/wwwroot/index.html release/wwwroot/404.html
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: release/wwwroot
