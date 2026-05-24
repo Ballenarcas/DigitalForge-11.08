@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Votify</title>
+<base href="/Ballenarcas/" />
+    <link rel="stylesheet" href="css/app.css" />
+    <link rel="stylesheet" href="css/ripple.css" />
+    <link rel="stylesheet" href="css/vote-celebration.css" />
+    <link rel="stylesheet" href="css/results-epic.css" />
+    <link rel="stylesheet" href="css/auth-feedback.css" />
+    <link rel="icon" type="image/png" href="lib/favicon.png" />
+    <link href="Votify.Client.styles.css" rel="stylesheet" />
+</head>
+
+<body>
+    <div id="app">
+        <svg class="loading-progress">
+            <circle r="40%" cx="50%" cy="50%" />
+            <circle r="40%" cx="50%" cy="50%" />
+        </svg>
+        <div class="loading-progress-text"></div>
+    </div>
+
+    <div id="blazor-error-ui">
+        An unhandled error has occurred.
+        <a href="." class="reload">Reload</a>
+        <span class="dismiss">🗙</span>
+    </div>
+
+    <script src="_framework/blazor.webassembly.js"></script>
+    <script>
+        // =========================================================
+        // RIPPLE EFFECT - Visible y robusto
+        // =========================================================
+        document.addEventListener('DOMContentLoaded', function() {
+            function addRipple(e) {
+                var btn = e.target.closest('button, [class*="btn-"]');
+                if (!btn || btn.disabled) return;
+
+                var rect = btn.getBoundingClientRect();
+                var clientX = e.clientX;
+                var clientY = e.clientY;
+                if (e.touches && e.touches.length) {
+                    clientX = e.touches[0].clientX;
+                    clientY = e.touches[0].clientY;
+                }
+
+                var size = Math.max(rect.width, rect.height) * 2.8;
+                var x = clientX - rect.left - size / 2;
+                var y = clientY - rect.top - size / 2;
+
+                var ripple = document.createElement('span');
+                ripple.className = 'ripple-span';
+                ripple.style.width  = size + 'px';
+                ripple.style.height = size + 'px';
+                ripple.style.left   = x + 'px';
+                ripple.style.top    = y + 'px';
+
+                btn.appendChild(ripple);
+
+                // Forzar reflow para que la transicion funcione
+                void ripple.offsetWidth;
+                ripple.classList.add('ripple-animate');
+
+                setTimeout(function() { ripple.remove(); }, 800);
+            }
+
+            document.addEventListener('pointerdown', addRipple, true);
+        });
+
+        // =========================================================
+        // RESULTADOS: Contador animado de numeros
+        // =========================================================
+        function animateCounters() {
+            var counters = document.querySelectorAll('.count-up-number');
+            counters.forEach(function(el) {
+                var target = parseFloat(el.getAttribute('data-target')) || 0;
+                var decimals = parseInt(el.getAttribute('data-decimals')) || 0;
+                var duration = parseInt(el.getAttribute('data-duration')) || 1500;
+                var startTime = null;
+                var startVal = 0;
+
+                function step(timestamp) {
+                    if (!startTime) startTime = timestamp;
+                    var progress = Math.min((timestamp - startTime) / duration, 1);
+                    var eased = 1 - Math.pow(1 - progress, 3); // easeOutCubic
+                    var current = startVal + (target - startVal) * eased;
+                    el.textContent = current.toFixed(decimals);
+                    if (progress < 1) {
+                        requestAnimationFrame(step);
+                    }
+                }
+                requestAnimationFrame(step);
+            });
+        }
+
+        // Observar cuando aparezcan los contadores en el DOM
+        var resultsObserver = new MutationObserver(function(mutations) {
+            if (document.querySelector('.count-up-number')) {
+                setTimeout(animateCounters, 500);
+                resultsObserver.disconnect();
+            }
+        });
+        resultsObserver.observe(document.body, { childList: true, subtree: true });
+    </script>
+</body>
+
+</html>
