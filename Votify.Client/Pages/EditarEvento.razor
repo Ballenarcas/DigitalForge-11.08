@@ -1,0 +1,208 @@
+@page "/editar-evento/{EventoId}"
+@using Votify.Client.DTOs
+@using Votify.Client.Services
+@using Votify.Client.Utilities
+@inject EventosService EventosService
+@inject NavigationManager Nav
+
+<div class="main-container">
+    <div class="header-principal">
+        <button class="btn-volver" @onclick="Volver">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="16" height="16">
+                <path d="M15 19L8 12L15 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Eventos
+        </button>
+    </div>
+
+    <div class="page-header-row">
+        <div class="logo-icon small">
+            <img src="images/evento-logo.png" alt="Logo" class="evento-logo-img" style="width:20px;height:20px;" />
+        </div>
+        <span class="brand-name">Editar Evento</span>
+    </div>
+
+    @if (cargando)
+    {
+        <div class="loader-container">
+            <div class="spinner"></div>
+            <p>Cargando evento...</p>
+        </div>
+    }
+    else if (evento == null)
+    {
+        <div class="empty-state">
+            <p>No se pudo cargar el evento.</p>
+        </div>
+    }
+    else
+    {
+        <div class="card">
+            <div class="form-body">
+                <div class="form-group">
+                    <label>Nombre del evento</label>
+                    <input type="text" @bind="editNombre" placeholder="Nombre del evento" class="form-control" />
+                </div>
+
+                <div class="form-group">
+                    <label>Descripcion</label>
+                    <textarea @bind="editDescripcion" placeholder="Describe el evento..." class="form-control textarea-custom" rows="3"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Imagen de portada</label>
+                    <div class="upload-container">
+                        @if (!string.IsNullOrEmpty(editImagenUrl))
+                        {
+                            <div class="preview-container">
+                                <img src="@editImagenUrl" class="image-preview" />
+                                <button class="btn-remove-image" @onclick="() => editImagenUrl = null">Eliminar</button>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="upload-box">
+                                <InputFile OnChange="HandleFileSelected" id="editFileInput" class="hidden-input" accept="image/*" />
+                                <label for="editFileInput" class="upload-label">
+                                    <span class="upload-icon">📷</span>
+                                    <span class="upload-text">Seleccionar imagen</span>
+                                    <span class="upload-subtext">PNG, JPG o WEBP</span>
+                                </label>
+                            </div>
+                        }
+                    </div>
+                    @if (subiendoImagen)
+                    {
+                        <p class="uploading-text">Subiendo imagen...</p>
+                    }
+                </div>
+
+                <div class="grid-dates">
+                    <div class="form-group">
+                        <label>Fecha de inicio</label>
+                        <input type="datetime-local" @bind="editFechaInicio" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label>Fecha de fin</label>
+                        <input type="datetime-local" @bind="editFechaFin" class="form-control" />
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrEmpty(editError))
+                {
+                    <div class="alert alert-error">
+                        <span>@editError</span>
+                    </div>
+                }
+
+                <button class="btn-submit" @onclick="GuardarEvento" disabled="@guardando">
+                    @if (guardando)
+                    {
+                        <span class="spinner-small"></span>
+                    }
+                    Guardar Cambios
+                </button>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public string? EventoId { get; set; }
+
+    private EventoDto? evento;
+    private bool cargando = true;
+    private bool guardando = false;
+    private bool subiendoImagen = false;
+    private string editNombre = "";
+    private string editDescripcion = "";
+    private DateTime editFechaInicio;
+    private DateTime editFechaFin;
+    private string? editImagenUrl;
+    private string? editError;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (string.IsNullOrEmpty(EventoId)) return;
+
+        try
+        {
+            evento = await EventosService.ObtenerEvento(EventoId);
+            if (evento != null)
+            {
+                editNombre = evento.Nombre;
+                editDescripcion = evento.Descripcion;
+                editFechaInicio = evento.FechaInicio.ToLocalTime();
+                editFechaFin = evento.FechaFin.ToLocalTime();
+                editImagenUrl = evento.ImagenUrl;
+            }
+        }
+        catch (Exception ex)
+        {
+            editError = ErrorMessageParser.ExtractErrorMessage(ex.Message);
+        }
+        finally
+        {
+            cargando = false;
+        }
+    }
+
+    private void Volver() => Nav.NavigateTo("");
+
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file == null) return;
+
+        subiendoImagen = true;
+        StateHasChanged();
+
+        try
+        {
+            var content = new MultipartFormDataContent();
+            var fileContent = new StreamContent(file.OpenReadStream(maxAllowedSize: 5_000_000));
+            fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(file.ContentType);
+            content.Add(fileContent, "file", file.Name);
+
+            editImagenUrl = await EventosService.SubirImagen(content);
+        }
+        catch (Exception ex)
+        {
+            editError = ErrorMessageParser.ExtractErrorMessage(ex.Message);
+        }
+        finally
+        {
+            subiendoImagen = false;
+        }
+    }
+
+    private async Task GuardarEvento()
+    {
+        if (evento == null) return;
+        guardando = true;
+        editError = null;
+
+        try
+        {
+            var dto = new EventoDto
+            {
+                Id = evento.Id,
+                Nombre = editNombre,
+                Descripcion = editDescripcion,
+                FechaInicio = editFechaInicio.ToUniversalTime(),
+                FechaFin = editFechaFin.ToUniversalTime(),
+                ImagenUrl = editImagenUrl
+            };
+            await EventosService.ActualizarEvento(evento.Id, dto);
+            Nav.NavigateTo("");
+        }
+        catch (Exception ex)
+        {
+            editError = ErrorMessageParser.ExtractErrorMessage(ex.Message);
+        }
+        finally
+        {
+            guardando = false;
+        }
+    }
+}

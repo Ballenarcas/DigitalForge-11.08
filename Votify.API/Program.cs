@@ -64,7 +64,6 @@ builder.Services.AddDbContext<VotifyDbContext>(options =>
     options.UseNpgsql(connectionString, o =>
         o.EnableRetryOnFailure());
     options.EnableSensitiveDataLogging();
-    options.LogTo(Console.WriteLine);    
 });
 
 builder.Services.AddScoped<IVotacionRepository, VotacionRepository>();
@@ -223,6 +222,18 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+app.UseExceptionHandler(errorApp =>
+{
+    errorApp.Run(async context =>
+    {
+        context.Response.StatusCode = 500;
+        context.Response.ContentType = "application/json";
+        var error = context.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerFeature>();
+        var msg = error?.Error?.Message ?? "Unknown error";
+        var inner = error?.Error?.InnerException?.Message;
+        await context.Response.WriteAsync(System.Text.Json.JsonSerializer.Serialize(new { Message = msg, Detalle = inner ?? "" }));
+    });
+});
 app.UseCors("AllowBlazor");
 app.UseDefaultFiles();
 app.UseStaticFiles();

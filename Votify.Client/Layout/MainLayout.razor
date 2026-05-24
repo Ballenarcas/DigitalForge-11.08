@@ -13,7 +13,7 @@
 
             <!-- Logo centrado -->
             <div class="logo-container">
-                <a href="">
+                <a href="" @onclick:preventDefault @onclick="IrAInicio">
                     <div class="logo-icon">
                         <img src="images/votify-logo-blanco.png" alt="Votify Logo" />
                     </div>
@@ -160,4 +160,6 @@
         await AuthService.LogoutAsync();
         NavManager.NavigateTo(""); // Refresca la página al inicio
     }
+
+    private void IrAInicio() => NavManager.NavigateTo("");
 }
