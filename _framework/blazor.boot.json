@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "Votify.Client",
   "resources": {
-    "hash": "sha256-Ssfk3U6vUEsV8DmRJOGru2bOKsAxQjC3GcdP8fMooI4=",
+    "hash": "sha256-NA7v24nRWdckL69kJZZz5XXFFDCNkV5JAr0NXNp4fBQ=",
     "fingerprinting": {
       "BCrypt.Net-Next.dwn6rgs717.wasm": "BCrypt.Net-Next.wasm",
       "Blazored.LocalStorage.12n6dz54qr.wasm": "Blazored.LocalStorage.wasm",
@@ -9,7 +9,7 @@
       "Microsoft.AspNetCore.Components.Authorization.t2m5p6tq5d.wasm": "Microsoft.AspNetCore.Components.Authorization.wasm",
       "Microsoft.AspNetCore.Components.Forms.vq9g6cpll0.wasm": "Microsoft.AspNetCore.Components.Forms.wasm",
       "Microsoft.AspNetCore.Components.48w6vadgo5.wasm": "Microsoft.AspNetCore.Components.wasm",
-      "Microsoft.AspNetCore.Components.Web.3hqrq5id24.wasm": "Microsoft.AspNetCore.Components.Web.wasm",
+      "Microsoft.AspNetCore.Components.Web.avuy70vu5p.wasm": "Microsoft.AspNetCore.Components.Web.wasm",
       "Microsoft.AspNetCore.Components.WebAssembly.7gzrq3f655.wasm": "Microsoft.AspNetCore.Components.WebAssembly.wasm",
       "Microsoft.AspNetCore.Metadata.id4soexi0e.wasm": "Microsoft.AspNetCore.Metadata.wasm",
       "Microsoft.Extensions.Configuration.Abstractions.1qdt9piwob.wasm": "Microsoft.Extensions.Configuration.Abstractions.wasm",
@@ -62,9 +62,9 @@
       "System.Text.RegularExpressions.vvyipbqy7m.wasm": "System.Text.RegularExpressions.wasm",
       "System.Threading.ck7ypa45et.wasm": "System.Threading.wasm",
       "System.t250xnkyfs.wasm": "System.wasm",
-      "Votify.Application.uflosgs7lc.wasm": "Votify.Application.wasm",
-      "Votify.Client.xrs4gdml1q.wasm": "Votify.Client.wasm",
-      "Votify.Domain.31756tm78o.wasm": "Votify.Domain.wasm",
+      "Votify.Application.3t44711bsm.wasm": "Votify.Application.wasm",
+      "Votify.Client.tjw7lcj2yu.wasm": "Votify.Client.wasm",
+      "Votify.Domain.cyebsxt7a6.wasm": "Votify.Domain.wasm",
       "dotnet.js": "dotnet.js",
       "dotnet.native.xsn1d6x2kd.js": "dotnet.native.js",
       "dotnet.native.vz0adxojrz.wasm": "dotnet.native.wasm",
@@ -98,7 +98,7 @@
       "Microsoft.AspNetCore.Components.Authorization.t2m5p6tq5d.wasm": "sha256-BeCEMJhiwAJn5J9xpoFaMdZariLkMPLD6OUtIucXlSc=",
       "Microsoft.AspNetCore.Components.Forms.vq9g6cpll0.wasm": "sha256-V9ttpAY74fNEjoJEKbC6wvqj1BjRfApaJtUGDvTgrMY=",
       "Microsoft.AspNetCore.Components.48w6vadgo5.wasm": "sha256-XGBSi97MMjia1D4Ek/pUTwpFLRWe1wn/1VwQxWJDO+k=",
-      "Microsoft.AspNetCore.Components.Web.3hqrq5id24.wasm": "sha256-OVNSmxExAWuhEZKS6msubme8CD/94pijCiIylEO1PsE=",
+      "Microsoft.AspNetCore.Components.Web.avuy70vu5p.wasm": "sha256-xqdzlees32p3/U3bfDbTD80gOQ4lC6qx/04csXm6Wko=",
       "Microsoft.AspNetCore.Components.WebAssembly.7gzrq3f655.wasm": "sha256-yV3R8hq5Rtmt8B3Zbx69JuiDPReYCzvVOyaNM4ITXf0=",
       "Microsoft.AspNetCore.Metadata.id4soexi0e.wasm": "sha256-JqWZNYjSAZoa8r+y1gapT5yqlUframsRAcxiIruSaW4=",
       "Microsoft.Extensions.Configuration.Abstractions.1qdt9piwob.wasm": "sha256-ubcwYfiSsxd0T0HiIqWT+3KbH2InCAhOIg1+8ynI/Rg=",
@@ -149,9 +149,9 @@
       "System.Text.RegularExpressions.vvyipbqy7m.wasm": "sha256-G2ZuX9PTyfhl4B8LVBZ7OgvZ8u8hv7H58qvjAyVSQbc=",
       "System.Threading.ck7ypa45et.wasm": "sha256-NAT337jZ8vKKqEaIIZX7h6Ebx8VSc6hIlBPK0fPmL28=",
       "System.t250xnkyfs.wasm": "sha256-tVaTeiubnxofQV5rO7ga2UOORIQEtLkQr36ewcMO+tw=",
-      "Votify.Application.uflosgs7lc.wasm": "sha256-diGIhS6jgcCJ8LbrpZpNef5o576Mq9f/UZEizYmHLEI=",
-      "Votify.Client.xrs4gdml1q.wasm": "sha256-U5F4k/bD0jOUtxsb1mM3i0hMI/bRkI9Wf1v6CTNL0Qk=",
-      "Votify.Domain.31756tm78o.wasm": "sha256-KdMGVWxx7PruLFgEDZz2tEnZforAXYRWmBXigpXUgD8="
+      "Votify.Application.3t44711bsm.wasm": "sha256-qTMvYfA6AKH5HTC8yxFgmQmj/yOVDfxkM+lM39LeM78=",
+      "Votify.Client.tjw7lcj2yu.wasm": "sha256-d8p7aQqozI3l77H9mtV7Ha2xJVHxv3xGKmvlCYmkSNk=",
+      "Votify.Domain.cyebsxt7a6.wasm": "sha256-dHDfn+CHdiR6W2z49JmDAxy55cvhJTSUOG9npJ4jMq4="
     }
   },
   "cacheBootResources": true,
