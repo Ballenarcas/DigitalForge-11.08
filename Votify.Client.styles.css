@@ -1208,6 +1208,66 @@ article[b-3o3p5hwdhv] {
     animation: fadeInScale-b-0jfjj2oacp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+/* Search */
+.search-container[b-0jfjj2oacp] {
+    position: relative;
+    max-width: 100%;
+    margin-bottom: 1.5rem;
+    animation: fadeInScale-b-0jfjj2oacp 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.search-container svg[b-0jfjj2oacp] {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    pointer-events: none;
+    transition: color 0.2s;
+}
+.search-input[b-0jfjj2oacp] {
+    width: 100%;
+    padding: 0.85rem 2.5rem 0.85rem 2.75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    font-size: 0.95rem;
+    color: #1e293b;
+    background: white;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    box-sizing: border-box;
+}
+.search-input:focus[b-0jfjj2oacp] {
+    outline: none;
+    border-color: #a855f7;
+    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1), 0 4px 12px rgba(0,0,0,0.05);
+}
+.search-input[b-0jfjj2oacp]::placeholder {
+    color: #94a3b8;
+}
+.search-clear[b-0jfjj2oacp] {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #f1f5f9;
+    border: none;
+    color: #64748b;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    font-size: 0.7rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    padding: 0;
+}
+.search-clear:hover[b-0jfjj2oacp] {
+    background: #e2e8f0;
+    color: #334155;
+}
+
 /* Epic entrance animations */
 @keyframes fadeInScale-b-0jfjj2oacp {
     from { opacity: 0; transform: scale(0.96) translateY(10px); }
