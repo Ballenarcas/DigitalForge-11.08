@@ -25,6 +25,20 @@
 
     <div class="content-wrapper">
 
+        @if (listaEventos != null && listaEventos.Any())
+        {
+            <div class="search-container">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="18" height="18">
+                    <path d="M21 21L15.5 15.5M11 19C6.58172 19 3 15.4183 3 11C3 6.58172 6.58172 3 11 3C15.4183 3 19 6.58172 19 11C19 15.4183 15.4183 19 11 19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <input type="text" class="search-input" placeholder="Buscar eventos por nombre o descripción..." @bind="textoBusqueda" @bind:event="oninput" />
+                @if (!string.IsNullOrEmpty(textoBusqueda))
+                {
+                    <button class="search-clear" @onclick="() => textoBusqueda = string.Empty">✕</button>
+                }
+            </div>
+        }
+
         @if (listaEventos == null)
         {
             <div class="loader-container">
@@ -32,7 +46,7 @@
                 <p>Cargando...</p>
             </div>
         }
-        else if (!listaEventos.Any())
+        else if (!EventosFiltrados.Any())
         {
             <div class="empty-state">
                 <p>No hay eventos disponibles.</p>
@@ -41,7 +55,7 @@
         else
         {
             <div class="votaciones-grid">
-                @foreach (var e in listaEventos.OrderBy(e => e.Nombre))
+                @foreach (var e in EventosFiltrados.OrderBy(e => e.Nombre))
                 {
                     var ahora = DateTime.UtcNow;
                     var yaInicio  = ahora >= e.FechaInicio;
@@ -273,7 +287,15 @@
 
 @code {
     private List<EventoDto>? listaEventos;
+    private string? textoBusqueda;
     private HashSet<string> misEventosIds = new();
+
+    private IEnumerable<EventoDto> EventosFiltrados =>
+        string.IsNullOrWhiteSpace(textoBusqueda)
+            ? (listaEventos ?? new List<EventoDto>())
+            : (listaEventos ?? new List<EventoDto>()).Where(e =>
+                (e.Nombre?.Contains(textoBusqueda, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (e.Descripcion?.Contains(textoBusqueda, StringComparison.OrdinalIgnoreCase) ?? false));
     private Dictionary<string, string> misRolesPorEvento = new();
     private bool isAuthenticated = true;
     private bool mostrarEditor = false;
