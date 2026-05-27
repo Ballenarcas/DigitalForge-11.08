@@ -102,10 +102,53 @@
                     }
                     Guardar Cambios
                 </button>
+
+                <button class="btn-eliminar-evento" @onclick="AbrirConfirmacionEliminar" disabled="@eliminandoEvento">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"/>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                    </svg>
+                    Eliminar Evento
+                </button>
             </div>
         </div>
     }
 </div>
+
+@if (mostrandoConfirmacionEliminar && evento != null)
+{
+    <div class="confirm-modal-overlay">
+        <div class="confirm-modal-content" @onclick:stopPropagation="true">
+            <div class="confirm-modal-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"/>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                </svg>
+            </div>
+            <h2>Eliminar Evento</h2>
+            <p>Estas a punto de eliminar <strong>@evento.Nombre</strong>.</p>
+            <p class="warning-text">Esta accion <strong>no se puede deshacer</strong>.</p>
+
+            @if (!string.IsNullOrEmpty(errorEliminar))
+            {
+                <div class="confirm-error">@errorEliminar</div>
+            }
+
+            <div class="confirm-modal-actions">
+                <button class="btn-modal-cancel" @onclick="CerrarConfirmacionEliminar" disabled="@eliminandoEvento">
+                    Cancelar
+                </button>
+                <button class="btn-modal-delete" @onclick="ConfirmarEliminarEvento" disabled="@eliminandoEvento">
+                    @if (eliminandoEvento)
+                    {
+                        <span class="btn-spinner"></span>
+                    }
+                    Eliminar
+                </button>
+            </div>
+        </div>
+    </div>
+}
 
 @code {
     [Parameter] public string? EventoId { get; set; }
@@ -114,12 +157,15 @@
     private bool cargando = true;
     private bool guardando = false;
     private bool subiendoImagen = false;
+    private bool mostrandoConfirmacionEliminar = false;
+    private bool eliminandoEvento = false;
     private string editNombre = "";
     private string editDescripcion = "";
     private DateTime editFechaInicio;
     private DateTime editFechaFin;
     private string? editImagenUrl;
     private string? editError;
+    private string? errorEliminar;
 
     protected override async Task OnInitializedAsync()
     {
@@ -203,6 +249,39 @@
         finally
         {
             guardando = false;
+        }
+    }
+
+    private void AbrirConfirmacionEliminar()
+    {
+        mostrandoConfirmacionEliminar = true;
+        errorEliminar = null;
+    }
+
+    private void CerrarConfirmacionEliminar()
+    {
+        mostrandoConfirmacionEliminar = false;
+        errorEliminar = null;
+    }
+
+    private async Task ConfirmarEliminarEvento()
+    {
+        if (evento?.Id == null) return;
+        eliminandoEvento = true;
+        errorEliminar = null;
+
+        try
+        {
+            await EventosService.EliminarEvento(evento.Id);
+            Nav.NavigateTo("");
+        }
+        catch (Exception ex)
+        {
+            errorEliminar = ErrorMessageParser.ExtractErrorMessage(ex.Message);
+        }
+        finally
+        {
+            eliminandoEvento = false;
         }
     }
 }

@@ -190,98 +190,36 @@
 
 @if (mostrarConfirmacionEliminar && eventoEliminando != null)
 {
-    <div class="delete-epic-overlay">
-        @for (int i = 0; i < 8; i++)
-        {
-            var delay = i * 0.15;
-            <div class="epic-ring" style="animation-delay: @(delay)s;"></div>
-        }
-        @for (int i = 0; i < 60; i++)
-        {
-            var angle = i * 6;
-            var dist = 80 + (i % 5) * 60;
-            var size = 6 + (i % 10);
-            var colors = new[] { "#e94560", "#dc2626", "#7c3aed", "#ff6b6b", "#ffffff", "#621d95" };
-            var color = colors[i % colors.Length];
-            var delay = (i % 8) * 0.06;
-            var duration = 0.6 + (i % 4) * 0.2;
-            <div class="epic-particle"
-                 style="
-                     --angle: @angle;
-                     --dist: @dist;
-                     --size: @size;
-                     --color: @color;
-                     animation-delay: @delay.ToString("F2")s;
-                     animation-duration: @duration.ToString("F2")s;
-                 "></div>
-        }
-        @for (int i = 0; i < 40; i++)
-        {
-            var x = (i % 11 - 5) * 120;
-            var y = -200 - (i % 7) * 80;
-            var delay = i * 0.04;
-            var color = i % 2 == 0 ? "#e94560" : "#ffffff";
-            <div class="epic-spark" style="--sx: @x; --sy: @y; animation-delay: @delay.ToString("F2")s; background: @color; box-shadow: 0 0 6px @color; width: @(4 + i % 6)px; height: @(4 + i % 6)px;"></div>
-        }
-
-        <div class="delete-modal-center @(confirmLeaving ? "modal-epic-vanish" : "modal-epic-appear")">
-            <div class="delete-modal-glare"></div>
-            <div class="delete-icon-wrapper @(confirmLeaving ? "icon-epic-death" : "")">
-                <div class="icon-ring-outer"></div>
-                <div class="icon-ring-inner"></div>
-                @if (confirmLeaving)
-                {
-                    <svg class="check-draw" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M20 6L9 17l-5-5"/>
-                    </svg>
-                }
-                else
-                {
-                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"/>
-                        <line x1="12" y1="8" x2="12" y2="12"/>
-                        <line x1="12" y1="16" x2="12.01" y2="16"/>
-                    </svg>
-                }
+    <div class="confirm-modal-overlay">
+        <div class="confirm-modal-content" @onclick:stopPropagation="true">
+            <div class="confirm-modal-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"/>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                </svg>
             </div>
-            <h2 class="@(confirmLeaving ? "title-epic-vanish" : "")">@(confirmLeaving ? "Eliminando..." : "Eliminar Evento")</h2>
-            @if (!confirmLeaving)
+            <h2>Eliminar Evento</h2>
+            <p>¿Estás seguro de que deseas eliminar <strong>@eventoEliminando.Nombre</strong>?</p>
+            <p class="warning-text">Esta acción <strong>no se puede deshacer</strong>.</p>
+
+            @if (!string.IsNullOrEmpty(errorEliminar))
             {
-                <p>Esta a punto de eliminar <strong>@eventoEliminando.Nombre</strong>. Esta accion no se puede deshacer.</p>
-
-                @if (!string.IsNullOrEmpty(errorEliminar))
-                {
-                    <div class="confirm-error">@errorEliminar</div>
-                }
-
-                <div class="confirm-modal-actions">
-                    <button class="btn-epic-cancel" @onclick="CerrarConfirmacionEliminar" disabled="@eliminandoEvento">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-                        </svg>
-                        Cancelar
-                    </button>
-                    <button class="btn-epic-delete" @onclick="ConfirmarEliminarEvento" disabled="@eliminandoEvento">
-                        @if (eliminandoEvento)
-                        {
-                            <span class="btn-spinner"></span>
-                        }
-                        else
-                        {
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="3 6 5 6 21 6"/>
-                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                            </svg>
-                        }
-                        @(confirmLeaving ? "Eliminando..." : "Si, eliminar")
-                    </button>
-                </div>
+                <div class="confirm-error">@errorEliminar</div>
             }
+
+            <div class="confirm-modal-actions">
+                <button class="btn-modal-cancel" @onclick="CerrarConfirmacionEliminar" disabled="@eliminandoEvento">
+                    Cancelar
+                </button>
+                <button class="btn-modal-delete" @onclick="ConfirmarEliminarEvento" disabled="@eliminandoEvento">
+                    @if (eliminandoEvento)
+                    {
+                        <span class="btn-spinner"></span>
+                    }
+                    Eliminar
+                </button>
+            </div>
         </div>
-        @if (confirmLeaving)
-        {
-            <div class="white-flash"></div>
-        }
     </div>
 }
 
