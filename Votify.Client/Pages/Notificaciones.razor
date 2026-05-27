@@ -1,6 +1,7 @@
 @page "/notificaciones"
 @inject Votify.Client.Services.NotificacionesService NotificacionesService
 @inject NavigationManager NavManager
+@inject IJSRuntime JS
 @using Votify.Client.DTOs
 
 <style>
@@ -111,25 +112,81 @@
         opacity: 0.5;
     }
 
+    /* ---- Botón volver ---- */
+    .header-principal {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        margin-bottom: 1.25rem;
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
     .btn-volver {
-        display: inline-block;
-        margin-top: 1rem;
-        padding: 0.75rem 1.5rem;
-        background: #e94560;
-        color: white;
-        border-radius: 8px;
-        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        background: white;
+        border: 1px solid #e2e8f0;
+        color: #64748b;
+        padding: 0.4rem 0.8rem;
+        border-radius: 10px;
         font-weight: 600;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.2s;
     }
 
     .btn-volver:hover {
-        background: #d1364e;
+        background: #f8f9fc;
+        border-color: #ddd6fe;
+        color: #7c3aed;
+    }
+
+    /* ---- Fila de título con logo ---- */
+    .page-header-row {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 2rem;
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .logo-icon.small {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .brand-name {
+        font-weight: 800;
+        font-size: 1.2rem;
+        color: #4c1d95;
+        letter-spacing: -0.02em;
     }
 </style>
 
 <div class="notificaciones-container">
-    <div class="notificaciones-header">
-        <h1 class="notificaciones-title">Notificaciones</h1>
+
+    <!-- Botón volver -->
+    <div class="header-principal">
+        <button class="btn-volver" @onclick="HandleVolver">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="16" height="16">
+                <path d="M15 19L8 12L15 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Volver
+        </button>
+    </div>
+
+    <!-- Título con logo -->
+    <div class="page-header-row">
+        <div class="logo-icon small">
+            <img src="images/notificacion-logo.png" alt="Logo Notificaciones" style="height:22px;width:auto;object-fit:contain;" />
+        </div>
+        <span class="brand-name">Notificaciones</span>
         @if (noLeidasCount > 0)
         {
             <span class="badge-no-leidas">@noLeidasCount sin leer</span>
@@ -151,7 +208,6 @@
             <div class="empty-icon">🔔</div>
             <h3>No tienes notificaciones</h3>
             <p>Las notificaciones de tus eventos aparecerán aquí.</p>
-            <button class="btn-volver" @onclick="IrAInicio">Explorar eventos</button>
         </div>
     }
     else
@@ -206,6 +262,11 @@
     }
 
     private void IrAInicio() => NavManager.NavigateTo("");
+
+    private async Task HandleVolver()
+    {
+        await JS.InvokeVoidAsync("history.back");
+    }
 
     private async Task MarcarLeida(NotificacionDto notificacion)
     {
