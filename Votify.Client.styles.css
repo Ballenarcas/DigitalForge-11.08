@@ -1543,11 +1543,16 @@ article[b-3o3p5hwdhv] {
 /* 4. Buttons */
 .footer-actions[b-0jfjj2oacp] {
     display: flex;
-    gap: 0.75rem;
+    gap: 0.5rem;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: flex-start;
     flex-shrink: 0;
     flex-wrap: nowrap;
+    width: 100%;
+}
+
+.footer-actions .btn-eliminar-evento[b-0jfjj2oacp] {
+    margin-left: auto;
 }
 
 /* 5. Modal Auth */
@@ -1692,22 +1697,23 @@ article[b-3o3p5hwdhv] {
     background: #bf65b0;
     border: none;
     color: white;
-    padding: 0 0.8rem;
+    width: 2rem;
+    height: 2rem;
     border-radius: 8px;
     font-weight: 700;
     font-size: 0.8rem;
-    line-height: 1.2;
     cursor: pointer;
     transition: 0.2s;
-    height: 2rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    white-space: nowrap;
+    padding: 0;
+    flex-shrink: 0;
 }
 .btn-ver:hover[b-0jfjj2oacp] {
     background: #a54d96;
     transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(165, 77, 150, 0.3);
 }
 .btn-eliminar[b-0jfjj2oacp] {
     background: #fee2e2;
@@ -2184,57 +2190,53 @@ article[b-3o3p5hwdhv] {
     transform: none;
 }
 
-/* Edit button */
+/* Edit button - icon only, same style as btn-ver */
 .btn-editar[b-0jfjj2oacp] {
-    background: white;
-    border: 1.5px solid #e9d5ff;
-    color: #621d95;
-    padding: 0 0.8rem;
+    background: #bf65b0;
+    border: none;
+    color: white;
+    width: 2rem;
+    height: 2rem;
     border-radius: 8px;
     font-weight: 700;
     font-size: 0.8rem;
-    line-height: 1.2;
     cursor: pointer;
     transition: 0.2s;
-    height: 2rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.35rem;
-    white-space: nowrap;
+    padding: 0;
+    flex-shrink: 0;
 }
 
 .btn-editar:hover[b-0jfjj2oacp] {
-    background: #f5f3ff;
-    border-color: #7c3aed;
+    background: #a54d96;
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(98, 29, 149, 0.15);
+    box-shadow: 0 4px 12px rgba(165, 77, 150, 0.3);
 }
 
+/* Delete button - icon only, soft red, no pulse */
 .btn-eliminar-evento[b-0jfjj2oacp] {
-    background: white;
+    background: #fef2f2;
     border: 1.5px solid #fecaca;
     color: #dc2626;
-    padding: 0 0.8rem;
+    width: 2rem;
+    height: 2rem;
     border-radius: 8px;
-    font-weight: 700;
-    font-size: 0.8rem;
-    line-height: 1.2;
     cursor: pointer;
     transition: 0.2s;
-    height: 2rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.35rem;
-    white-space: nowrap;
+    padding: 0;
+    flex-shrink: 0;
 }
 
 .btn-eliminar-evento:hover[b-0jfjj2oacp] {
-    background: #fef2f2;
-    border-color: #dc2626;
+    background: #fee2e2;
+    border-color: #ef4444;
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.15);
+    box-shadow: 0 4px 10px rgba(220, 38, 38, 0.2);
 }
 
 /* ── EPIC CARD ANIMATIONS ── */
@@ -2296,15 +2298,7 @@ article[b-3o3p5hwdhv] {
     100% { transform: scale(1); box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
 }
 
-/* Delete button pulse animation */
-@keyframes deletePulse-b-0jfjj2oacp {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.5); }
-    50% { box-shadow: 0 0 0 6px rgba(220, 38, 38, 0); }
-}
-
-.btn-eliminar-evento[b-0jfjj2oacp] {
-    animation: deletePulse-b-0jfjj2oacp 1.5s ease-in-out infinite;
-}
+/* (pulse animation removed - no parpadeo) */
 
 /* ── CONFIRM MODAL EPIC ANIMATION ── */
 .delete-epic-overlay[b-0jfjj2oacp] {
@@ -2986,14 +2980,7 @@ article[b-3o3p5hwdhv] {
     50% { box-shadow: 0 0 0 6px rgba(220, 38, 38, 0); }
 }
 
-.btn-eliminar[b-m3ipdm2mbp] {
-    animation: deletePulse-b-m3ipdm2mbp 1.5s ease-in-out infinite;
-}
 
-.btn-ver[b-m3ipdm2mbp] {
-    animation: deletePulse-b-m3ipdm2mbp 1.5s ease-in-out infinite;
-    animation-name: buttonPulseVotacion-b-m3ipdm2mbp;
-}
 
 @keyframes buttonPulseVotacion-b-m3ipdm2mbp {
     0%, 100% { box-shadow: 0 0 0 0 rgba(147, 51, 234, 0.4); }
@@ -3043,9 +3030,14 @@ article[b-3o3p5hwdhv] {
     display: flex;
     gap: 0.5rem;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: flex-start;
     flex-shrink: 0;
     flex-wrap: nowrap;
+    width: 100%;
+}
+
+.footer-actions .btn-eliminar[b-m3ipdm2mbp] {
+    margin-left: auto;
 }
 
 /* 5. Modal Auth */
@@ -3168,43 +3160,44 @@ article[b-3o3p5hwdhv] {
     background: #bf65b0;
     border: none;
     color: white;
-    padding: 0 0.8rem;
+    width: 2rem;
+    height: 2rem;
     border-radius: 8px;
     font-weight: 700;
     font-size: 0.8rem;
-    line-height: 1.2;
     cursor: pointer;
     transition: 0.2s;
-    height: 2rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    white-space: nowrap;
+    padding: 0;
+    flex-shrink: 0;
 }
 .btn-ver:hover[b-m3ipdm2mbp] {
     background: #a54d96;
     transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(165, 77, 150, 0.3);
 }
 .btn-eliminar[b-m3ipdm2mbp] {
-    background: #fee2e2;
-    border: 1px solid #fecaca;
-    color: #b91c1c;
-    padding: 0 0.8rem;
+    background: #fef2f2;
+    border: 1.5px solid #fecaca;
+    color: #dc2626;
+    width: 2rem;
+    height: 2rem;
     border-radius: 8px;
-    font-weight: 700;
-    font-size: 0.8rem;
-    line-height: 1.2;
     cursor: pointer;
     transition: 0.2s;
-    height: 2rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    white-space: nowrap;
+    padding: 0;
+    flex-shrink: 0;
 }
 .btn-eliminar:hover[b-m3ipdm2mbp] {
-    background: #fecaca;
-    border-color: #f87171;
+    background: #fee2e2;
+    border-color: #ef4444;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(220, 38, 38, 0.2);
 }
 .btn-resultados[b-m3ipdm2mbp] {
     background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
