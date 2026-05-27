@@ -243,6 +243,15 @@ namespace Votify.Application.Services
             return null;
         }
 
+        public async Task<Dictionary<string, string>> ObtenerMisRolesAsync(string participanteId)
+        {
+            if (!Guid.TryParse(participanteId, out var pId))
+                return new Dictionary<string, string>();
+
+            var roles = await _participanteEventoRepo.ObtenerRolesPorParticipanteAsync(pId);
+            return roles.ToDictionary(kvp => kvp.Key.ToString(), kvp => kvp.Value);
+        }
+
         private static EventoDto MapToEventoDTO(Evento e) => new EventoDto
         {
             Id          = e.Id.ToString(),

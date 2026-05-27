@@ -13,5 +13,6 @@ namespace Votify.Domain.Interfaces
         Task<bool> ActualizarRolAsync(Guid eventoId, Guid participanteId, string rol);
         Task<bool> EliminarAsync(Guid eventoId, Guid participanteId);
         Task<List<Guid>> ObtenerOrganizadoresIdsAsync(Guid eventoId);
+        Task<Dictionary<Guid, string>> ObtenerRolesPorParticipanteAsync(Guid participanteId);
     }
 }

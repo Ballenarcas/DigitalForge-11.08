@@ -39,7 +39,7 @@ namespace Votify.Infrastructure.Repositories
         {
             if (!Guid.TryParse(proyectoId, out var guidId)) return null;
 
-            var entity = await _context.Proyectos.FindAsync(guidId);
+            var entity = await _context.Proyectos.AsNoTracking().FirstOrDefaultAsync(p => p.Id == guidId);
             if (entity == null)
             {
                 return null;
@@ -55,7 +55,7 @@ namespace Votify.Infrastructure.Repositories
 
         public async Task<List<Proyecto>> ObtenerTodasAsync()
         {
-            var entities = await _context.Proyectos.ToListAsync();
+            var entities = await _context.Proyectos.AsNoTracking().ToListAsync();
             return entities.Select(p => new Proyecto(
                 p.Nombre,
                 p.Descripcion,
@@ -71,6 +71,7 @@ namespace Votify.Infrastructure.Repositories
                 return new List<Proyecto>();
 
             var entities = await _context.Proyectos
+                .AsNoTracking()
                 .Where(p => p.VotacionId == votacionGuid)
                 .ToListAsync();
 

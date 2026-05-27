@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using Votify.Application.DTOs;
 using Votify.Application.Interfaces;
 using Votify.Application.Services.Estrategia;
@@ -63,28 +65,30 @@ namespace Votify.Application.Services
         public async Task<List<CrearVotacionResponse>> ObtenerTodasAsync()
         {
             var entidades = await _repo.ObtenerTodasAsync();
-            // Actualizar estados automáticamente según fechas
             await ActualizarEstadosAutomaticosAsync(entidades);
-            var responses = new List<CrearVotacionResponse>();
-            foreach (var entidad in entidades)
+            var criteriosPorVotacion = _criterioRepo is not null
+                ? await _criterioRepo.ObtenerPorVotacionesAsync(entidades.Select(e => e.Id.ToString()))
+                : new Dictionary<string, List<Criterio>>();
+            return entidades.Select(e =>
             {
-                responses.Add(await MapToResponseAsync(entidad));
-            }
-            return responses;
+                criteriosPorVotacion.TryGetValue(e.Id.ToString(), out var criterios);
+                return MapToResponse(e, criterios?.Select(MapCriterioDto).ToList());
+            }).ToList();
         }
         public async Task<List<CrearVotacionResponse>> ObtenerPorEventoAsync(string eventoId)
         {
             if (!Guid.TryParse(eventoId, out var guid)) return new List<CrearVotacionResponse>();
             
             var entidades = await _repo.ObtenerPorEventoAsync(guid);
-            // Actualizar estados automáticamente según fechas
             await ActualizarEstadosAutomaticosAsync(entidades);
-            var responses = new List<CrearVotacionResponse>();
-            foreach (var entidad in entidades)
+            var criteriosPorVotacion = _criterioRepo is not null
+                ? await _criterioRepo.ObtenerPorVotacionesAsync(entidades.Select(e => e.Id.ToString()))
+                : new Dictionary<string, List<Criterio>>();
+            return entidades.Select(e =>
             {
-                responses.Add(await MapToResponseAsync(entidad));
-            }
-            return responses;
+                criteriosPorVotacion.TryGetValue(e.Id.ToString(), out var criterios);
+                return MapToResponse(e, criterios?.Select(MapCriterioDto).ToList());
+            }).ToList();
         }
 
         public async Task<CrearVotacionResponse?> ObtenerPorIdAsync(string id)

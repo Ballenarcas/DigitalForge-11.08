@@ -52,6 +52,7 @@ namespace Votify.Infrastructure.Repositories
             }
 
             var entities = await _db.ValoracionesCriterio
+                .AsNoTracking()
                 .Where(v => v.ProyectoId == proyectoGuid && v.VotanteId == votanteGuid)
                 .ToListAsync();
 

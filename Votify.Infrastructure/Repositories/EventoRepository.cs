@@ -17,7 +17,7 @@ namespace Votify.Infrastructure.Repositories
 
         public async Task<List<Evento>> ObtenerTodosAsync()
         {
-            var entities = await _db.Eventos.ToListAsync();
+            var entities = await _db.Eventos.AsNoTracking().ToListAsync();
             return entities.Select(MapToDomain).ToList();
         }
 
@@ -29,6 +29,7 @@ namespace Votify.Infrastructure.Repositories
                 .ToListAsync();
 
             var entities = await _db.Eventos
+                .AsNoTracking()
                 .Where(e => eventoIds.Contains(e.Id))
                 .ToListAsync();
 
@@ -38,7 +39,7 @@ namespace Votify.Infrastructure.Repositories
         public async Task<Evento?> ObtenerPorIdAsync(string id)
         {
             if (!Guid.TryParse(id, out var guid)) return null;
-            var entity = await _db.Eventos.FindAsync(guid);
+            var entity = await _db.Eventos.AsNoTracking().FirstOrDefaultAsync(e => e.Id == guid);
             return entity == null ? null : MapToDomain(entity);
         }
 

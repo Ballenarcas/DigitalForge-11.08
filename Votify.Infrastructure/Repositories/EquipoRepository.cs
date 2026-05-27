@@ -35,7 +35,7 @@ namespace Votify.Infrastructure.Repositories
 
         public async Task<Equipo?> ObtenerPorIdAsync(Guid id)
         {
-            var entity = await _context.Equipos.FindAsync(id);
+            var entity = await _context.Equipos.AsNoTracking().FirstOrDefaultAsync(e => e.Id == id);
             if (entity == null) return null;
 
             return new Equipo(entity.Nombre, entity.Id, entity.CreatedAt);
@@ -43,7 +43,7 @@ namespace Votify.Infrastructure.Repositories
 
         public async Task<IEnumerable<Equipo>> ObtenerTodosAsync()
         {
-            var entities = await _context.Equipos.ToListAsync();
+            var entities = await _context.Equipos.AsNoTracking().ToListAsync();
             return entities.Select(e => new Equipo(e.Nombre, e.Id, e.CreatedAt));
         }
     }

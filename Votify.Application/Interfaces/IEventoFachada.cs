@@ -11,6 +11,7 @@ namespace Votify.Application.Interfaces
         Task<List<EventoDto>> ObtenerMisEventosAsync(string participanteId);
         Task ParticiparEnEventoAsync(string eventoId, string participanteId);
         Task<string?> ObtenerRolAsync(string eventoId, string participanteId);
+        Task<Dictionary<string, string>> ObtenerMisRolesAsync(string participanteId);
         Task<List<ParticipanteRolDto>> ObtenerParticipantesAsync(string eventoId, string solicitanteId, string? search = null);
         Task<RoleStatisticsDto> ObtenerEstadisticasRolesAsync(string eventoId, string solicitanteId);
         Task CambiarRolAsync(string eventoId, string participanteId, string solicitanteId, string rol);

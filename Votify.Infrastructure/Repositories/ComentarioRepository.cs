@@ -60,17 +60,20 @@ namespace Votify.Infrastructure.Repositories
                 return new List<Comentario>();
             }
 
-            var comentarios = await _context.Comentarios
-                .Where(c => c.Proyecto_Id == guidProyectoId)
-                .OrderByDescending(c => c.FechaCreacion)
-                .Select(c => new Comentario
+            var comentarios = await (
+                from c in _context.Comentarios.AsNoTracking()
+                join p in _context.Participantes.AsNoTracking() on c.Autor_Id equals p.Id into autorJoin
+                from autor in autorJoin.DefaultIfEmpty()
+                where c.Proyecto_Id == guidProyectoId
+                orderby c.FechaCreacion descending
+                select new Comentario
                 {
                     Texto = c.Texto,
                     AutorId = c.Autor_Id,
-                    AutorNombre = c.Autor_Id.HasValue ? _context.Participantes.Where(p => p.Id == c.Autor_Id.Value).Select(p => p.Nombre).FirstOrDefault() : null,
+                    AutorNombre = autor != null ? autor.Nombre : null,
                     FechaCreacion = c.FechaCreacion
-                })
-                .ToListAsync();
+                }
+            ).ToListAsync();
 
             return comentarios;
         }

@@ -21,7 +21,7 @@ namespace Votify.Infrastructure.Repositories
 
         public async Task<Participante?> GetByEmailAsync(string email)
         {
-            var entity = await _context.Participantes.FirstOrDefaultAsync(p => p.Email == email);
+            var entity = await _context.Participantes.AsNoTracking().FirstOrDefaultAsync(p => p.Email == email);
             if (entity == null)
             {
                 return null;
@@ -35,7 +35,7 @@ namespace Votify.Infrastructure.Repositories
 
         public async Task<Participante?> ObtenerPorIdAsync(Guid id)
         {
-            var entity = await _context.Participantes.FindAsync(id);
+            var entity = await _context.Participantes.AsNoTracking().FirstOrDefaultAsync(p => p.Id == id);
             if (entity == null) return null;
 
             return new Participante(entity.Nombre, entity.Email, entity.PasswordHash, entity.EquipoId)
@@ -74,7 +74,7 @@ namespace Votify.Infrastructure.Repositories
 
         public async Task<IEnumerable<Participante>> ObtenerTodosAsync()
         {
-            var entities = await _context.Participantes.ToListAsync();
+            var entities = await _context.Participantes.AsNoTracking().ToListAsync();
             return entities.Select(e => new Participante(e.Nombre, e.Email, e.PasswordHash, e.EquipoId)
             {
                 Id = e.Id

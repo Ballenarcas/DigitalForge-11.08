@@ -309,39 +309,24 @@
         }
     }
 
-    private async Task CargarEventos()
-    {
-        try 
+private async Task CargarEventos()
         {
-            listaEventos = await EventosService.ObtenerEventosGenerales();
-
-            var misEventos = await EventosService.ObtenerMisEventos();
-            misEventosIds = misEventos.Where(e => e.Id != null).Select(e => e.Id!).ToHashSet();
-
-            misRolesPorEvento.Clear();
-            foreach (var id in misEventosIds)
+            try 
             {
-                try
-                {
-                    var rol = await EventosService.ObtenerRolEnEvento(id);
-                    if (!string.IsNullOrEmpty(rol))
-                    {
-                        misRolesPorEvento[id] = rol;
-                    }
-                }
-                catch
-                {
-                    Console.WriteLine($"No se pudo obtener el rol para el evento {id}");
-                }
+                listaEventos = await EventosService.ObtenerEventosGenerales();
+
+                var misEventos = await EventosService.ObtenerMisEventos();
+                misEventosIds = misEventos.Where(e => e.Id != null).Select(e => e.Id!).ToHashSet();
+
+                misRolesPorEvento = await EventosService.ObtenerMisRoles();
+            }
+            catch (Exception ex)
+            {
+                var errorMsg = ErrorMessageParser.ExtractErrorMessage(ex.Message);
+                Console.WriteLine($"Error cargando eventos: {errorMsg}");
+                listaEventos = new List<EventoDto>();
             }
         }
-        catch (Exception ex)
-        {
-            var errorMsg = ErrorMessageParser.ExtractErrorMessage(ex.Message);
-            Console.WriteLine($"Error cargando eventos: {errorMsg}");
-            listaEventos = new List<EventoDto>();
-        }
-    }
 
     private async Task Registrarse(string id)
     {

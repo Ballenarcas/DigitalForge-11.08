@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
 using Votify.Domain.Entities;
 using Votify.Domain.Interfaces;
 using Votify.Infrastructure.Persistence;
@@ -23,11 +25,36 @@ namespace Votify.Infrastructure.Repositories
             }
 
             var entities = await _db.Criterios
+                .AsNoTracking()
                 .Where(c => c.VotacionId == votacionGuid)
                 .OrderBy(c => c.Nombre)
                 .ToListAsync();
 
             return entities.Select(MapToDomain).ToList();
+        }
+
+        public async Task<Dictionary<string, List<Criterio>>> ObtenerPorVotacionesAsync(IEnumerable<string> votacionIds)
+        {
+            var guidIds = votacionIds
+                .Where(id => Guid.TryParse(id, out _))
+                .Select(Guid.Parse)
+                .ToList();
+
+            if (!guidIds.Any())
+                return new Dictionary<string, List<Criterio>>();
+
+            var entities = await _db.Criterios
+                .AsNoTracking()
+                .Where(c => guidIds.Contains(c.VotacionId))
+                .OrderBy(c => c.Nombre)
+                .ToListAsync();
+
+            return entities
+                .GroupBy(c => c.VotacionId.ToString())
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Select(MapToDomain).ToList()
+                );
         }
 
         public async Task ReemplazarPorVotacionAsync(string votacionId, List<Criterio> criterios)

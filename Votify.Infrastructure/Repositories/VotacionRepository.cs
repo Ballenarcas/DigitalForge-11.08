@@ -46,19 +46,20 @@ namespace Votify.Infrastructure.Repositories
         {
             if (!Guid.TryParse(id, out var guid)) return null;
             
-            var entity = await _db.Votaciones.FindAsync(guid);
+            var entity = await _db.Votaciones.AsNoTracking().FirstOrDefaultAsync(v => v.Id == guid);
             return entity == null ? null : MapToDomain(entity);
         }
 
         public async Task<List<Votacion>> ObtenerTodasAsync()
         {
-            var entities = await _db.Votaciones.ToListAsync();
+            var entities = await _db.Votaciones.AsNoTracking().ToListAsync();
             return entities.Select(MapToDomain).ToList();
         }
 
         public async Task<List<Votacion>> ObtenerPorEventoAsync(Guid eventoId)
         {
             var entities = await _db.Votaciones
+                .AsNoTracking()
                 .Where(v => v.EventoId == eventoId)
                 .ToListAsync();
             return entities.Select(MapToDomain).ToList();
@@ -201,8 +202,11 @@ namespace Votify.Infrastructure.Repositories
         {
             if (!Guid.TryParse(votacionId, out var guid)) return null;
 
-            var entity = await _db.Votaciones.FindAsync(guid);
-            return entity?.EventoId.ToString();
+            var eventoId = await _db.Votaciones.AsNoTracking()
+                .Where(v => v.Id == guid)
+                .Select(v => v.EventoId)
+                .FirstOrDefaultAsync();
+            return eventoId.ToString();
         }
     }
 }

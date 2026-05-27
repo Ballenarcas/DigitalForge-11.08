@@ -36,14 +36,15 @@ namespace Votify.Infrastructure.Repositories
         public async Task<string?> ObtenerRolAsync(Guid eventoId, Guid participanteId)
         {
             var pe = await _db.ParticipantesEventos
+                .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.EventoId == eventoId && x.ParticipanteId == participanteId);
             return pe?.Rol;
         }
 
         public async Task<List<ParticipanteEventoDetalle>> ObtenerParticipantesPorEventoAsync(Guid eventoId, string? search = null)
         {
-            var query = from pe in _db.ParticipantesEventos
-                        join p in _db.Participantes on pe.ParticipanteId equals p.Id
+            var query = from pe in _db.ParticipantesEventos.AsNoTracking()
+                        join p in _db.Participantes.AsNoTracking() on pe.ParticipanteId equals p.Id
                         where pe.EventoId == eventoId
                         select new ParticipanteEventoDetalle
                         {
@@ -65,6 +66,7 @@ namespace Votify.Infrastructure.Repositories
         public async Task<RoleStatistics> ContarRolesPorEventoAsync(Guid eventoId)
         {
             var group = await _db.ParticipantesEventos
+                .AsNoTracking()
                 .Where(pe => pe.EventoId == eventoId)
                 .GroupBy(pe => pe.Rol)
                 .Select(g => new { Rol = g.Key, Count = g.Count() })
@@ -86,6 +88,7 @@ namespace Votify.Infrastructure.Repositories
         public async Task<int> ContarParticipantesConRolAsync(Guid eventoId)
         {
             return await _db.ParticipantesEventos
+                .AsNoTracking()
                 .CountAsync(pe => pe.EventoId == eventoId && !string.IsNullOrWhiteSpace(pe.Rol));
         }
 
@@ -115,9 +118,18 @@ namespace Votify.Infrastructure.Repositories
         public async Task<List<Guid>> ObtenerOrganizadoresIdsAsync(Guid eventoId)
         {
             return await _db.ParticipantesEventos
+                .AsNoTracking()
                 .Where(pe => pe.EventoId == eventoId && pe.Rol == "ORGANIZADOR")
                 .Select(pe => pe.ParticipanteId)
                 .ToListAsync();
+        }
+
+        public async Task<Dictionary<Guid, string>> ObtenerRolesPorParticipanteAsync(Guid participanteId)
+        {
+            return await _db.ParticipantesEventos
+                .AsNoTracking()
+                .Where(pe => pe.ParticipanteId == participanteId)
+                .ToDictionaryAsync(pe => pe.EventoId, pe => pe.Rol ?? "");
         }
     }
 }

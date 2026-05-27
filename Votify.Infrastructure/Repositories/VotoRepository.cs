@@ -35,7 +35,7 @@ namespace Votify.Infrastructure.Repositories
         {
             if (!Guid.TryParse(proyectoId, out var guid)) return new List<Voto>();
 
-            var entities = await _db.Votos.Where(v => v.ProyectoId == guid).ToListAsync();
+            var entities = await _db.Votos.AsNoTracking().Where(v => v.ProyectoId == guid).ToListAsync();
             return entities.Select(MapToDomain).ToList();
         }
 

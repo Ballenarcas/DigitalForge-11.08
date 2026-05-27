@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Votify.Application.DTOs;
 using Votify.Application.Interfaces;
 
@@ -32,6 +33,9 @@ namespace Votify.Application.Services.Fachadas
 
         public Task<string?> ObtenerRolAsync(string eventoId, string participanteId)
             => _eventoService.ObtenerRolEnEventoAsync(eventoId, participanteId);
+
+        public Task<Dictionary<string, string>> ObtenerMisRolesAsync(string participanteId)
+            => _eventoService.ObtenerMisRolesAsync(participanteId);
 
         public Task<List<ParticipanteRolDto>> ObtenerParticipantesAsync(string eventoId, string solicitanteId, string? search = null)
             => _eventoService.ObtenerParticipantesPorEventoAsync(eventoId, solicitanteId, search);

@@ -40,6 +40,7 @@ namespace Votify.Infrastructure.Repositories
         public async Task<List<Notificacion>> ObtenerPorUsuarioAsync(Guid usuarioId)
         {
             var entities = await _context.Notificaciones
+                .AsNoTracking()
                 .Where(n => n.UsuarioId == usuarioId)
                 .OrderByDescending(n => n.CreatedAt)
                 .ToListAsync();
@@ -57,7 +58,7 @@ namespace Votify.Infrastructure.Repositories
 
         public async Task<Notificacion?> ObtenerPorIdAsync(Guid id)
         {
-            var entity = await _context.Notificaciones.FindAsync(id);
+            var entity = await _context.Notificaciones.AsNoTracking().FirstOrDefaultAsync(n => n.Id == id);
             if (entity == null) return null;
 
             return new Notificacion(

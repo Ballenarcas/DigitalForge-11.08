@@ -57,6 +57,7 @@ namespace Votify.Infrastructure.Repositories
         public async Task<List<ManualVotosAsignacion>> ObtenerPorVotacionAsync(Guid votacionId)
         {
             var entities = await _context.ManualVotosAsignaciones
+                .AsNoTracking()
                 .Where(m => m.VotacionId == votacionId)
                 .ToListAsync();
 
@@ -78,7 +79,7 @@ namespace Votify.Infrastructure.Repositories
 
         public async Task<ManualVotosAsignacion?> ObtenerPorIdAsync(Guid id)
         {
-            var entity = await _context.ManualVotosAsignaciones.FindAsync(id);
+            var entity = await _context.ManualVotosAsignaciones.AsNoTracking().FirstOrDefaultAsync(m => m.Id == id);
             if (entity == null) return null;
 
             return new ManualVotosAsignacion
