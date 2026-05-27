@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "Votify.Client",
   "resources": {
-    "hash": "sha256-z1iNOVoY24w2sQwUfEFBCOXYW47SZrB7ji+hE7gvHn8=",
+    "hash": "sha256-gMyU2lpNm2Tp1bpVpg1GqCU0hXPbBmrJj1xLa6MvoQE=",
     "fingerprinting": {
       "BCrypt.Net-Next.dwn6rgs717.wasm": "BCrypt.Net-Next.wasm",
       "Blazored.LocalStorage.12n6dz54qr.wasm": "Blazored.LocalStorage.wasm",
@@ -62,9 +62,9 @@
       "System.Text.RegularExpressions.vvyipbqy7m.wasm": "System.Text.RegularExpressions.wasm",
       "System.Threading.ck7ypa45et.wasm": "System.Threading.wasm",
       "System.t250xnkyfs.wasm": "System.wasm",
-      "Votify.Application.niaehnbyva.wasm": "Votify.Application.wasm",
-      "Votify.Client.idsx8szag3.wasm": "Votify.Client.wasm",
-      "Votify.Domain.dbhj50l2fh.wasm": "Votify.Domain.wasm",
+      "Votify.Application.5b251lm8kr.wasm": "Votify.Application.wasm",
+      "Votify.Client.0zclxqkiay.wasm": "Votify.Client.wasm",
+      "Votify.Domain.n85gqwei06.wasm": "Votify.Domain.wasm",
       "dotnet.js": "dotnet.js",
       "dotnet.native.xsn1d6x2kd.js": "dotnet.native.js",
       "dotnet.native.vz0adxojrz.wasm": "dotnet.native.wasm",
@@ -149,9 +149,9 @@
       "System.Text.RegularExpressions.vvyipbqy7m.wasm": "sha256-G2ZuX9PTyfhl4B8LVBZ7OgvZ8u8hv7H58qvjAyVSQbc=",
       "System.Threading.ck7ypa45et.wasm": "sha256-NAT337jZ8vKKqEaIIZX7h6Ebx8VSc6hIlBPK0fPmL28=",
       "System.t250xnkyfs.wasm": "sha256-tVaTeiubnxofQV5rO7ga2UOORIQEtLkQr36ewcMO+tw=",
-      "Votify.Application.niaehnbyva.wasm": "sha256-QTbMqOmRaYW5fIVXinRb0CIls6CbVHRnp1d6jO2ghfE=",
-      "Votify.Client.idsx8szag3.wasm": "sha256-GkqH9vkDXv6WqzwIbgTStzzlEfNXYAkr2VUreDc5W1c=",
-      "Votify.Domain.dbhj50l2fh.wasm": "sha256-lyymMY+s4W/3AKEEC351e6r7lnqthwIE2qfp7PS02oM="
+      "Votify.Application.5b251lm8kr.wasm": "sha256-8Q9qyDR0DucpW4dP7ru7ygUT+52WdG1uZB1GIJPORgs=",
+      "Votify.Client.0zclxqkiay.wasm": "sha256-7F1xbyqpxSJwexi7a2AFSUA69lXqTBlZ9CqcJN3bZ3Q=",
+      "Votify.Domain.n85gqwei06.wasm": "sha256-eUeaxetcNaHolg0YgDsBJ4B+dOJlGPJ/MV4isETVPMY="
     }
   },
   "cacheBootResources": true,
