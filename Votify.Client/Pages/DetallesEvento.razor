@@ -51,6 +51,16 @@
 
                 <h1 class="proyecto-titulo">@evento.Nombre</h1>
 
+                @if (evento.Categorias != null && evento.Categorias.Any())
+                {
+                    <div class="category-tags">
+                        @foreach (var cat in evento.Categorias)
+                        {
+                            <span class="category-chip">@cat</span>
+                        }
+                    </div>
+                }
+
                 <!-- Imagen / Banner -->
                 <div class="proyecto-imagen">
                     <img src="@(string.IsNullOrEmpty(evento.ImagenUrl) ? "images/evento-default.png" : evento.ImagenUrl)" alt="@evento.Nombre" style="width:100%; height:100%; object-fit:cover;" />
@@ -184,6 +194,27 @@
 
     .proyecto-titulo {
         font-size: 2.4rem; font-weight: 900; color: #0f172a; line-height: 1.15; letter-spacing: -0.03em; margin: 0;
+    }
+
+    .category-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .category-chip {
+        background: #f3e8ff;
+        color: #7c3aed;
+        border: 1px solid #ddd6fe;
+        font-size: 0.8rem;
+        font-weight: 700;
+        padding: 0.35rem 0.85rem;
+        border-radius: 20px;
+        letter-spacing: 0.02em;
+        display: inline-flex;
+        align-items: center;
     }
 
     .proyecto-imagen {

@@ -316,14 +316,7 @@
     50% { box-shadow: 0 0 0 6px rgba(220, 38, 38, 0); }
 }
 
-.btn-eliminar {
-    animation: deletePulse 1.5s ease-in-out infinite;
-}
 
-.btn-ver {
-    animation: deletePulse 1.5s ease-in-out infinite;
-    animation-name: buttonPulseVotacion;
-}
 
 @keyframes buttonPulseVotacion {
     0%, 100% { box-shadow: 0 0 0 0 rgba(147, 51, 234, 0.4); }
@@ -373,9 +366,14 @@
     display: flex;
     gap: 0.5rem;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: flex-start;
     flex-shrink: 0;
     flex-wrap: nowrap;
+    width: 100%;
+}
+
+.footer-actions .btn-eliminar {
+    margin-left: auto;
 }
 
 /* 5. Modal Auth */
@@ -498,43 +496,44 @@
     background: #bf65b0;
     border: none;
     color: white;
-    padding: 0 0.8rem;
+    width: 2rem;
+    height: 2rem;
     border-radius: 8px;
     font-weight: 700;
     font-size: 0.8rem;
-    line-height: 1.2;
     cursor: pointer;
     transition: 0.2s;
-    height: 2rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    white-space: nowrap;
+    padding: 0;
+    flex-shrink: 0;
 }
 .btn-ver:hover {
     background: #a54d96;
     transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(165, 77, 150, 0.3);
 }
 .btn-eliminar {
-    background: #fee2e2;
-    border: 1px solid #fecaca;
-    color: #b91c1c;
-    padding: 0 0.8rem;
+    background: #fef2f2;
+    border: 1.5px solid #fecaca;
+    color: #dc2626;
+    width: 2rem;
+    height: 2rem;
     border-radius: 8px;
-    font-weight: 700;
-    font-size: 0.8rem;
-    line-height: 1.2;
     cursor: pointer;
     transition: 0.2s;
-    height: 2rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    white-space: nowrap;
+    padding: 0;
+    flex-shrink: 0;
 }
 .btn-eliminar:hover {
-    background: #fecaca;
-    border-color: #f87171;
+    background: #fee2e2;
+    border-color: #ef4444;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(220, 38, 38, 0.2);
 }
 .btn-resultados {
     background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
