@@ -283,7 +283,22 @@ private async Task CargarEventos()
                 var misEventos = await EventosService.ObtenerMisEventos();
                 misEventosIds = misEventos.Where(e => e.Id != null).Select(e => e.Id!).ToHashSet();
 
-                misRolesPorEvento = await EventosService.ObtenerMisRoles();
+                misRolesPorEvento.Clear();
+                foreach (var id in misEventosIds)
+                {
+                    try
+                    {
+                        var rol = await EventosService.ObtenerRolEnEvento(id);
+                        if (!string.IsNullOrEmpty(rol))
+                        {
+                            misRolesPorEvento[id] = rol;
+                        }
+                    }
+                    catch
+                    {
+                        Console.WriteLine($"No se pudo obtener el rol para el evento {id}");
+                    }
+                }
             }
             catch (Exception ex)
             {

@@ -77,15 +77,7 @@ namespace Votify.Client.Services
 
         public async Task<Dictionary<string, string>> ObtenerMisRoles()
         {
-            try
-            {
-                var resultado = await _http.GetFromJsonAsync<Dictionary<string, string>>("api/eventos/mis-roles");
-                return resultado ?? new Dictionary<string, string>();
-            }
-            catch
-            {
-                return new Dictionary<string, string>();
-            }
+            return new Dictionary<string, string>();
         }
 
         public async Task<List<ParticipanteRolDto>> ObtenerParticipantesPorEvento(string eventoId, string search = "")

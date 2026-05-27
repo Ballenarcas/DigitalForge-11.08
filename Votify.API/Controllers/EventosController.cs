@@ -124,20 +124,6 @@ namespace Votify.API.Controllers
             return Ok(new { Rol = rol });
         }
 
-        [HttpGet("mis-roles")]
-        [Microsoft.AspNetCore.Authorization.Authorize]
-        public async Task<IActionResult> GetMisRoles()
-        {
-            var usuarioId = ObtenerUsuarioId();
-            if (string.IsNullOrEmpty(usuarioId))
-            {
-                return Unauthorized(new { Message = "Usuario no autenticado." });
-            }
-
-            var roles = await _fachada.ObtenerMisRolesAsync(usuarioId);
-            return Ok(roles);
-        }
-
         [HttpGet("{id}/participantes")]
         [Microsoft.AspNetCore.Authorization.Authorize]
         public async Task<IActionResult> GetParticipantes(string id, [FromQuery] string? search)
