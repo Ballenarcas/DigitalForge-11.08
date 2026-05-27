@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "Votify.Client",
   "resources": {
-    "hash": "sha256-gMyU2lpNm2Tp1bpVpg1GqCU0hXPbBmrJj1xLa6MvoQE=",
+    "hash": "sha256-kyvdaKrZENyf0PgpyKNG77eSFdZ7GNx9LokPtAw9/Hk=",
     "fingerprinting": {
       "BCrypt.Net-Next.dwn6rgs717.wasm": "BCrypt.Net-Next.wasm",
       "Blazored.LocalStorage.12n6dz54qr.wasm": "Blazored.LocalStorage.wasm",
@@ -32,7 +32,7 @@
       "System.Collections.Immutable.gny4yc5v6m.wasm": "System.Collections.Immutable.wasm",
       "System.Collections.NonGeneric.vpepmc0qh4.wasm": "System.Collections.NonGeneric.wasm",
       "System.Collections.Specialized.zb97dhxt05.wasm": "System.Collections.Specialized.wasm",
-      "System.Collections.nn3reataq1.wasm": "System.Collections.wasm",
+      "System.Collections.ljh3x0ppx6.wasm": "System.Collections.wasm",
       "System.ComponentModel.Annotations.oaw7ozp65y.wasm": "System.ComponentModel.Annotations.wasm",
       "System.ComponentModel.Primitives.zvj46ndyhb.wasm": "System.ComponentModel.Primitives.wasm",
       "System.ComponentModel.TypeConverter.cj7l6lijfo.wasm": "System.ComponentModel.TypeConverter.wasm",
@@ -62,9 +62,9 @@
       "System.Text.RegularExpressions.vvyipbqy7m.wasm": "System.Text.RegularExpressions.wasm",
       "System.Threading.ck7ypa45et.wasm": "System.Threading.wasm",
       "System.t250xnkyfs.wasm": "System.wasm",
-      "Votify.Application.5b251lm8kr.wasm": "Votify.Application.wasm",
-      "Votify.Client.0zclxqkiay.wasm": "Votify.Client.wasm",
-      "Votify.Domain.n85gqwei06.wasm": "Votify.Domain.wasm",
+      "Votify.Application.fo1t7gi0h6.wasm": "Votify.Application.wasm",
+      "Votify.Client.7kjtd56mkr.wasm": "Votify.Client.wasm",
+      "Votify.Domain.hx5ggt0k5s.wasm": "Votify.Domain.wasm",
       "dotnet.js": "dotnet.js",
       "dotnet.native.xsn1d6x2kd.js": "dotnet.native.js",
       "dotnet.native.vz0adxojrz.wasm": "dotnet.native.wasm",
@@ -121,7 +121,7 @@
       "System.Collections.Immutable.gny4yc5v6m.wasm": "sha256-bKptbttUx5VrbzoVTrL0VZUTHXgyIVLh16gHWEFdjn4=",
       "System.Collections.NonGeneric.vpepmc0qh4.wasm": "sha256-PeNWjXL7U1S9HNMLA9OyicHCr9LlrcXbdnZxbVijcjo=",
       "System.Collections.Specialized.zb97dhxt05.wasm": "sha256-AXQGafjR5TbPwiE83Aqub6jZltGQ/VvPFCyKKTJQ8JE=",
-      "System.Collections.nn3reataq1.wasm": "sha256-vS4apTiq/sCVNVpxlUytZUUdXBYGt6d2R5eKxvBH0I0=",
+      "System.Collections.ljh3x0ppx6.wasm": "sha256-kQzGrct8dx8kIDdJ26xXMMscaPOdiuy3JoMLziASjBk=",
       "System.ComponentModel.Annotations.oaw7ozp65y.wasm": "sha256-QDPcFqHW7RsJ+K6hytWWpVovvnMx7rOGal/y/JV9xS0=",
       "System.ComponentModel.Primitives.zvj46ndyhb.wasm": "sha256-rw93jxMxYMh0SIzQ3E7bJZyEfYpJE6gJdKLVZ/DmMf8=",
       "System.ComponentModel.TypeConverter.cj7l6lijfo.wasm": "sha256-aDNlMmCJGas/e9Lo+9LUvORCkpVzeAMRX6IoevbzNoQ=",
@@ -149,9 +149,9 @@
       "System.Text.RegularExpressions.vvyipbqy7m.wasm": "sha256-G2ZuX9PTyfhl4B8LVBZ7OgvZ8u8hv7H58qvjAyVSQbc=",
       "System.Threading.ck7ypa45et.wasm": "sha256-NAT337jZ8vKKqEaIIZX7h6Ebx8VSc6hIlBPK0fPmL28=",
       "System.t250xnkyfs.wasm": "sha256-tVaTeiubnxofQV5rO7ga2UOORIQEtLkQr36ewcMO+tw=",
-      "Votify.Application.5b251lm8kr.wasm": "sha256-8Q9qyDR0DucpW4dP7ru7ygUT+52WdG1uZB1GIJPORgs=",
-      "Votify.Client.0zclxqkiay.wasm": "sha256-7F1xbyqpxSJwexi7a2AFSUA69lXqTBlZ9CqcJN3bZ3Q=",
-      "Votify.Domain.n85gqwei06.wasm": "sha256-eUeaxetcNaHolg0YgDsBJ4B+dOJlGPJ/MV4isETVPMY="
+      "Votify.Application.fo1t7gi0h6.wasm": "sha256-v3TqIl1ztIoJD4TpvXRNQoL1Yz5lDH1PWzCPIFwK+Xg=",
+      "Votify.Client.7kjtd56mkr.wasm": "sha256-R0mLLxA1kxlC4wH7DodweOFNhzsRJwe7711we2uxo6g=",
+      "Votify.Domain.hx5ggt0k5s.wasm": "sha256-BSasVXadpOQE5PSOLWtzm1H8FLMrPoNtQGTpdVoVrwE="
     }
   },
   "cacheBootResources": true,
