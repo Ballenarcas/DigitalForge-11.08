@@ -158,7 +158,7 @@
     private async Task CerrarSesion()
     {
         await AuthService.LogoutAsync();
-        NavManager.NavigateTo(""); // Refresca la página al inicio
+        NavManager.NavigateTo("", forceLoad: true);
     }
 
     private void IrAInicio() => NavManager.NavigateTo("");

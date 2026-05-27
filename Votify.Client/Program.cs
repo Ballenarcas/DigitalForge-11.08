@@ -16,9 +16,9 @@ builder.Services.AddScoped<ParticipantesService>();
 builder.Services.AddScoped<NotificacionesService>();
 builder.Services.AddScoped<AppState>();
 
-// Servicios de Autenticación
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddAuthorizationCore();
+builder.Services.AddScoped<AuthorizationMessageHandler>();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
@@ -26,6 +26,12 @@ var apiUrl = builder.HostEnvironment.IsDevelopment()
     ? "http://localhost:5154"
     : "https://votify.azurewebsites.net/";
 
-builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(apiUrl) });
+builder.Services.AddScoped(sp =>
+{
+    var handler = sp.GetRequiredService<AuthorizationMessageHandler>();
+    handler.InnerHandler = new HttpClientHandler();
+    var client = new HttpClient(handler) { BaseAddress = new Uri(apiUrl) };
+    return client;
+});
 
 await builder.Build().RunAsync();
