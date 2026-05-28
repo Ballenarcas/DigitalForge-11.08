@@ -59,17 +59,18 @@
     max-width: 100%;
     margin-bottom: 1.5rem;
     animation: fadeInScale 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+    display: flex;
+    align-items: center;
 }
 .search-container svg {
     position: absolute;
     left: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
     color: #475569;
     pointer-events: none;
     transition: all 0.2s ease;
     width: 20px;
     height: 20px;
+    flex-shrink: 0;
 }
 .search-container:has(.search-input:focus) svg {
     color: #a855f7;
@@ -85,6 +86,7 @@
     transition: all 0.2s;
     box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     box-sizing: border-box;
+    height: 2.5rem;
 }
 .search-input:focus {
     outline: none;
