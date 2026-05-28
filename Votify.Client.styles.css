@@ -1220,9 +1220,14 @@ article[b-3o3p5hwdhv] {
     left: 1rem;
     top: 50%;
     transform: translateY(-50%);
-    color: #94a3b8;
+    color: #475569;
     pointer-events: none;
-    transition: color 0.2s;
+    transition: all 0.2s ease;
+    width: 20px;
+    height: 20px;
+}
+.search-container:has(.search-input:focus) svg[b-0jfjj2oacp] {
+    color: #a855f7;
 }
 .search-input[b-0jfjj2oacp] {
     width: 100%;
@@ -1473,37 +1478,37 @@ article[b-3o3p5hwdhv] {
 .status-ended .status-dot[b-0jfjj2oacp] { background: #ef4444; }
 
 .pulse[b-0jfjj2oacp] {
-    animation: pulse-dot 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    animation: pulse-dot-b-0jfjj2oacp 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
-@@keyframes pulse-dot {
-    0%[b-0jfjj2oacp], 100%[b-0jfjj2oacp] { opacity: 1; transform: scale(1); }
-    50%[b-0jfjj2oacp] { opacity: 0.4; transform: scale(0.8); }
+@keyframes pulse-dot-b-0jfjj2oacp {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
 }
 
 /* ── Enhanced Animations Suite ── */
-@@keyframes buttonPulse {
-    0%[b-0jfjj2oacp], 100%[b-0jfjj2oacp] { box-shadow: 0 0 0 0 rgba(147, 51, 234, 0.4); }
-    50%[b-0jfjj2oacp] { box-shadow: 0 0 0 8px rgba(147, 51, 234, 0); }
+@keyframes buttonPulse-b-0jfjj2oacp {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(147, 51, 234, 0.4); }
+    50% { box-shadow: 0 0 0 8px rgba(147, 51, 234, 0); }
 }
 
-@@keyframes slideInButton {
-    from[b-0jfjj2oacp] { opacity: 0; transform: translateX(-5px); }
-    to[b-0jfjj2oacp] { opacity: 1; transform: translateX(0); }
+@keyframes slideInButton-b-0jfjj2oacp {
+    from { opacity: 0; transform: translateX(-5px); }
+    to { opacity: 1; transform: translateX(0); }
 }
 
-@@keyframes breathe {
-    0%[b-0jfjj2oacp], 100%[b-0jfjj2oacp] { opacity: 0.6; transform: scale(1); }
-    50%[b-0jfjj2oacp] { opacity: 1; transform: scale(1.05); }
+@keyframes breathe-b-0jfjj2oacp {
+    0%, 100% { opacity: 0.6; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.05); }
 }
 
-@@keyframes shimmerText {
-    0%[b-0jfjj2oacp] { background-position: -200% 0; }
-    100%[b-0jfjj2oacp] { background-position: 200% 0; }
+@keyframes shimmerText-b-0jfjj2oacp {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
 }
 
-@@keyframes cardGlow {
-    0%[b-0jfjj2oacp], 100%[b-0jfjj2oacp] { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02); }
-    50%[b-0jfjj2oacp] { box-shadow: 0 8px 24px rgba(147, 51, 234, 0.08); }
+@keyframes cardGlow-b-0jfjj2oacp {
+    0%, 100% { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02); }
+    50% { box-shadow: 0 8px 24px rgba(147, 51, 234, 0.08); }
 }
 
 .description-container[b-0jfjj2oacp] {
@@ -1607,7 +1612,7 @@ article[b-3o3p5hwdhv] {
     gap: 0.4rem;
     position: relative;
     overflow: hidden;
-    animation: slideInButton 0.5s ease-out;
+    animation: slideInButton-b-0jfjj2oacp 0.5s ease-out;
 }
 .btn-crear[b-0jfjj2oacp]::before {
     content: '';
@@ -1615,7 +1620,7 @@ article[b-3o3p5hwdhv] {
     inset: 0;
     background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
     transform: translateX(-100%);
-    animation: buttonShine 0.6s ease-in-out 0.1s;
+    animation: buttonShine-b-0jfjj2oacp 0.6s ease-in-out 0.1s;
 }
 .btn-crear:hover[b-0jfjj2oacp] {
     background: #7e22ce;
@@ -1626,8 +1631,8 @@ article[b-3o3p5hwdhv] {
     transform: translateY(0) scale(0.98);
 }
 
-@@keyframes buttonShine {
-    to[b-0jfjj2oacp] { transform: translateX(100%); }
+@keyframes buttonShine-b-0jfjj2oacp {
+    to { transform: translateX(100%); }
 }
 .btn-login-modal[b-0jfjj2oacp] {
     background: transparent;
@@ -2908,11 +2913,11 @@ article[b-3o3p5hwdhv] {
 .status-ended .status-dot[b-m3ipdm2mbp] { background: #ef4444; }
 
 .pulse[b-m3ipdm2mbp] {
-    animation: pulse-dot 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    animation: pulse-dot-b-m3ipdm2mbp 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
-@@keyframes pulse-dot {
-    0%[b-m3ipdm2mbp], 100%[b-m3ipdm2mbp] { opacity: 1; transform: scale(1); }
-    50%[b-m3ipdm2mbp] { opacity: 0.4; transform: scale(0.8); }
+@keyframes pulse-dot-b-m3ipdm2mbp {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
 }
 
 /* ── EPIC CARD ANIMATIONS (VOTACIONES - less exaggerated) ── */
