@@ -5,10 +5,19 @@ on:
     branches: [ main ]
 
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
 
 jobs:
-  build-and-deploy:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -19,17 +28,29 @@ jobs:
         with:
           dotnet-version: '9.0.x'
 
+      - name: Set base href for GitHub Pages
+        run: |
+          sed -i 's|<base href="/" />|<base href="/DigitalForge-11.08/" />|g' Votify.Client/wwwroot/index.html
+
+      - name: Restore dependencies
+        run: dotnet restore Votify.Client/Votify.Client.csproj
+
       - name: Build and Publish Blazor
-        # IMPORTANTE: Reemplaza esto con la ruta real de tu proyecto Blazor
-        run: dotnet publish "Votify.Client\Votify.Client.csproj" -c Release -o release --nologo
+        run: dotnet publish Votify.Client/Votify.Client.csproj -c Release -o release --nologo
 
       - name: Fix GitHub Pages routing
         run: |
           touch release/wwwroot/.nojekyll
           cp release/wwwroot/index.html release/wwwroot/404.html
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: release/wwwroot
+          path: 'release/wwwroot'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
