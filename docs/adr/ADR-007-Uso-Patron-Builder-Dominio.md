@@ -1,7 +1,7 @@
 ADR-007: Uso del Patrón de Diseño Builder para la Construcción de Entidades de Dominio
 Fecha: 14-05-2026
 Sprint: S3
-Estado: Aceptado
+Estado: Rechazado
 
 1) Contexto
 A medida que el dominio de Votify ha crecido, las entidades principales han acumulado constructores con un número elevado de parámetros posicionales, dificultando su instanciación correcta y propiciando errores sutiles. Se han identificado los siguientes problemas:
