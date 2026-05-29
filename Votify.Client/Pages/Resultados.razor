@@ -452,18 +452,22 @@
     private string? eventoId;
     private bool EsMulticriterio;
 
+    private string? VotacionIdAnterior;
+
     protected override async Task OnInitializedAsync()
     {
         if (!string.IsNullOrEmpty(VotacionId))
         {
+            VotacionIdAnterior = VotacionId;
             await CargarDatosAsync();
         }
     }
 
     protected override async Task OnParametersSetAsync()
     {
-        if (!string.IsNullOrEmpty(VotacionId))
+        if (!string.IsNullOrEmpty(VotacionId) && VotacionId != VotacionIdAnterior)
         {
+            VotacionIdAnterior = VotacionId;
             await CargarDatosAsync();
         }
     }

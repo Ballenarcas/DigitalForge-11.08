@@ -76,21 +76,28 @@ namespace Votify.Application.Services
 
                 foreach (var categoria in categoriasUnicas)
                 {
-                    var votacionDto = new CrearVotacionDto
+                    try
                     {
-                        Nombre = categoria,
-                        Tipo = "ESTANDAR",
-                        FechaInicio = dto.FechaInicio,
-                        FechaFin = dto.FechaFin,
-                        LimiteProy = 1,
-                        Comentarios = false,
-                        ComentariosObligatorios = false,
-                        EsAnonima = false,
-                        EventoId = e.Id.ToString(),
-                        ImagenUrl = dto.ImagenUrl
-                    };
+                        var votacionDto = new CrearVotacionDto
+                        {
+                            Nombre = categoria,
+                            Tipo = "ESTANDAR",
+                            FechaInicio = dto.FechaInicio,
+                            FechaFin = dto.FechaFin,
+                            LimiteProy = 1,
+                            Comentarios = false,
+                            ComentariosObligatorios = false,
+                            EsAnonima = false,
+                            EventoId = e.Id.ToString(),
+                            ImagenUrl = dto.ImagenUrl
+                        };
 
-                    await _votacionService.CrearVotacionAsync(votacionDto);
+                        await _votacionService.CrearVotacionAsync(votacionDto);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error creando votación '{categoria}': {ex.Message}");
+                    }
                 }
             }
 

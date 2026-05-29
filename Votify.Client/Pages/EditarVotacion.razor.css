@@ -7,6 +7,7 @@
     border: 2px dashed #e0e7ff;
     border-radius: 12px;
     background-color: #f8fafc;
+    position: relative;
 }
 
 .image-preview {
@@ -22,15 +23,21 @@
 }
 
 .btn-remove-image {
-    padding: 8px 16px;
+    padding: 10px 20px;
     background-color: #ef4444;
     color: white;
     border: none;
     border-radius: 8px;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
     transition: all 0.2s;
     font-size: 14px;
+    width: 100%;
+    max-width: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
 }
 
 .btn-remove-image:hover {

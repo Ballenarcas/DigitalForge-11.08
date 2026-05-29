@@ -1133,12 +1133,16 @@ input:checked + .slider:before {
         }
     }
 
-    private void AgregarCriterio() => Criterios.Add(new CriterioDto { Nombre = "", Peso = 0 });
+    private void AgregarCriterio()
+    {
+        Criterios = new List<CriterioDto>(Criterios) { new CriterioDto { Nombre = "", Peso = 0 } };
+    }
+
     private void QuitarCriterio(CriterioDto criterio)
     {
         if (Criterios.Count > 1)
         {
-            Criterios.Remove(criterio);
+            Criterios = Criterios.Where(c => c != criterio).ToList();
         }
     }
     private void HandleVolver() => Nav.NavigateTo($"votaciones?eventoId={AppState.EventoId}");

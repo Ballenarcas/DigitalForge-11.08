@@ -13,15 +13,15 @@
             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="16" height="16">
                 <path d="M15 19L8 12L15 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
-            Volver
+            Votaciones
         </button>
     </div>
 
     <div class="page-header-row">
         <div class="logo-icon small">
-            <span style="font-size: 1.5rem;">📊</span>
+            <img src="images/votaciones-logo.png" alt="Logo Votaciones" class="votaciones-logo-img" style="width:20px;height:20px;" />
         </div>
-        <span class="brand-name">Ranking</span>
+        <span class="brand-name">Edición de votos de @(AppState.EventoNombre ?? "Evento")</span>
     </div>
 
     <div class="content-wrapper">
@@ -240,7 +240,7 @@
 
     .brand-name {
         font-weight: 800;
-        font-size: 1.5rem;
+        font-size: 1.2rem;
         color: #4c1d95;
         letter-spacing: -0.02em;
     }

@@ -72,13 +72,6 @@ namespace Votify.Infrastructure.Repositories
             {
                 var votacionId = v.Id;
 
-                await _db.Votos.Where(vt => vt.VotacionId == votacionId).ExecuteDeleteAsync();
-
-                var criterioIds = await _db.Criterios.Where(c => c.VotacionId == votacionId).Select(c => c.Id).ToListAsync();
-                if (criterioIds.Any())
-                    await _db.ValoracionesCriterio.Where(vc => criterioIds.Contains(vc.CriterioId)).ExecuteDeleteAsync();
-                await _db.Criterios.Where(c => c.VotacionId == votacionId).ExecuteDeleteAsync();
-
                 var proyectoIds = await _db.Proyectos.Where(p => p.VotacionId == votacionId).Select(p => p.Id).ToListAsync();
                 if (proyectoIds.Any())
                 {
@@ -88,11 +81,19 @@ namespace Votify.Infrastructure.Repositories
                         await _db.Comentarios.Where(c => c.Proyecto_Id == pId).ExecuteDeleteAsync();
                     }
                 }
-                await _db.Proyectos.Where(p => p.VotacionId == votacionId).ExecuteDeleteAsync();
 
                 await _db.ManualVotosAsignaciones.Where(a => a.VotacionId == votacionId).ExecuteDeleteAsync();
+                await _db.Votos.Where(vt => vt.VotacionId == votacionId).ExecuteDeleteAsync();
+
+                var criterioIds = await _db.Criterios.Where(c => c.VotacionId == votacionId).Select(c => c.Id).ToListAsync();
+                if (criterioIds.Any())
+                    await _db.ValoracionesCriterio.Where(vc => criterioIds.Contains(vc.CriterioId)).ExecuteDeleteAsync();
+                await _db.Criterios.Where(c => c.VotacionId == votacionId).ExecuteDeleteAsync();
+
+                await _db.Proyectos.Where(p => p.VotacionId == votacionId).ExecuteDeleteAsync();
             }
             await _db.Votaciones.Where(v => v.EventoId == guid).ExecuteDeleteAsync();
+            await _db.Notificaciones.Where(n => n.RecursoId == id).ExecuteDeleteAsync();
 
             _db.Eventos.Remove(entity);
             await _db.SaveChangesAsync();

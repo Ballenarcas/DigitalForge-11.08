@@ -606,13 +606,13 @@ input[type="datetime-local"].form-control::-webkit-datetime-edit {
             return;
         }
 
-        Categorias.Add(nueva);
+        Categorias = new List<string>(Categorias) { nueva };
         NuevaCategoria = string.Empty;
     }
 
     private void EliminarCategoria(string categoria)
     {
-        Categorias.RemoveAll(c => string.Equals(c, categoria, StringComparison.OrdinalIgnoreCase));
+        Categorias = Categorias.Where(c => !string.Equals(c, categoria, StringComparison.OrdinalIgnoreCase)).ToList();
     }
 
     private void HandleCategoriaKeyDown(KeyboardEventArgs e)
