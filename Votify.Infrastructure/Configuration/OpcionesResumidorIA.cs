@@ -5,7 +5,7 @@ namespace Votify.Infrastructure.Configuration
         public string BaseUrl { get; set; } = string.Empty;
         public string ApiKey { get; set; } = string.Empty;
         public string Model { get; set; } = "gemini-3-flash";
-        public int MaxTokens { get; set; } = 1024;
+        public int MaxTokens { get; set; } = 20000;
         public int TimeoutSeconds { get; set; } = 60;
         public int MaxRetryAttempts { get; set; } = 3;
         public int RetryDelaySeconds { get; set; } = 2;
